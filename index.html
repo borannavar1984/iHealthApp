@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="iHealth">
+<meta name="theme-color" content="#0f1117">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<title>iHealth</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1117; --card:#1a1d27; --card2:#232736; --border:#2e3345;
+    --text:#e8eaf0; --muted:#8a90a5; --accent:#4f8cff; --accent2:#2563eb;
+    --green:#34d399; --red:#f87171; --amber:#fbbf24; --purple:#a78bfa;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6fa; --card:#ffffff; --card2:#eef1f6; --border:#dde3ec;
+    --text:#20242c; --muted:#5b6472; --accent:#2E75B6; --accent2:#1F4E79;
+    --green:#1f7a4d; --red:#c0392b; --amber:#b8720a; --purple:#7c3aed;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    max-width:560px;margin:0 auto;
+  }
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    position:sticky;top:env(safe-area-inset-top);z-index:20;background:var(--bg);
+    margin:0 -14px 14px;
+    padding:14px 14px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  h1{font-size:22px;font-weight:700;letter-spacing:-.2px}
+  h1 span{color:var(--accent)}
+  .badge{background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:12px;padding:4px 10px;border-radius:20px}
+  .badge b{color:var(--green)}
+  .label{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 8px}
+  .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+  .section h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  input[type=text],input[type=date],input[type=tel],input[type=time],input[type=number],textarea,select{
+    width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px 13px;font-size:15px;outline:none;transition:border-color .12s,box-shadow .12s;font-family:inherit;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)}
+  textarea{resize:vertical;min-height:60px}
+  button.opt{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:11px 6px;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .1s ease,background .12s,border-color .12s}
+  button.opt.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+  button.opt:active{transform:scale(.95)}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:7px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+  .chip button{background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;padding:0;font-size:14px;line-height:1}
+  .item-add{display:flex;gap:8px;margin-top:8px}
+  .item-add input{flex:1}
+  .item-add button{background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:700;cursor:pointer}
+  .btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;margin-top:14px;transition:transform .1s ease,opacity .1s ease}
+  .btn:active{transform:scale(.97);opacity:.85}
+  .btn-save{background:var(--accent2);color:#fff}
+  .btn-wa{background:#25D366;color:#06281c}
+  .btn-ghost{background:var(--card2);color:var(--muted);font-size:14px;padding:12px;margin-top:10px}
+  .btn-sm{padding:9px 14px;font-size:13px;margin-top:0;border-radius:10px;width:auto}
+  .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#06281c;padding:12px 22px;border-radius:24px;font-weight:700;font-size:14px;display:none;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:calc(100% - 48px);text-align:center}
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tabs button{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:10px;font-size:14px;font-weight:600;cursor:pointer}
+  .tabs button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+  .theme-toggle{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:20px;font-size:14px;cursor:pointer;line-height:1}
+  .fasting-box{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:12px 14px;margin-top:8px}
+  .fasting-box .fh{font-size:20px;font-weight:700}
+  .fasting-flag{font-size:12px;padding:3px 9px;border-radius:20px;font-weight:700}
+  .fasting-flag.ok{background:color-mix(in srgb, var(--green) 20%, transparent);color:var(--green)}
+  .fasting-flag.low{background:color-mix(in srgb, var(--amber) 20%, transparent);color:var(--amber)}
+  .fasting-flag.none{background:var(--card);color:var(--muted)}
+  .habit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .habit-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:10px 12px}
+  .stepper{display:flex;gap:4px}
+  .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:700;cursor:pointer}
+  .stepper button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+  .tracker-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .wa-preview{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.5;margin-top:10px;max-height:400px;overflow-y:auto}
+  .cloud-status{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+  .cloud-status.on{color:var(--green)}
+  .cloud-status.off{color:var(--amber)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;border-left:4px solid var(--accent2)}
+  .card.green{border-left-color:var(--green)}
+  .card.orange{border-left-color:var(--red)}
+  .card.purple{border-left-color:var(--purple)}
+  .card-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}
+  .card-value{font-size:19px;font-weight:700;margin:4px 0 2px}
+  .card-sub{font-size:11px;color:var(--muted)}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+  .chart-card h4{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .dash-empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+  .add-tracker-form{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--border)}
+  .muted-note{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+</style>
+</head>
+<body>
+<header>
+  <h1>i<span>Health</span></h1>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="badge" id="weightBadge">—</div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="sel" id="tabTodayBtn" onclick="showMainTab('today')">📝 Today</button>
+  <button id="tabDashboardBtn" onclick="showMainTab('dashboard')">📊 Dashboard</button>
+</div>
+
+<div id="todayView">
+
+<div class="section">
+  <h3>📅 Date</h3>
+  <input type="date" id="fDate" onchange="onDateChange()">
+</div>
+
+<div class="section">
+  <h3>⚖️ Weight & Activity</h3>
+  <div class="row3">
+    <div><div class="label" style="margin-top:0">Weight (kg)</div><input type="tel" id="fWeight" inputmode="decimal" placeholder="65.0"></div>
+    <div><div class="label" style="margin-top:0">Steps</div><input type="tel" id="fSteps" inputmode="numeric" placeholder="8000"></div>
+    <div><div class="label" style="margin-top:0">Nap (min)</div><input type="tel" id="fNap" inputmode="numeric" placeholder="20"></div>
+  </div>
+  <div class="row2" style="margin-top:8px">
+    <div><div class="label" style="margin-top:0">Workout</div><input type="text" id="fWorkout" placeholder="e.g. 45 min yoga"></div>
+    <div><div class="label" style="margin-top:0">Run (miles)</div><input type="tel" id="fRunMiles" inputmode="decimal" placeholder="optional"></div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>⏱️ Fasting</h3>
+  <div class="fasting-box">
+    <div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div>
+    <span class="fasting-flag none" id="fastingFlag">no data</span>
+  </div>
+  <div class="muted-note">Auto-calculated from yesterday's dinner time → today's breakfast time. Target: 16 hrs.</div>
+</div>
+
+<div class="section" id="mealBreakfast" data-meal="breakfast">
+  <h3>🍳 Breakfast</h3>
+  <input type="time" id="breakfastTime" onchange="recalcFasting()">
+  <div class="chip-row" id="breakfastChips" style="margin-top:10px"></div>
+  <div class="item-add"><input type="text" id="breakfastInput" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
+</div>
+
+<div class="section" id="mealSnack" data-meal="snack">
+  <h3>🥗 Snack</h3>
+  <input type="time" id="snackTime">
+  <div class="chip-row" id="snackChips" style="margin-top:10px"></div>
+  <div class="item-add"><input type="text" id="snackInput" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
+</div>
+
+<div class="section" id="mealDinner" data-meal="dinner">
+  <h3>🍽️ Dinner</h3>
+  <input type="time" id="dinnerTime" onchange="recalcFasting()">
+  <div class="chip-row" id="dinnerChips" style="margin-top:10px"></div>
+  <div class="item-add"><input type="text" id="dinnerInput" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
+</div>
+
+<div class="section">
+  <h3>✅ Habits</h3>
+  <div class="habit-grid">
+    <div class="habit-row"><span>💧 Water</span><button class="opt" id="habitWater" onclick="toggleHabit('water')">Done</button></div>
+    <div class="habit-row"><span>🌅 Morning Detox</span><button class="opt" id="habitDetox" onclick="toggleHabit('morning_detox')">Done</button></div>
+    <div class="habit-row"><span>🫁 Deep Breathing</span><button class="opt" id="habitBreathing" onclick="toggleHabit('deep_breathing')">Done</button></div>
+    <div class="habit-row"><span>💊 Multivitamin</span><button class="opt" id="habitMultivit" onclick="toggleHabit('multivitamin')">Done</button></div>
+  </div>
+  <div class="habit-row" style="margin-top:8px">
+    <span>🌾 Isabgol (2x target)</span>
+    <div class="stepper" id="isabgolStepper"></div>
+  </div>
+</div>
+
+<div class="section" id="trackerSection">
+  <h3>🧩 My Trackers</h3>
+  <div id="trackerList"></div>
+  <button class="btn btn-ghost btn-sm" onclick="toggleAddTrackerForm()">+ Add tracker</button>
+  <div class="add-tracker-form" id="addTrackerForm" style="display:none">
+    <input type="text" id="newTrackerName" placeholder="e.g. Knee physio exercises">
+    <select id="newTrackerType">
+      <option value="boolean">Yes / No</option>
+      <option value="count">Count (0-5)</option>
+      <option value="number">Number</option>
+      <option value="text">Text</option>
+    </select>
+    <button class="btn btn-save btn-sm" onclick="addTracker()">Save Tracker</button>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📝 Notes</h3>
+  <textarea id="fNotes" placeholder="Anything else about today…"></textarea>
+</div>
+
+<button class="btn btn-save" id="saveBtn" onclick="saveDay()">Save Today's Log</button>
+
+<div class="section" style="margin-top:14px">
+  <h3>💬 WhatsApp Message</h3>
+  <div class="muted-note">Draft template — this is my best guess at your format from the migrated history. Tell me how it should differ and I'll adjust it.</div>
+  <button class="btn btn-wa" onclick="generateWhatsApp()">Generate Message</button>
+  <div class="wa-preview" id="waPreview" style="display:none"></div>
+  <button class="btn btn-ghost btn-sm" id="copyWaBtn" style="display:none" onclick="copyWhatsApp()">Copy to Clipboard</button>
+</div>
+
+<div class="label" style="margin-top:22px">☁️ Cloud Sync</div>
+<div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
+<div id="cloudSetup">
+  <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
+  <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. borannavar1984-health-data)" autocomplete="off" style="margin-top:8px">
+  <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
+  <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
+</div>
+<div id="cloudControls" style="display:none">
+  <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
+</div>
+
+<div class="label" style="margin-top:22px">💾 Backup</div>
+<button class="btn btn-ghost" onclick="backupData()">Backup all data (.json)</button>
+
+</div>
+
+<div id="dashboardView" style="display:none">
+  <div class="cards" id="ovCards"></div>
+  <div class="chart-card"><h4>Weight Trend toward 65.0 kg</h4><canvas id="weightChart" height="200"></canvas><div class="dash-empty" id="weightChartEmpty" style="display:none"></div></div>
+  <div class="chart-card"><h4>Fasting Hours (16 hr target)</h4><canvas id="fastingChart" height="180"></canvas><div class="dash-empty" id="fastingChartEmpty" style="display:none"></div></div>
+  <div class="chart-card"><h4>Steps</h4><canvas id="stepsChart" height="180"></canvas><div class="dash-empty" id="stepsChartEmpty" style="display:none"></div></div>
+  <div class="chart-card"><h4>Habit Adherence (all logged days)</h4><canvas id="habitChart" height="200"></canvas><div class="dash-empty" id="habitChartEmpty" style="display:none"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GOAL_WEIGHT = 65.0;
+const LS_DAYS = "ihealth_days_v2";
+const LS_TRACKERS = "ihealth_trackers_v1";
+const CLOUD_KEY = "ihealth_cloud_cfg_v2";
+
+let days = loadDays();       // { "YYYY-MM-DD": record }
+let trackers = loadTrackers(); // [{id,label,type}]
+let meals = { breakfast: [], snack: [], dinner: [] };
+let habits = { water:false, morning_detox:false, deep_breathing:false, multivitamin:false, isabgol_count:0 };
+let customValues = {};
+
+function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
+function persistDays(){ try{ localStorage.setItem(LS_DAYS, JSON.stringify(days)); }catch(e){} }
+function loadTrackers(){ try{ return JSON.parse(localStorage.getItem(LS_TRACKERS)||"[]"); }catch(e){ return []; } }
+function persistTrackers(){ try{ localStorage.setItem(LS_TRACKERS, JSON.stringify(trackers)); }catch(e){} }
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function prevDateStr(dateStr){ const d=new Date(dateStr+"T00:00:00"); d.setDate(d.getDate()-1); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function toast(msg,color){
+  const t=document.getElementById("toast");
+  const icon = color==="var(--red)" ? "⚠️ " : color==="var(--amber)" ? "ℹ️ " : "✅ ";
+  t.textContent=icon+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2400);
+}
+
+// normalize a meal field from either legacy shape (array of strings) or
+// current shape ({time, items}) so history and live data render the same way
+function normMeal(v){
+  if(Array.isArray(v)) return { time:null, items:v };
+  if(v && typeof v==="object") return { time:v.time||null, items:v.items||[] };
+  return { time:null, items:[] };
+}
+// isabgol: legacy boolean -> count-equivalent (2=yes, 0=no); current int stays as-is
+function normIsabgolCount(rec){
+  if(rec.isabgol_count!=null) return rec.isabgol_count;
+  if(rec.isabgol===true) return 2;
+  if(rec.isabgol===false) return 0;
+  return null;
+}
+function normBool(v){ return v===true ? true : v===false ? false : null; }
+function normWater(rec){ return rec.water==="completed" ? true : (rec.water==null ? null : false); }
+
+// ===== Meal item chips =====
+function renderMealChips(meal){
+  const box=document.getElementById(meal+"Chips"); box.innerHTML="";
+  meals[meal].forEach((item,idx)=>{
+    const c=document.createElement("div"); c.className="chip";
+    c.innerHTML = `<span></span><button aria-label="Remove">×</button>`;
+    c.querySelector("span").textContent = item;
+    c.querySelector("button").onclick=()=>{ meals[meal].splice(idx,1); renderMealChips(meal); };
+    box.appendChild(c);
+  });
+}
+function addMealItem(meal){
+  const input=document.getElementById(meal+"Input");
+  const v=input.value.trim();
+  if(!v) return;
+  meals[meal].push(v);
+  input.value="";
+  renderMealChips(meal);
+}
+["breakfast","snack","dinner"].forEach(meal=>{
+  document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
+});
+
+// ===== Habits =====
+function toggleHabit(key){
+  habits[key] = !habits[key];
+  renderHabitButtons();
+}
+function renderHabitButtons(){
+  document.getElementById("habitWater").classList.toggle("sel", !!habits.water);
+  document.getElementById("habitDetox").classList.toggle("sel", !!habits.morning_detox);
+  document.getElementById("habitBreathing").classList.toggle("sel", !!habits.deep_breathing);
+  document.getElementById("habitMultivit").classList.toggle("sel", !!habits.multivitamin);
+}
+function renderIsabgolStepper(){
+  const box=document.getElementById("isabgolStepper"); box.innerHTML="";
+  [0,1,2].forEach(n=>{
+    const b=document.createElement("button"); b.textContent=n;
+    b.className = habits.isabgol_count===n ? "sel" : "";
+    b.onclick=()=>{ habits.isabgol_count=n; renderIsabgolStepper(); };
+    box.appendChild(b);
+  });
+}
+
+// ===== Custom trackers =====
+function toggleAddTrackerForm(){
+  const f=document.getElementById("addTrackerForm");
+  f.style.display = f.style.display==="none" ? "flex" : "none";
+}
+function addTracker(){
+  const name=document.getElementById("newTrackerName").value.trim();
+  const type=document.getElementById("newTrackerType").value;
+  if(!name){ toast("Enter a tracker name","var(--red)"); return; }
+  const t = { id:genId(), label:name, type, addedDate:todayStr() };
+  trackers.push(t);
+  persistTrackers();
+  document.getElementById("newTrackerName").value="";
+  document.getElementById("addTrackerForm").style.display="none";
+  renderTrackers();
+  toast(`Added tracker "${name}"`);
+  if(cloudCfg) cloudSaveTrackers().catch(()=>toast("Tracker saved locally — cloud sync failed","var(--amber)"));
+}
+function renderTrackers(){
+  const box=document.getElementById("trackerList"); box.innerHTML="";
+  if(!trackers.length){ box.innerHTML='<div class="muted-note">No custom trackers yet — add one below (e.g. "Knee physio exercises").</div>'; return; }
+  trackers.forEach(t=>{
+    const row=document.createElement("div"); row.className="tracker-row";
+    let control="";
+    if(t.type==="boolean"){
+      control = `<button class="opt${customValues[t.id]===true?" sel":""}" data-tid="${t.id}">Done</button>`;
+    } else if(t.type==="count"){
+      control = `<div class="stepper" data-tid="${t.id}">${[0,1,2,3,4,5].map(n=>`<button data-n="${n}" class="${customValues[t.id]===n?"sel":""}">${n}</button>`).join("")}</div>`;
+    } else if(t.type==="number"){
+      control = `<input type="tel" inputmode="decimal" data-tid="${t.id}" style="width:90px" value="${customValues[t.id]??""}" placeholder="0">`;
+    } else {
+      control = `<input type="text" data-tid="${t.id}" style="width:140px" value="${customValues[t.id]??""}" placeholder="…">`;
+    }
+    row.innerHTML = `<span>${t.label}</span>${control}`;
+    box.appendChild(row);
+
+    if(t.type==="boolean"){
+      row.querySelector("button").onclick=()=>{ customValues[t.id] = customValues[t.id]===true ? null : true; renderTrackers(); };
+    } else if(t.type==="count"){
+      row.querySelectorAll(".stepper button").forEach(b=>{
+        b.onclick=()=>{ customValues[t.id]=Number(b.dataset.n); renderTrackers(); };
+      });
+    } else {
+      row.querySelector("input").addEventListener("input", e=>{ customValues[t.id]=e.target.value; });
+    }
+  });
+}
+
+// ===== Fasting auto-calc =====
+function recalcFasting(){
+  const date = document.getElementById("fDate").value || todayStr();
+  const prevDate = prevDateStr(date);
+  const prevRec = days[prevDate];
+  const prevDinner = prevRec ? normMeal(prevRec.dinner).time : null;
+  const todayBreakfast = document.getElementById("breakfastTime").value;
+  const flagEl = document.getElementById("fastingFlag");
+  const hoursEl = document.getElementById("fastingHours");
+  if(!prevDinner || !todayBreakfast){
+    hoursEl.textContent = "—";
+    flagEl.textContent = "no data";
+    flagEl.className = "fasting-flag none";
+    return null;
+  }
+  const dinnerDt = new Date(prevDate+"T"+prevDinner+":00");
+  const breakfastDt = new Date(date+"T"+todayBreakfast+":00");
+  let hrs = (breakfastDt - dinnerDt) / 3600000;
+  if(hrs < 0) hrs += 24;
+  hrs = Math.round(hrs*10)/10;
+  hoursEl.textContent = hrs;
+  if(hrs >= 16){ flagEl.textContent="✅ 16h+"; flagEl.className="fasting-flag ok"; }
+  else { flagEl.textContent="⚠️ under 16h"; flagEl.className="fasting-flag low"; }
+  return hrs;
+}
+
+// ===== Load a date into the form (existing entry or blank) =====
+function loadDateIntoForm(date){
+  const rec = days[date];
+  meals = { breakfast: normMeal(rec?.breakfast).items.slice(), snack: normMeal(rec?.snack).items.slice(), dinner: normMeal(rec?.dinner).items.slice() };
+  document.getElementById("breakfastTime").value = normMeal(rec?.breakfast).time || "";
+  document.getElementById("snackTime").value = normMeal(rec?.snack).time || "";
+  document.getElementById("dinnerTime").value = normMeal(rec?.dinner).time || "";
+  ["breakfast","snack","dinner"].forEach(renderMealChips);
+
+  document.getElementById("fWeight").value = rec?.weight ?? "";
+  document.getElementById("fSteps").value = rec?.steps ?? "";
+  document.getElementById("fNap").value = rec?.power_nap_min ?? "";
+  document.getElementById("fWorkout").value = rec?.workout ?? "";
+  document.getElementById("fRunMiles").value = rec?.run_miles ?? "";
+  document.getElementById("fNotes").value = rec?.notes ?? "";
+
+  habits = {
+    water: rec ? normWater(rec)===true : false,
+    morning_detox: rec ? !!rec.morning_detox : false,
+    deep_breathing: rec ? !!rec.deep_breathing : false,
+    multivitamin: rec ? !!rec.multivitamin : false,
+    isabgol_count: rec ? (normIsabgolCount(rec) ?? 0) : 0,
+  };
+  renderHabitButtons(); renderIsabgolStepper();
+
+  customValues = rec?.custom ? { ...rec.custom } : {};
+  renderTrackers();
+
+  document.getElementById("waPreview").style.display="none";
+  document.getElementById("copyWaBtn").style.display="none";
+  recalcFasting();
+  updateWeightBadge();
+}
+
+function onDateChange(){
+  const date = document.getElementById("fDate").value;
+  loadDateIntoForm(date);
+}
+
+function updateWeightBadge(){
+  const dates = Object.keys(days).sort();
+  const latest = dates.length ? days[dates[dates.length-1]] : null;
+  const el = document.getElementById("weightBadge");
+  if(latest && latest.weight!=null){
+    const diff = Math.round((latest.weight - GOAL_WEIGHT)*10)/10;
+    el.innerHTML = `${latest.weight}kg <b>${diff>0?"−"+diff:"🎯"}</b>`;
+  } else {
+    el.textContent = `Goal: ${GOAL_WEIGHT.toFixed(1)}kg`;
+  }
+}
+
+// ===== Save =====
+async function saveDay(){
+  const date = document.getElementById("fDate").value || todayStr();
+
+  if(date !== todayStr()){
+    const existing = days[todayStr()];
+    const lastLogged = Object.keys(days).sort().pop();
+    if(lastLogged && date.slice(0,7) !== lastLogged.slice(0,7)){
+      if(!confirm(`You're logging for ${date} (a different month than your last entry, ${lastLogged}) — continue?`)) return;
+    } else if(!confirm(`You're logging for ${date}, not today — continue?`)){
+      return;
+    }
+  }
+
+  const fastingHours = recalcFasting();
+  const record = {
+    date,
+    weight: parseFloat(document.getElementById("fWeight").value) || null,
+    steps: parseInt(document.getElementById("fSteps").value,10) || null,
+    power_nap_min: parseInt(document.getElementById("fNap").value,10) || null,
+    workout: document.getElementById("fWorkout").value.trim() || null,
+    run_miles: parseFloat(document.getElementById("fRunMiles").value) || null,
+    breakfast: { time: document.getElementById("breakfastTime").value||null, items: meals.breakfast },
+    snack: { time: document.getElementById("snackTime").value||null, items: meals.snack },
+    dinner: { time: document.getElementById("dinnerTime").value||null, items: meals.dinner },
+    fasting_hours: fastingHours,
+    water: habits.water ? "completed" : null,
+    morning_detox: habits.morning_detox,
+    deep_breathing: habits.deep_breathing,
+    multivitamin: habits.multivitamin,
+    isabgol_count: habits.isabgol_count,
+    custom: { ...customValues },
+    notes: document.getElementById("fNotes").value.trim(),
+    _source: "live",
+  };
+
+  days[date] = { ...(days[date]||{}), ...record };
+  persistDays();
+  updateWeightBadge();
+  toast("Saved ✓");
+
+  if(cloudCfg){
+    try{
+      await cloudSaveDay(days[date]);
+      setCloudStatus(true);
+    }catch(err){
+      setCloudStatus(false, "Saved locally — cloud sync failed, reconnect or retry later");
+    }
+  }
+}
+
+// ===== WhatsApp message =====
+function fmtDateLong(dateStr){
+  const d = new Date(dateStr+"T00:00:00");
+  return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+function fmtTime12(t){
+  if(!t) return "";
+  const [h,m] = t.split(":").map(Number);
+  const ampm = h>=12 ? "PM" : "AM";
+  const h12 = h%12===0 ? 12 : h%12;
+  return `${h12}:${String(m).padStart(2,"0")} ${ampm}`;
+}
+function buildWhatsAppMessage(){
+  const date = document.getElementById("fDate").value || todayStr();
+  const weight = document.getElementById("fWeight").value;
+  const steps = document.getElementById("fSteps").value;
+  const fastingHours = document.getElementById("fastingHours").textContent;
+  const bkTime = document.getElementById("breakfastTime").value;
+  const snTime = document.getElementById("snackTime").value;
+  const dnTime = document.getElementById("dinnerTime").value;
+  const workout = document.getElementById("fWorkout").value.trim();
+  const runMiles = document.getElementById("fRunMiles").value;
+  const nap = document.getElementById("fNap").value;
+  const notes = document.getElementById("fNotes").value.trim();
+
+  let lines = [];
+  lines.push(`📅 ${fmtDateLong(date)}`);
+  lines.push("");
+  if(weight) lines.push(`⚖️ Weight: ${weight} kg (Goal: ${GOAL_WEIGHT} kg)`);
+  if(steps) lines.push(`👟 Steps: ${Number(steps).toLocaleString()}`);
+  if(fastingHours && fastingHours!=="—") lines.push(`⏱️ Fasting: ${fastingHours} hrs`);
+  if(lines[lines.length-1]!=="") lines.push("");
+
+  if(meals.breakfast.length){
+    lines.push(`🍳 Breakfast${bkTime?" ("+fmtTime12(bkTime)+")":""}`);
+    meals.breakfast.forEach(i=>lines.push(`• ${i}`));
+    lines.push("");
+  }
+  if(meals.snack.length){
+    lines.push(`🥗 Snack${snTime?" ("+fmtTime12(snTime)+")":""}`);
+    meals.snack.forEach(i=>lines.push(`• ${i}`));
+    lines.push("");
+  }
+  if(meals.dinner.length){
+    lines.push(`🍽️ Dinner${dnTime?" ("+fmtTime12(dnTime)+")":""}`);
+    meals.dinner.forEach(i=>lines.push(`• ${i}`));
+    lines.push("");
+  }
+
+  const habitParts = [];
+  if(habits.water) habitParts.push("Water ✓");
+  habitParts.push(`Isabgol ${habits.isabgol_count}/2${habits.isabgol_count>=2?" ✓":""}`);
+  if(habits.morning_detox) habitParts.push("Morning Detox ✓");
+  if(habits.deep_breathing) habitParts.push("Deep Breathing ✓");
+  if(habits.multivitamin) habitParts.push("Multivitamin ✓");
+  if(habitParts.length) lines.push(`✅ ${habitParts.join(" · ")}`);
+
+  if(workout) lines.push(`🏋️ Workout: ${workout}${runMiles?` (${runMiles} mi)`:""}`);
+  if(nap) lines.push(`😴 Power Nap: ${nap} min`);
+  if(notes){ lines.push(""); lines.push(`📝 ${notes}`); }
+
+  return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+function generateWhatsApp(){
+  const msg = buildWhatsAppMessage();
+  const box = document.getElementById("waPreview");
+  box.textContent = msg;
+  box.style.display = "block";
+  document.getElementById("copyWaBtn").style.display = "block";
+}
+async function copyWhatsApp(){
+  const msg = document.getElementById("waPreview").textContent;
+  try{
+    await navigator.clipboard.writeText(msg);
+    toast("Copied — paste into WhatsApp");
+  }catch(e){
+    const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    toast("Copied — paste into WhatsApp");
+  }
+}
+
+// ===== Backup =====
+function backupData(){
+  const payload = { backup:new Date().toISOString(), source:"iHealth", days, trackers };
+  const blob = new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
+  const fname = `ihealth_backup_${payload.backup.replace(/[-:T]/g,"").slice(0,14)}.json`;
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
+  toast("Backup downloaded");
+}
+
+// ===== Cloud Sync: private GitHub data repo =====
+function loadCloudCfg(){ try{ return JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); }catch(e){ return null; } }
+function saveCloudCfg(cfg){ localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg)); }
+function clearCloudCfg(){ localStorage.removeItem(CLOUD_KEY); }
+let cloudCfg = loadCloudCfg();
+
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,"")))); }
+function contentsUrl(cfg, path){ return `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`; }
+
+async function cloudGetJson(cfg, path){
+  const res = await fetch(contentsUrl(cfg,path), { headers:{ Authorization:`Bearer ${cfg.token}`, Accept:"application/vnd.github+json" } });
+  if(res.status===404) return { data:null, sha:null };
+  if(!res.ok) throw new Error(`GitHub read failed (${res.status})`);
+  const body = await res.json();
+  let data=null;
+  try{ data = JSON.parse(b64ToUtf8(body.content)); }catch(e){ data=null; }
+  return { data, sha: body.sha };
+}
+async function cloudPutJson(cfg, path, data, sha, message){
+  const body = { message: message||"iHealth sync", content: utf8ToB64(JSON.stringify(data,null,1)) };
+  if(sha) body.sha = sha;
+  const res = await fetch(contentsUrl(cfg,path), {
+    method:"PUT",
+    headers:{ Authorization:`Bearer ${cfg.token}`, Accept:"application/vnd.github+json", "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+  if(res.status===409){ const err=new Error("Conflict — retrying"); err.conflict=true; throw err; }
+  if(!res.ok) throw new Error(`GitHub write failed (${res.status})`);
+}
+
+async function cloudSaveDay(record, attempts){
+  attempts = attempts || 3;
+  if(!cloudCfg) return;
+  // write the per-day file (unique path, low conflict risk)
+  const { sha:daySha } = await cloudGetJson(cloudCfg, `days/${record.date}.json`);
+  await cloudPutJson(cloudCfg, `days/${record.date}.json`, record, daySha, `iHealth: log ${record.date}`);
+  // update the index.json mirror, retrying on conflict
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{
+      const { data: index, sha: indexSha } = await cloudGetJson(cloudCfg, "index.json");
+      const arr = Array.isArray(index) ? index : [];
+      const idx = arr.findIndex(d=>d.date===record.date);
+      if(idx>=0) arr[idx]=record; else arr.push(record);
+      arr.sort((a,b)=>a.date.localeCompare(b.date));
+      await cloudPutJson(cloudCfg, "index.json", arr, indexSha, `iHealth: index update ${record.date}`);
+      return;
+    }catch(err){
+      lastErr = err;
+      if(!err.conflict) throw err;
+    }
+  }
+  throw lastErr;
+}
+
+async function cloudSaveTrackers(attempts){
+  attempts = attempts || 3;
+  if(!cloudCfg) return;
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{
+      const { sha } = await cloudGetJson(cloudCfg, "trackers.json");
+      await cloudPutJson(cloudCfg, "trackers.json", trackers, sha, "iHealth: tracker definitions update");
+      return;
+    }catch(err){
+      lastErr = err;
+      if(!err.conflict) throw err;
+    }
+  }
+  throw lastErr;
+}
+
+function setCloudStatus(ok, msg){
+  const el = document.getElementById("cloudStatus");
+  if(!cloudCfg){ el.textContent="Not connected — saving on this device only"; el.className="cloud-status off"; return; }
+  if(ok){ el.textContent=`Connected to ${cloudCfg.owner}/${cloudCfg.repo} — last synced ${new Date().toLocaleTimeString()}`; el.className="cloud-status on"; }
+  else { el.textContent = msg || "Cloud sync error"; el.className="cloud-status off"; }
+}
+
+function mergeDaysFromCloud(remoteArr){
+  (remoteArr||[]).forEach(rec=>{
+    // local live edits win over cloud on merge conflicts for the same date+source;
+    // otherwise take the cloud copy (handles a second device's changes)
+    const local = days[rec.date];
+    if(!local || (local._source==="migrated" && rec._source!=="migrated") || !local._justEdited){
+      days[rec.date] = rec;
+    }
+  });
+}
+
+async function cloudConnect(){
+  const owner=document.getElementById("cloudOwner").value.trim();
+  const repo=document.getElementById("cloudRepo").value.trim();
+  const token=document.getElementById("cloudToken").value.trim();
+  if(!owner||!repo||!token){ toast("Fill in owner, repo and token","var(--red)"); return; }
+  const cfg={owner,repo,token};
+  toast("Connecting…","var(--amber)");
+  try{
+    const { data: index } = await cloudGetJson(cfg, "index.json");
+    const { data: remoteTrackers } = await cloudGetJson(cfg, "trackers.json");
+    cloudCfg = cfg;
+    saveCloudCfg(cfg);
+    mergeDaysFromCloud(index);
+    persistDays();
+    if(Array.isArray(remoteTrackers) && remoteTrackers.length) { trackers = remoteTrackers; persistTrackers(); }
+    document.getElementById("cloudSetup").style.display="none";
+    document.getElementById("cloudControls").style.display="block";
+    document.getElementById("cloudToken").value="";
+    toast(`Connected — ${(index||[]).length} days loaded`);
+    setCloudStatus(true);
+    renderTrackers();
+    updateWeightBadge();
+    if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
+  }catch(err){
+    toast("Connect failed: "+err.message,"var(--red)");
+    setCloudStatus(false, "Not connected — check token/repo and try again");
+  }
+}
+
+function cloudDisconnect(){
+  cloudCfg=null; clearCloudCfg();
+  document.getElementById("cloudSetup").style.display="block";
+  document.getElementById("cloudControls").style.display="none";
+  document.getElementById("cloudOwner").value="";
+  document.getElementById("cloudRepo").value="";
+  setCloudStatus(false);
+  toast("Disconnected — saving on this device only","var(--amber)");
+}
+
+async function cloudPullOnLoad(){
+  try{
+    const { data: index } = await cloudGetJson(cloudCfg, "index.json");
+    const { data: remoteTrackers } = await cloudGetJson(cloudCfg, "trackers.json");
+    mergeDaysFromCloud(index);
+    persistDays();
+    if(Array.isArray(remoteTrackers)) { trackers = remoteTrackers; persistTrackers(); }
+    setCloudStatus(true);
+    updateWeightBadge();
+    renderTrackers();
+  }catch(err){
+    setCloudStatus(false, "Offline or cloud unreachable — using local copy");
+  }
+}
+
+// ===== Tabs =====
+function showMainTab(tab){
+  const isDash = tab==="dashboard";
+  document.getElementById("todayView").style.display = isDash ? "none" : "block";
+  document.getElementById("dashboardView").style.display = isDash ? "block" : "none";
+  document.getElementById("tabTodayBtn").classList.toggle("sel", !isDash);
+  document.getElementById("tabDashboardBtn").classList.toggle("sel", isDash);
+  if(isDash) renderDashboard();
+}
+
+// ===== Dashboard =====
+let charts = { weight:null, fasting:null, steps:null, habit:null };
+function themeColor(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function showChartFallback(id, msg){ document.getElementById(id).style.display="none"; const e=document.getElementById(id+"Empty"); e.textContent=msg; e.style.display="block"; }
+function showChartCanvas(id){ document.getElementById(id).style.display="block"; document.getElementById(id+"Empty").style.display="none"; }
+
+function allSortedRecords(){
+  return Object.values(days).filter(d=>d && d.date).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function renderDashboard(){
+  const recs = allSortedRecords();
+  const withWeight = recs.filter(r=>r.weight!=null);
+  const latest = withWeight.length ? withWeight[withWeight.length-1] : null;
+  const first = withWeight.length ? withWeight[0] : null;
+  const change = (latest && first && withWeight.length>1) ? Math.round((latest.weight-first.weight)*10)/10 : null;
+  const toGoal = latest ? Math.round((latest.weight-GOAL_WEIGHT)*10)/10 : null;
+
+  const withFasting = recs.filter(r=>r.fasting_hours!=null);
+  const fastingAdherence = withFasting.length ? Math.round(withFasting.filter(r=>r.fasting_hours>=16).length/withFasting.length*100) : null;
+
+  document.getElementById("ovCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${latest?latest.weight+"kg":"—"}</div><div class="card-sub">${latest?latest.date:"No entries yet"}</div></div>
+    <div class="card ${toGoal!==null && toGoal<=0 ? "green":"orange"}"><div class="card-label">🎯 To Goal (65.0kg)</div><div class="card-value">${toGoal!==null ? (toGoal>0?"−"+toGoal:"Reached ✓") : "—"}</div><div class="card-sub">${toGoal!==null?"kg to go":""}</div></div>
+    <div class="card purple"><div class="card-label">📆 Days Logged</div><div class="card-value">${recs.length}</div><div class="card-sub">${recs.length?recs[0].date+" → "+recs[recs.length-1].date:""}</div></div>
+    <div class="card ${fastingAdherence!==null && fastingAdherence>=70 ? "green":"orange"}"><div class="card-label">⏱️ 16h Fasting Rate</div><div class="card-value">${fastingAdherence!==null?fastingAdherence+"%":"—"}</div><div class="card-sub">Of days with fasting logged</div></div>
+  `;
+
+  if(typeof Chart==="undefined"){
+    const msg="📊 Chart couldn't load (check your connection) — data is still saved";
+    ["weightChart","fastingChart","stepsChart","habitChart"].forEach(id=>showChartFallback(id,msg));
+    return;
+  }
+  const textColor = themeColor("--text");
+  const gridColor = themeColor("--border");
+
+  if(withWeight.length){
+    showChartCanvas("weightChart");
+    if(charts.weight) charts.weight.destroy();
+    charts.weight = new Chart(document.getElementById("weightChart"), {
+      type:"line",
+      data:{ labels: withWeight.map(r=>r.date), datasets:[
+        { label:"Weight (kg)", data: withWeight.map(r=>r.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,0.12)", fill:true, tension:.25, pointRadius:2 },
+        { label:"Goal", data: withWeight.map(()=>GOAL_WEIGHT), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0 }
+      ]},
+      options:{ responsive:true, plugins:{ legend:{ position:"bottom", labels:{ color:textColor } } },
+        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ color:gridColor } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
+    });
+  } else showChartFallback("weightChart","⚖️ No weight entries yet");
+
+  if(withFasting.length){
+    showChartCanvas("fastingChart");
+    if(charts.fasting) charts.fasting.destroy();
+    charts.fasting = new Chart(document.getElementById("fastingChart"), {
+      type:"bar",
+      data:{ labels: withFasting.map(r=>r.date), datasets:[{ label:"Fasting hrs", data: withFasting.map(r=>r.fasting_hours),
+        backgroundColor: withFasting.map(r=>r.fasting_hours>=16?themeColor("--green"):themeColor("--amber")) }] },
+      options:{ responsive:true, plugins:{ legend:{ display:false } },
+        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
+    });
+  } else showChartFallback("fastingChart","⏱️ No fasting data yet");
+
+  const withSteps = recs.filter(r=>r.steps!=null);
+  if(withSteps.length){
+    showChartCanvas("stepsChart");
+    if(charts.steps) charts.steps.destroy();
+    charts.steps = new Chart(document.getElementById("stepsChart"), {
+      type:"bar",
+      data:{ labels: withSteps.map(r=>r.date), datasets:[{ label:"Steps", data: withSteps.map(r=>r.steps), backgroundColor: themeColor("--purple") }] },
+      options:{ responsive:true, plugins:{ legend:{ display:false } },
+        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
+    });
+  } else showChartFallback("stepsChart","👟 No step data yet");
+
+  const habitDefs = [
+    { key:"water", label:"Water", get:r=>normWater(r) },
+    { key:"morning_detox", label:"Morning Detox", get:r=>normBool(r.morning_detox) },
+    { key:"deep_breathing", label:"Deep Breathing", get:r=>normBool(r.deep_breathing) },
+    { key:"multivitamin", label:"Multivitamin", get:r=>normBool(r.multivitamin) },
+    { key:"isabgol", label:"Isabgol (any)", get:r=>{ const c=normIsabgolCount(r); return c==null?null:c>0; } },
+  ];
+  const habitStats = habitDefs.map(h=>{
+    const tracked = recs.map(h.get).filter(v=>v!==null);
+    const yes = tracked.filter(v=>v===true).length;
+    return { label:h.label, pct: tracked.length ? Math.round(yes/tracked.length*100) : null };
+  }).filter(h=>h.pct!==null);
+  if(habitStats.length){
+    showChartCanvas("habitChart");
+    if(charts.habit) charts.habit.destroy();
+    charts.habit = new Chart(document.getElementById("habitChart"), {
+      type:"bar",
+      data:{ labels: habitStats.map(h=>h.label), datasets:[{ label:"Adherence %", data: habitStats.map(h=>h.pct), backgroundColor: themeColor("--green") }] },
+      options:{ indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } },
+        scales:{ x:{ min:0, max:100, ticks:{ color:textColor }, grid:{ color:gridColor } }, y:{ ticks:{ color:textColor }, grid:{ display:false } } } }
+    });
+  } else showChartFallback("habitChart","✅ No habit data yet");
+}
+
+// ===== Theme =====
+function setTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  document.getElementById("themeToggle").textContent = theme==="light" ? "☀️" : "🌙";
+  try{ localStorage.setItem("ihealth_theme", theme); }catch(e){}
+  if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute("data-theme")==="light" ? "light" : "dark";
+  setTheme(current==="dark" ? "light" : "dark");
+}
+
+// ===== Init =====
+document.getElementById("fDate").value = todayStr();
+renderIsabgolStepper();
+renderHabitButtons();
+renderTrackers();
+loadDateIntoForm(todayStr());
+updateWeightBadge();
+if(cloudCfg){
+  document.getElementById("cloudSetup").style.display="none";
+  document.getElementById("cloudControls").style.display="block";
+  document.getElementById("cloudOwner").value=cloudCfg.owner;
+  document.getElementById("cloudRepo").value=cloudCfg.repo;
+  cloudPullOnLoad().then(()=>loadDateIntoForm(document.getElementById("fDate").value));
+} else {
+  setCloudStatus(false);
+}
+(function initTheme(){
+  let saved="dark";
+  try{ saved = localStorage.getItem("ihealth_theme") || "dark"; }catch(e){}
+  setTheme(saved);
+})();
+</script>
+</body>
+</html>

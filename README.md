@@ -22,7 +22,7 @@ screen like a real app (Safari → Share → Add to Home Screen).
 ## Data
 
 All of Deep's actual health data (weight, food, fasting logs) lives in a **separate
-private repo**, `borannavar1984/borannavar1984-health-data` — never here. This repo is
+private repo**, `borannavar1984/health-data` — never here. This repo is
 public and contains zero personal data; searching it should always come up empty on
 anything personal. See that repo's README for its layout.
 

@@ -7,7 +7,7 @@ Plain-English log of what's built and what's still open, against the phases in
 
 - Found Deep's full daily-log history embedded in an uploaded `iHealthDashboard.html`
   (a `const ALL_DATA` blob) — 171 days, 2026-01-01 to 2026-06-29.
-- Migrated into `borannavar1984/borannavar1984-health-data`: one JSON file per day
+- Migrated into `borannavar1984/health-data`: one JSON file per day
   under `days/`, a fast-read `index.json` mirror, a generated `Master_Daily_Log.md`,
   and a `manifest.json` listing the 9 unlogged days in range.
 - No values invented anywhere — unset fields are `null`, not guessed.

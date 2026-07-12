@@ -1,7 +1,7 @@
 # Setup checklist (one-time, ~5 minutes)
 
 ## 1. Private data repo — done ✓
-`borannavar1984/borannavar1984-health-data` already exists (private) and already has
+`borannavar1984/health-data` already exists (private) and already has
 your history migrated in (Jan 1 – Jun 29, 2026, from `iHealthDashboard.html`).
 
 ## 2. Turn on GitHub Pages for this repo
@@ -18,7 +18,7 @@ I can't flip this on myself (no repo-admin access from here). One-time:
 2. Token name: something like `iHealth app`
 3. Expiration: whatever you're comfortable with (you can regenerate later)
 4. Repository access: **Only select repositories** → pick
-   `borannavar1984-health-data`
+   `health-data`
 5. Permissions → Repository permissions → **Contents** → set to **Read and write**
 6. Generate token, copy it (starts with `github_pat_...`) — GitHub only shows it once
 
@@ -28,7 +28,7 @@ I can't flip this on myself (no repo-admin access from here). One-time:
 2. Scroll to **Cloud Sync**
 3. Fill in:
    - GitHub username: `borannavar1984`
-   - Private data repo name: `borannavar1984-health-data`
+   - Private data repo name: `health-data`
    - Personal access token: paste from step 3
 4. Tap **Connect & Sync** — this pulls your full history in
 

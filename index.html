@@ -98,6 +98,15 @@
   .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
   .chart-card h4{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
   .dash-empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+  .dash-month{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+  .dash-month select{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-size:15px}
+  .dtable-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow-x:auto;margin-bottom:16px}
+  .dtable-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:420px}
+  .dtable-wrap th{background:var(--card2);padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.4px;white-space:nowrap}
+  .dtable-wrap td{padding:8px 10px;border-bottom:1px solid var(--card2);white-space:nowrap}
+  .tw-head{padding:10px 12px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border)}
+  .entry-row{cursor:pointer}
+  .entry-row:hover td{background:var(--card2)}
   .add-tracker-form{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--border)}
   .muted-note{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
 </style>
@@ -149,21 +158,30 @@
   <h3>🍳 Breakfast</h3>
   <input type="time" id="breakfastTime" onchange="recalcFasting()">
   <div class="chip-row" id="breakfastChips" style="margin-top:10px"></div>
-  <div class="item-add"><input type="text" id="breakfastInput" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
+  <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
+  <datalist id="breakfastAutocomplete"></datalist>
+  <div class="label" style="margin:10px 0 6px">Frequent</div>
+  <div class="chip-row" id="breakfastQuick"></div>
 </div>
 
 <div class="section" id="mealSnack" data-meal="snack">
   <h3>🥗 Snack</h3>
   <input type="time" id="snackTime">
   <div class="chip-row" id="snackChips" style="margin-top:10px"></div>
-  <div class="item-add"><input type="text" id="snackInput" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
+  <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
+  <datalist id="snackAutocomplete"></datalist>
+  <div class="label" style="margin:10px 0 6px">Frequent</div>
+  <div class="chip-row" id="snackQuick"></div>
 </div>
 
 <div class="section" id="mealDinner" data-meal="dinner">
   <h3>🍽️ Dinner</h3>
   <input type="time" id="dinnerTime" onchange="recalcFasting()">
   <div class="chip-row" id="dinnerChips" style="margin-top:10px"></div>
-  <div class="item-add"><input type="text" id="dinnerInput" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
+  <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
+  <datalist id="dinnerAutocomplete"></datalist>
+  <div class="label" style="margin:10px 0 6px">Frequent</div>
+  <div class="chip-row" id="dinnerQuick"></div>
 </div>
 
 <div class="section">
@@ -229,11 +247,28 @@
 </div>
 
 <div id="dashboardView" style="display:none">
-  <div class="cards" id="ovCards"></div>
-  <div class="chart-card"><h4>Weight Trend toward 65.0 kg</h4><canvas id="weightChart" height="200"></canvas><div class="dash-empty" id="weightChartEmpty" style="display:none"></div></div>
-  <div class="chart-card"><h4>Fasting Hours (16 hr target)</h4><canvas id="fastingChart" height="180"></canvas><div class="dash-empty" id="fastingChartEmpty" style="display:none"></div></div>
-  <div class="chart-card"><h4>Steps</h4><canvas id="stepsChart" height="180"></canvas><div class="dash-empty" id="stepsChartEmpty" style="display:none"></div></div>
-  <div class="chart-card"><h4>Habit Adherence (all logged days)</h4><canvas id="habitChart" height="200"></canvas><div class="dash-empty" id="habitChartEmpty" style="display:none"></div></div>
+  <div class="dash-tabs">
+    <button class="sel" id="dashOverviewBtn" onclick="showDashTab('overview')">Overview</button>
+    <button id="dashMonthlyBtn" onclick="showDashTab('monthly')">Monthly Detail</button>
+  </div>
+
+  <div id="dashOverviewView">
+    <div class="cards" id="ovCards"></div>
+    <div class="chart-card"><h4>Weight Trend toward 65.0 kg</h4><canvas id="weightChart" height="200"></canvas><div class="dash-empty" id="weightChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Fasting Hours (16 hr target)</h4><canvas id="fastingChart" height="180"></canvas><div class="dash-empty" id="fastingChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Steps</h4><canvas id="stepsChart" height="180"></canvas><div class="dash-empty" id="stepsChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Running (miles per run)</h4><canvas id="runChart" height="180"></canvas><div class="dash-empty" id="runChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Habit Adherence (all logged days)</h4><canvas id="habitChart" height="200"></canvas><div class="dash-empty" id="habitChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Month over Month</div><div id="ovMonthlyTable"></div></div>
+  </div>
+
+  <div id="dashMonthlyView" style="display:none">
+    <div class="dash-month">
+      <select id="dashMonthSel" onchange="renderMonthlyDetail()"></select>
+    </div>
+    <div class="cards" id="monCards"></div>
+    <div class="dtable-wrap"><div class="tw-head" id="monDayHead">Days</div><div id="monDayTable"></div></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -291,17 +326,48 @@ function renderMealChips(meal){
     box.appendChild(c);
   });
 }
-function addMealItem(meal){
+function addMealItem(meal, itemOverride){
   const input=document.getElementById(meal+"Input");
-  const v=input.value.trim();
+  const v=(itemOverride!=null ? itemOverride : input.value).trim();
   if(!v) return;
+  if(itemOverride==null) input.value="";
+  if(meals[meal].some(x=>x.toLowerCase()===v.toLowerCase())) return; // already added today
   meals[meal].push(v);
-  input.value="";
   renderMealChips(meal);
 }
 ["breakfast","snack","dinner"].forEach(meal=>{
   document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
 });
+
+// ===== Frequent-item quick picks, learned from history (exact-string match — similar
+// phrasing counts separately, so this favors items you log the same way each time) =====
+function mealItemFrequency(meal){
+  const counts = new Map();
+  Object.values(days).forEach(rec=>{
+    normMeal(rec && rec[meal]).items.forEach(item=>{
+      const key = item.trim();
+      if(!key) return;
+      counts.set(key, (counts.get(key)||0)+1);
+    });
+  });
+  return [...counts.entries()].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]));
+}
+function renderMealQuickPicks(meal){
+  const freq = mealItemFrequency(meal);
+  const quickBox = document.getElementById(meal+"Quick");
+  quickBox.innerHTML="";
+  if(!freq.length){ quickBox.innerHTML = '<div class="muted-note">Nothing logged yet — items you add will show up here next time.</div>'; }
+  freq.slice(0,12).forEach(([item])=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=item;
+    b.onclick=()=>addMealItem(meal, item);
+    quickBox.appendChild(b);
+  });
+  const datalist = document.getElementById(meal+"Autocomplete");
+  datalist.innerHTML = freq.map(([item])=>`<option value="${item.replace(/"/g,"&quot;")}">`).join("");
+}
+function renderAllMealQuickPicks(){
+  ["breakfast","snack","dinner"].forEach(renderMealQuickPicks);
+}
 
 // ===== Habits =====
 function toggleHabit(key){
@@ -406,6 +472,7 @@ function loadDateIntoForm(date){
   document.getElementById("snackTime").value = normMeal(rec?.snack).time || "";
   document.getElementById("dinnerTime").value = normMeal(rec?.dinner).time || "";
   ["breakfast","snack","dinner"].forEach(renderMealChips);
+  renderAllMealQuickPicks();
 
   document.getElementById("fWeight").value = rec?.weight ?? "";
   document.getElementById("fSteps").value = rec?.steps ?? "";
@@ -704,6 +771,7 @@ async function cloudConnect(){
     setCloudStatus(true);
     renderTrackers();
     updateWeightBadge();
+    renderAllMealQuickPicks();
     if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
   }catch(err){
     toast("Connect failed: "+err.message,"var(--red)");
@@ -747,7 +815,7 @@ function showMainTab(tab){
 }
 
 // ===== Dashboard =====
-let charts = { weight:null, fasting:null, steps:null, habit:null };
+let charts = { weight:null, fasting:null, steps:null, run:null, habit:null };
 function themeColor(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function showChartFallback(id, msg){ document.getElementById(id).style.display="none"; const e=document.getElementById(id+"Empty"); e.textContent=msg; e.style.display="block"; }
 function showChartCanvas(id){ document.getElementById(id).style.display="block"; document.getElementById(id+"Empty").style.display="none"; }
@@ -756,7 +824,33 @@ function allSortedRecords(){
   return Object.values(days).filter(d=>d && d.date).sort((a,b)=>a.date.localeCompare(b.date));
 }
 
+function monthLabel(m){
+  const [y,mo]=m.split("-").map(Number);
+  return new Date(y, mo-1, 1).toLocaleString(undefined,{month:"long",year:"numeric"});
+}
+// every month that has data, plus the real current month, sorted oldest-first
+function allMonths(){
+  const months = [...new Set(allSortedRecords().map(r=>r.date.slice(0,7)))];
+  const cur = todayStr().slice(0,7);
+  if(!months.includes(cur)) months.push(cur);
+  return months.sort();
+}
+
+function showDashTab(tab){
+  const isOverview = tab==="overview";
+  document.getElementById("dashOverviewView").style.display = isOverview ? "block" : "none";
+  document.getElementById("dashMonthlyView").style.display = isOverview ? "none" : "block";
+  document.getElementById("dashOverviewBtn").classList.toggle("sel", isOverview);
+  document.getElementById("dashMonthlyBtn").classList.toggle("sel", !isOverview);
+  if(isOverview) renderOverview(); else renderMonthlyDetail();
+}
+
 function renderDashboard(){
+  const overviewActive = document.getElementById("dashOverviewView").style.display !== "none";
+  if(overviewActive) renderOverview(); else renderMonthlyDetail();
+}
+
+function renderOverview(){
   const recs = allSortedRecords();
   const withWeight = recs.filter(r=>r.weight!=null);
   const latest = withWeight.length ? withWeight[withWeight.length-1] : null;
@@ -776,9 +870,8 @@ function renderDashboard(){
 
   if(typeof Chart==="undefined"){
     const msg="📊 Chart couldn't load (check your connection) — data is still saved";
-    ["weightChart","fastingChart","stepsChart","habitChart"].forEach(id=>showChartFallback(id,msg));
-    return;
-  }
+    ["weightChart","fastingChart","stepsChart","runChart","habitChart"].forEach(id=>showChartFallback(id,msg));
+  } else {
   const textColor = themeColor("--text");
   const gridColor = themeColor("--border");
 
@@ -820,6 +913,18 @@ function renderDashboard(){
     });
   } else showChartFallback("stepsChart","👟 No step data yet");
 
+  const withRun = recs.filter(r=>r.run_miles!=null);
+  if(withRun.length){
+    showChartCanvas("runChart");
+    if(charts.run) charts.run.destroy();
+    charts.run = new Chart(document.getElementById("runChart"), {
+      type:"bar",
+      data:{ labels: withRun.map(r=>r.date), datasets:[{ label:"Miles", data: withRun.map(r=>r.run_miles), backgroundColor: themeColor("--red") }] },
+      options:{ responsive:true, plugins:{ legend:{ display:false } },
+        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
+    });
+  } else showChartFallback("runChart","🏃 No runs logged yet");
+
   const habitDefs = [
     { key:"water", label:"Water", get:r=>normWater(r) },
     { key:"morning_detox", label:"Morning Detox", get:r=>normBool(r.morning_detox) },
@@ -842,6 +947,64 @@ function renderDashboard(){
         scales:{ x:{ min:0, max:100, ticks:{ color:textColor }, grid:{ color:gridColor } }, y:{ ticks:{ color:textColor }, grid:{ display:false } } } }
     });
   } else showChartFallback("habitChart","✅ No habit data yet");
+  } // end typeof Chart!=="undefined"
+
+  const months = allMonths();
+  const monthRows = months.map(m=>{
+    const mRecs = recs.filter(r=>r.date.slice(0,7)===m);
+    const mWeights = mRecs.filter(r=>r.weight!=null).map(r=>r.weight);
+    const avgWeight = mWeights.length ? (mWeights.reduce((a,b)=>a+b,0)/mWeights.length).toFixed(1) : "—";
+    const mSteps = mRecs.filter(r=>r.steps!=null).map(r=>r.steps);
+    const avgSteps = mSteps.length ? Math.round(mSteps.reduce((a,b)=>a+b,0)/mSteps.length) : "—";
+    const mFasting = mRecs.filter(r=>r.fasting_hours!=null);
+    const fastingPct = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
+    const mRunMiles = mRecs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
+    const workoutDays = mRecs.filter(r=>r.workout).length;
+    return { m, daysLogged: mRecs.length, avgWeight, avgSteps, fastingPct, mRunMiles, workoutDays };
+  }).filter(r=>r.daysLogged>0);
+  document.getElementById("ovMonthlyTable").innerHTML = monthRows.length ? `<table><thead><tr><th>Month</th><th>Days Logged</th><th>Avg Weight</th><th>Avg Steps</th><th>16h Fasting</th><th>Run Miles</th><th>Workout Days</th></tr></thead><tbody>
+    ${monthRows.map(r=>`<tr><td>${monthLabel(r.m)}</td><td>${r.daysLogged}</td><td>${r.avgWeight}${r.avgWeight!=="—"?"kg":""}</td><td>${r.avgSteps}</td><td>${r.fastingPct!==null?r.fastingPct+"%":"—"}</td><td>${r.mRunMiles?r.mRunMiles.toFixed(1):"—"}</td><td>${r.workoutDays}</td></tr>`).join("")}
+  </tbody></table>` : `<div class="dash-empty">📊 No months logged yet</div>`;
+}
+
+function renderMonthlyDetail(){
+  const months = allMonths();
+  const sel = document.getElementById("dashMonthSel");
+  const prevVal = sel.value;
+  sel.innerHTML="";
+  months.slice().reverse().forEach(m=>{ const opt=document.createElement("option"); opt.value=m; opt.textContent=monthLabel(m); sel.appendChild(opt); });
+  const mostRecent = months[months.length-1];
+  sel.value = months.includes(prevVal) ? prevVal : mostRecent;
+
+  const month = sel.value;
+  const recs = allSortedRecords().filter(r=>r.date.slice(0,7)===month);
+
+  const mWeights = recs.filter(r=>r.weight!=null).map(r=>r.weight);
+  const avgWeight = mWeights.length ? (mWeights.reduce((a,b)=>a+b,0)/mWeights.length).toFixed(1) : "—";
+  const mSteps = recs.filter(r=>r.steps!=null).map(r=>r.steps);
+  const totalSteps = mSteps.length ? mSteps.reduce((a,b)=>a+b,0) : 0;
+  const mFasting = recs.filter(r=>r.fasting_hours!=null);
+  const fastingPct = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
+  const totalRunMiles = recs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
+  const workoutDays = recs.filter(r=>r.workout).length;
+
+  document.getElementById("monCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${avgWeight}${avgWeight!=="—"?"kg":""}</div></div>
+    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${totalSteps.toLocaleString()}</div></div>
+    <div class="card ${fastingPct!==null && fastingPct>=70 ? "green":"orange"}"><div class="card-label">⏱️ 16h Fasting</div><div class="card-value">${fastingPct!==null?fastingPct+"%":"—"}</div></div>
+    <div class="card orange"><div class="card-label">🏃 Run Miles</div><div class="card-value">${totalRunMiles?totalRunMiles.toFixed(1):"—"}</div><div class="card-sub">${workoutDays} workout day${workoutDays===1?"":"s"}</div></div>
+  `;
+
+  document.getElementById("monDayHead").textContent = `Days — ${monthLabel(month)} (${recs.length})`;
+  document.getElementById("monDayTable").innerHTML = recs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Fasting</th><th>Workout</th><th>Habits</th></tr></thead><tbody>
+    ${recs.map(r=>{
+      const habitFlags = [
+        normWater(r)===true?"💧":"", normBool(r.morning_detox)===true?"🌅":"", normBool(r.deep_breathing)===true?"🫁":"",
+        normBool(r.multivitamin)===true?"💊":"", (normIsabgolCount(r)||0)>0?"🌾":""
+      ].filter(Boolean).join(" ");
+      return `<tr><td>${r.date}</td><td>${r.weight!=null?r.weight+"kg":"—"}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td><td>${r.workout?r.workout+(r.run_miles?" ("+r.run_miles+"mi)":""):"—"}</td><td>${habitFlags||"—"}</td></tr>`;
+    }).join("")}
+  </tbody></table>` : `<div class="dash-empty">📊 No entries logged for this month</div>`;
 }
 
 // ===== Theme =====

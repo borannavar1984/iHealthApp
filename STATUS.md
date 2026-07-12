@@ -36,21 +36,41 @@ Plain-English log of what's built and what's still open, against the phases in
 
 ## Phase C — The dashboard: done
 
-- Weight trend chart with a 65.0 kg goal line.
-- Fasting-hours chart, bars colored by whether the 16 hr target was hit.
-- Steps chart.
-- Habit adherence chart (% yes across all logged days), computed correctly across
-  both the legacy schema (boolean isabgol, array-shaped breakfast/dinner, `water:
-  "completed"`) and the new live schema (isabgol count, `{time, items}` meals) — see
-  the `norm*()` helpers in `index.html`.
-- Stat cards: latest weight, distance to goal, days logged, 16 hr fasting rate.
+Split into **Overview** and **Monthly Detail** tabs (Deep flagged the first draft was
+missing month-by-month numbers and running data):
 
-Tested with 28 scripted-browser checks (mocked GitHub Contents API): fresh daily log
-entry end-to-end, custom tracker add, fasting calc, WhatsApp generation, cloud
-connect/sync, dashboard render, theme toggle, date-change confirmation, reload
-persistence — plus a second pass loading the real 171-day migrated history through
-the app to confirm legacy-shaped records render correctly with no JS errors and the
-dashboard aggregates across the full history without crashing.
+- **Overview**: weight trend chart with a 65.0 kg goal line, fasting-hours chart
+  (bars colored by whether the 16 hr target was hit), steps chart, **running chart**
+  (miles per run — was missing from the first draft), habit adherence chart (% yes
+  across all logged days), and a **month-over-month table** (days logged, avg weight,
+  avg steps, 16h fasting rate, run miles, workout days per month).
+- **Monthly Detail**: month picker, cards for that month (avg weight, total steps,
+  fasting rate, run miles + workout day count), and a full day-by-day table (weight,
+  steps, fasting, workout incl. run miles, habit-icon summary).
+- Habit/meal normalization computed correctly across both the legacy schema (boolean
+  isabgol, array-shaped breakfast/dinner, `water: "completed"`) and the new live
+  schema (isabgol count, `{time, items}` meals) — see the `norm*()` helpers.
+- Stat cards: latest weight, distance to goal, days logged, 16 hr fasting rate.
+- Fixed a real bug during this pass: the month-over-month table was being built
+  *after* the Chart.js-availability check, inside a block that `return`s early when
+  Chart.js fails to load (e.g. offline) — so the table silently never rendered in
+  that case. Restructured so chart rendering and the table are independent; the table
+  always renders regardless of whether the chart library loaded.
+
+**Quick-pick meal items**: breakfast/snack/dinner inputs now show up to 12
+frequently-logged items as tap-to-add chips (learned from history, exact-string
+match — similar phrasing counts separately), plus full autocomplete via `<datalist>`
+for anything logged before. Tapping a chip adds the item without retyping; duplicate
+taps are no-ops. Refreshes whenever `days` changes (date switch, save, cloud connect).
+
+Tested with 37 scripted-browser checks total (mocked GitHub Contents API) across four
+suites: fresh daily log entry end-to-end, custom tracker add, fasting calc, WhatsApp
+generation, cloud connect/sync, theme toggle, date-change confirmation, reload
+persistence; a pass loading the real 171-day migrated history through the app to
+confirm legacy-shaped records render with no JS errors; quick-pick chips surfacing
+real frequent items (e.g. "Mashed sweet potato" from dinner history) and populating
+autocomplete; and the Overview/Monthly Detail split with real history (multi-month
+table, running chart, month picker, day-level table).
 
 ## Phase D — Hosting & handover: partly done
 

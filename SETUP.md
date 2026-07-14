@@ -7,10 +7,43 @@ your history migrated in (Jan 1 – Jun 29, 2026, from `iHealthDashboard.html`).
 ## 2. Turn on GitHub Pages for this repo
 I can't flip this on myself (no repo-admin access from here). One-time:
 1. Go to **github.com/borannavar1984/iHealthApp/settings/pages**
-2. Under "Build and deployment" → Source, choose **Deploy from a branch**
-3. Branch: **main**, folder: **/ (root)**
-4. Save. GitHub will give you a URL like `https://borannavar1984.github.io/iHealthApp/`
-   — that's the app's permanent link.
+2. Under "Build and deployment" → Source, choose **GitHub Actions** (not "Deploy
+   from a branch" — this repo now has a workflow, `.github/workflows/pages.yml`,
+   that publishes both `main` and `develop` from one Pages site; the branch-deploy
+   option can only serve one branch, so Actions is what makes the dev site below
+   possible)
+3. That's it — no branch/folder to pick, the workflow handles both.
+4. Once it runs (a minute or two after this save, and after every push), you get:
+   - **Production:** `https://borannavar1984.github.io/iHealthApp/`
+   - **Dev:** `https://borannavar1984.github.io/iHealthApp/dev/`
+
+## 2b. Working on the dev branch
+
+Per your request, everything going forward develops on the `develop` branch first.
+The dev build at the URL above is a real, working copy of the app, but intentionally
+different from production in three ways so you can't mix them up or clobber real data:
+- A yellow **🧪 DEV** badge in the header and a banner under it
+- Its own local storage (`ihealth_dev_*` keys) — separate from production's, even
+  though both are served from the same `borannavar1984.github.io` domain
+- Its own Cloud Sync config, meant to point at a **separate data repo** (next step)
+
+Workflow: I push feature work to `develop`, you test at the `/dev/` URL, and once
+you're happy with how something looks/works, tell me and I'll merge `develop` into
+`main` — that's the only thing that ever changes production.
+
+## 2c. Create a private dev data repo
+
+So dev testing never touches your real logs, I need a second private repo, seeded
+with a **copy** of your real data so dev has realistic numbers to test against —
+same idea as `health-data`, just for testing:
+1. Go to **github.com/new**
+2. Repository name: `health-data-dev`
+3. Visibility: **Private**
+4. Create repository (README optional — I'll seed it)
+5. Tell me once it exists and I'll copy today's `health-data` snapshot into it once.
+   After that, it's independent — dev writes never sync back to `health-data`, and
+   `health-data` writes never sync into `health-data-dev` (you'd re-copy manually if
+   you ever want it refreshed with newer real data).
 
 ## 3. Create an access token scoped to just the private data repo
 
@@ -24,19 +57,27 @@ I can't flip this on myself (no repo-admin access from here). One-time:
 
 ## 4. Connect the app
 
-1. Open the app at the Pages URL from step 2
-2. Scroll to **Cloud Sync**
-3. Fill in:
+**Production** (`https://borannavar1984.github.io/iHealthApp/`):
+1. Scroll to **Cloud Sync**
+2. Fill in:
    - GitHub username: `borannavar1984`
    - Private data repo name: `health-data`
-   - Personal access token: paste from step 3
-4. Tap **Connect & Sync** — this pulls your full history in
+   - Personal access token: a token scoped to `health-data` (step 3)
+3. Tap **Connect & Sync** — this pulls your full history in
+
+**Dev** (`https://borannavar1984.github.io/iHealthApp/dev/`) — separate token needed:
+1. Repeat step 3 above but scope the new token to `health-data-dev` instead
+2. Connect the dev app the same way, pointing at `health-data-dev`
+
+These two connections are independent — connecting one never touches the other.
 
 ## 5. Add to your iPhone home screen
 
-1. Open the Pages URL in Safari on your iPhone
+1. Open either URL in Safari on your iPhone (production for daily use, dev for
+   testing new features)
 2. Tap the Share icon → **Add to Home Screen**
-3. The iHealth icon now opens like any other app, full-screen, no browser bar
+3. Each becomes its own home-screen icon — the dev one shows the 🧪 badge inside
+   the app so you always know which you're in
 
 ## Still open
 

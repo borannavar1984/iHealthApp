@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="iHealth">
+<meta name="apple-mobile-web-app-title" content="iHealth Dev">
 <meta name="theme-color" content="#0f1117">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>iHealth</title>
+<title>iHealth (Dev)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
@@ -113,12 +113,15 @@
 </head>
 <body>
 <header>
-  <h1>i<span>Health</span></h1>
+  <h1>i<span>Health</span> <span style="background:var(--amber);color:#3a2a00;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;vertical-align:middle;letter-spacing:.5px">🧪 DEV</span></h1>
   <div style="display:flex;align-items:center;gap:8px">
     <div class="badge" id="weightBadge">—</div>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
   </div>
 </header>
+<div style="background:color-mix(in srgb, var(--amber) 15%, transparent);border:1px solid var(--amber);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.4">
+  🧪 <b>Dev build</b> — separate storage and cloud config from the production app. Testing here never touches your real <code>health-data</code>.
+</div>
 
 <div class="tabs">
   <button class="sel" id="tabTodayBtn" onclick="showMainTab('today')">📝 Today</button>
@@ -233,7 +236,7 @@
 <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
 <div id="cloudSetup">
   <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
-  <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data)" autocomplete="off" style="margin-top:8px">
+  <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
   <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
   <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
 </div>
@@ -275,9 +278,9 @@
 
 <script>
 const GOAL_WEIGHT = 65.0;
-const LS_DAYS = "ihealth_days_v2";
-const LS_TRACKERS = "ihealth_trackers_v1";
-const CLOUD_KEY = "ihealth_cloud_cfg_v2";
+const LS_DAYS = "ihealth_dev_days_v2";
+const LS_TRACKERS = "ihealth_dev_trackers_v1";
+const CLOUD_KEY = "ihealth_dev_cloud_cfg_v2";
 
 let days = loadDays();       // { "YYYY-MM-DD": record }
 let trackers = loadTrackers(); // [{id,label,type}]
@@ -1011,7 +1014,7 @@ function renderMonthlyDetail(){
 function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
   document.getElementById("themeToggle").textContent = theme==="light" ? "☀️" : "🌙";
-  try{ localStorage.setItem("ihealth_theme", theme); }catch(e){}
+  try{ localStorage.setItem("ihealth_dev_theme", theme); }catch(e){}
   if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
 }
 function toggleTheme(){
@@ -1037,7 +1040,7 @@ if(cloudCfg){
 }
 (function initTheme(){
   let saved="dark";
-  try{ saved = localStorage.getItem("ihealth_theme") || "dark"; }catch(e){}
+  try{ saved = localStorage.getItem("ihealth_dev_theme") || "dark"; }catch(e){}
   setTheme(saved);
 })();
 </script>

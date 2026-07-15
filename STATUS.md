@@ -3,6 +3,17 @@
 Plain-English log of what's built and what's still open, against the phases in
 `PROJECT_BRIEF.md` (Deep approved 2026-07-12).
 
+## Pages troubleshooting note (2026-07-15)
+
+Deep hit a 404 on the production URL right after switching the repo's Pages source
+to "GitHub Actions" in Settings. The workflow itself had actually already deployed
+successfully once before (2026-07-14), but that run happened *before* the Pages
+source was explicitly saved in Settings — GitHub doesn't retroactively start serving
+an old deployment just because the source setting changes after the fact, it needs a
+fresh deployment once the source is properly saved. This commit exists to trigger
+that fresh deployment (workflow_dispatch isn't available to my GitHub integration,
+so a real push is how I force a new run).
+
 ## Phase A — Data foundation: done (partial)
 
 - Found Deep's full daily-log history embedded in an uploaded `iHealthDashboard.html`

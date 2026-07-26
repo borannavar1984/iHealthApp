@@ -11,6 +11,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>iHealth (Dev)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#0f1117; --card:#1a1d27; --card2:#232736; --border:#2e3345;
@@ -51,10 +52,16 @@
   }
   input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)}
   textarea{resize:vertical;min-height:60px}
+  .val-wrap{position:relative}
+  .val-wrap .unit{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+  .val-wrap input.hero-input{font-size:26px;font-weight:800;padding:16px 52px 16px 14px}
   button.opt{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:11px 6px;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .1s ease,background .12s,border-color .12s}
   button.opt.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
   button.opt:active{transform:scale(.95)}
   .chip-row{display:flex;flex-wrap:wrap;gap:8px}
+  .chip-wrap{position:relative;display:inline-flex}
+  .chip-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:2px solid var(--bg);font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;z-index:1}
+  .chip-remove:active{transform:scale(.9)}
   .chip{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:7px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
   .chip button{background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;padding:0;font-size:14px;line-height:1}
   .item-add{display:flex;gap:8px;margin-top:8px}
@@ -131,21 +138,20 @@
 <div id="todayView">
 
 <div class="section">
-  <h3>📅 Date</h3>
-  <input type="date" id="fDate" onchange="onDateChange()">
+  <h3>⚖️ Weight</h3>
+  <div class="val-wrap"><input type="tel" id="fWeight" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
 </div>
 
 <div class="section">
-  <h3>⚖️ Weight & Activity</h3>
+  <h3>🏃 Activity</h3>
   <div class="row3">
-    <div><div class="label" style="margin-top:0">Weight (kg)</div><input type="tel" id="fWeight" inputmode="decimal" placeholder="65.0"></div>
     <div><div class="label" style="margin-top:0">Steps</div><input type="tel" id="fSteps" inputmode="numeric" placeholder="8000"></div>
     <div><div class="label" style="margin-top:0">Nap (min)</div><input type="tel" id="fNap" inputmode="numeric" placeholder="20"></div>
+    <div><div class="label" style="margin-top:0">Run (mi)</div><input type="tel" id="fRunMiles" inputmode="decimal" placeholder="optional"></div>
   </div>
-  <div class="row2" style="margin-top:8px">
-    <div><div class="label" style="margin-top:0">Workout</div><input type="text" id="fWorkout" placeholder="e.g. 45 min yoga"></div>
-    <div><div class="label" style="margin-top:0">Run (miles)</div><input type="tel" id="fRunMiles" inputmode="decimal" placeholder="optional"></div>
-  </div>
+  <div class="label">Workout</div>
+  <input type="text" id="fWorkout" list="workoutAutocomplete" placeholder="e.g. 45 min yoga">
+  <datalist id="workoutAutocomplete"></datalist>
 </div>
 
 <div class="section">
@@ -159,32 +165,35 @@
 
 <div class="section" id="mealBreakfast" data-meal="breakfast">
   <h3>🍳 Breakfast</h3>
-  <input type="time" id="breakfastTime" onchange="recalcFasting()">
-  <div class="chip-row" id="breakfastChips" style="margin-top:10px"></div>
+  <div class="chip-row" id="breakfastChips"></div>
   <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
   <datalist id="breakfastAutocomplete"></datalist>
   <div class="label" style="margin:10px 0 6px">Frequent</div>
   <div class="chip-row" id="breakfastQuick"></div>
+  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
+  <input type="time" id="breakfastTime" onchange="recalcFasting()">
 </div>
 
 <div class="section" id="mealSnack" data-meal="snack">
   <h3>🥗 Snack</h3>
-  <input type="time" id="snackTime">
-  <div class="chip-row" id="snackChips" style="margin-top:10px"></div>
+  <div class="chip-row" id="snackChips"></div>
   <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
   <datalist id="snackAutocomplete"></datalist>
   <div class="label" style="margin:10px 0 6px">Frequent</div>
   <div class="chip-row" id="snackQuick"></div>
+  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
+  <input type="time" id="snackTime">
 </div>
 
 <div class="section" id="mealDinner" data-meal="dinner">
   <h3>🍽️ Dinner</h3>
-  <input type="time" id="dinnerTime" onchange="recalcFasting()">
-  <div class="chip-row" id="dinnerChips" style="margin-top:10px"></div>
+  <div class="chip-row" id="dinnerChips"></div>
   <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
   <datalist id="dinnerAutocomplete"></datalist>
   <div class="label" style="margin:10px 0 6px">Frequent</div>
   <div class="chip-row" id="dinnerQuick"></div>
+  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
+  <input type="time" id="dinnerTime" onchange="recalcFasting()">
 </div>
 
 <div class="section">
@@ -218,6 +227,12 @@
 </div>
 
 <div class="section">
+  <h3>📅 Date</h3>
+  <input type="date" id="fDate" onchange="onDateChange()">
+  <div class="muted-note">Defaults to today — only change this to log or edit a past day.</div>
+</div>
+
+<div class="section">
   <h3>📝 Notes</h3>
   <textarea id="fNotes" placeholder="Anything else about today…"></textarea>
 </div>
@@ -232,30 +247,36 @@
   <button class="btn btn-ghost btn-sm" id="copyWaBtn" style="display:none" onclick="copyWhatsApp()">Copy to Clipboard</button>
 </div>
 
-<div class="label" style="margin-top:22px">☁️ Cloud Sync</div>
-<div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
-<div id="cloudSetup">
-  <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
-  <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
-  <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
-  <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
-</div>
-<div id="cloudControls" style="display:none">
-  <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
-</div>
-
-<div class="label" style="margin-top:22px">💾 Backup</div>
-<button class="btn btn-ghost" onclick="backupData()">Backup all data (.json)</button>
-
 </div>
 
 <div id="dashboardView" style="display:none">
+
+<div class="section">
+  <h3>⚙️ Settings</h3>
+  <div class="label" style="margin-top:0">☁️ Cloud Sync</div>
+  <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
+  <div id="cloudSetup">
+    <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
+    <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
+    <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
+    <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
+  </div>
+  <div id="cloudControls" style="display:none">
+    <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
+  </div>
+  <div class="label">💾 Backup &amp; Export</div>
+  <div class="row2">
+    <button class="btn btn-ghost btn-sm" style="width:100%" onclick="backupData()">Backup (.json)</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%" onclick="exportExcel()">Export (.xlsx)</button>
+  </div>
+</div>
+
   <div class="dash-tabs">
-    <button class="sel" id="dashOverviewBtn" onclick="showDashTab('overview')">Overview</button>
-    <button id="dashMonthlyBtn" onclick="showDashTab('monthly')">Monthly Detail</button>
+    <button id="dashOverviewBtn" onclick="showDashTab('overview')">Summary</button>
+    <button class="sel" id="dashMonthlyBtn" onclick="showDashTab('monthly')">Monthly Detail</button>
   </div>
 
-  <div id="dashOverviewView">
+  <div id="dashOverviewView" style="display:none">
     <div class="cards" id="ovCards"></div>
     <div class="chart-card"><h4>Weight Trend toward 65.0 kg</h4><canvas id="weightChart" height="200"></canvas><div class="dash-empty" id="weightChartEmpty" style="display:none"></div></div>
     <div class="chart-card"><h4>Fasting Hours (16 hr target)</h4><canvas id="fastingChart" height="180"></canvas><div class="dash-empty" id="fastingChartEmpty" style="display:none"></div></div>
@@ -265,7 +286,7 @@
     <div class="dtable-wrap"><div class="tw-head">Month over Month</div><div id="ovMonthlyTable"></div></div>
   </div>
 
-  <div id="dashMonthlyView" style="display:none">
+  <div id="dashMonthlyView">
     <div class="dash-month">
       <select id="dashMonthSel" onchange="renderMonthlyDetail()"></select>
     </div>
@@ -281,6 +302,7 @@ const GOAL_WEIGHT = 65.0;
 const LS_DAYS = "ihealth_dev_days_v2";
 const LS_TRACKERS = "ihealth_dev_trackers_v1";
 const CLOUD_KEY = "ihealth_dev_cloud_cfg_v2";
+const HIDDEN_ITEMS_KEY = "ihealth_dev_hidden_items_v1";
 
 let days = loadDays();       // { "YYYY-MM-DD": record }
 let trackers = loadTrackers(); // [{id,label,type}]
@@ -344,6 +366,16 @@ function addMealItem(meal, itemOverride){
 
 // ===== Frequent-item quick picks, learned from history (exact-string match — similar
 // phrasing counts separately, so this favors items you log the same way each time) =====
+function loadHiddenItems(){ try{ return JSON.parse(localStorage.getItem(HIDDEN_ITEMS_KEY)||"[]"); }catch(e){ return []; } }
+function saveHiddenItems(list){ try{ localStorage.setItem(HIDDEN_ITEMS_KEY, JSON.stringify(list)); }catch(e){} }
+function hideQuickItem(meal, item){
+  const key = meal+"::"+item;
+  const hidden = loadHiddenItems();
+  if(!hidden.includes(key)) hidden.push(key);
+  saveHiddenItems(hidden);
+  renderMealQuickPicks(meal);
+}
+
 function mealItemFrequency(meal){
   const counts = new Map();
   Object.values(days).forEach(rec=>{
@@ -357,19 +389,40 @@ function mealItemFrequency(meal){
 }
 function renderMealQuickPicks(meal){
   const freq = mealItemFrequency(meal);
+  const hidden = new Set(loadHiddenItems());
+  const visible = freq.filter(([item])=>!hidden.has(meal+"::"+item));
   const quickBox = document.getElementById(meal+"Quick");
   quickBox.innerHTML="";
-  if(!freq.length){ quickBox.innerHTML = '<div class="muted-note">Nothing logged yet — items you add will show up here next time.</div>'; }
-  freq.slice(0,12).forEach(([item])=>{
+  if(!visible.length){ quickBox.innerHTML = '<div class="muted-note">Nothing logged yet — items you add will show up here next time.</div>'; }
+  visible.slice(0,12).forEach(([item])=>{
+    const wrap=document.createElement("div"); wrap.className="chip-wrap";
     const b=document.createElement("button"); b.className="opt"; b.textContent=item;
     b.onclick=()=>addMealItem(meal, item);
-    quickBox.appendChild(b);
+    const x=document.createElement("button"); x.type="button"; x.className="chip-remove"; x.textContent="×";
+    x.setAttribute("aria-label","Remove "+item+" from quick picks");
+    x.onclick=(ev)=>{ ev.stopPropagation(); hideQuickItem(meal, item); };
+    wrap.appendChild(b); wrap.appendChild(x); quickBox.appendChild(wrap);
   });
+  // autocomplete always includes everything, even items dismissed from the quick-pick row —
+  // dismissing only declutters the tap-targets, it never hides history from search
   const datalist = document.getElementById(meal+"Autocomplete");
   datalist.innerHTML = freq.map(([item])=>`<option value="${item.replace(/"/g,"&quot;")}">`).join("");
 }
 function renderAllMealQuickPicks(){
   ["breakfast","snack","dinner"].forEach(renderMealQuickPicks);
+}
+
+// Workout is free text with no fixed list — autocomplete from history, most-recent first
+function workoutRecency(){
+  const seen = [];
+  Object.values(days).filter(r=>r&&r.date).sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+    if(r.workout && !seen.includes(r.workout)) seen.push(r.workout);
+  });
+  return seen;
+}
+function renderWorkoutAutocomplete(){
+  const list = workoutRecency();
+  document.getElementById("workoutAutocomplete").innerHTML = list.map(w=>`<option value="${w.replace(/"/g,"&quot;")}">`).join("");
 }
 
 // ===== Habits =====
@@ -476,6 +529,7 @@ function loadDateIntoForm(date){
   document.getElementById("dinnerTime").value = normMeal(rec?.dinner).time || "";
   ["breakfast","snack","dinner"].forEach(renderMealChips);
   renderAllMealQuickPicks();
+  renderWorkoutAutocomplete();
 
   document.getElementById("fWeight").value = rec?.weight ?? "";
   document.getElementById("fSteps").value = rec?.steps ?? "";
@@ -558,6 +612,8 @@ async function saveDay(){
   days[date] = { ...(days[date]||{}), ...record };
   persistDays();
   updateWeightBadge();
+  renderAllMealQuickPicks();
+  renderWorkoutAutocomplete();
   toast("Saved ✓");
 
   if(cloudCfg){
@@ -659,6 +715,86 @@ function backupData(){
   const fname = `ihealth_backup_${payload.backup.replace(/[-:T]/g,"").slice(0,14)}.json`;
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
   toast("Backup downloaded");
+}
+
+// ===== Excel export (client-side, SheetJS) — clean raw data to pivot/chart yourself;
+// this lightweight library can't produce native embedded charts =====
+function trackerLabel(id){ const t=trackers.find(t=>t.id===id); return t ? t.label : id; }
+
+function exportExcel(){
+  if(typeof XLSX==="undefined"){ toast("Export library couldn't load — check your connection","var(--red)"); return; }
+  const recs = Object.values(days).filter(d=>d&&d.date).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!recs.length){ toast("Nothing to export yet","var(--amber)"); return; }
+
+  const customIds = [...new Set(recs.flatMap(r=>Object.keys(r.custom||{})))];
+
+  const dailyLog = recs.map(r=>{
+    const bk=normMeal(r.breakfast), sn=normMeal(r.snack), dn=normMeal(r.dinner);
+    const row = {
+      Date:r.date, "Weight (kg)":r.weight, Steps:r.steps, "Power Nap (min)":r.power_nap_min,
+      Workout:r.workout, "Run (mi)":r.run_miles,
+      "Breakfast Time":bk.time, "Breakfast Items":bk.items.join("; "),
+      "Snack Time":sn.time, "Snack Items":sn.items.join("; "),
+      "Dinner Time":dn.time, "Dinner Items":dn.items.join("; "),
+      "Fasting (hrs)":r.fasting_hours, Water:normWater(r)===true?"Yes":normWater(r)===false?"No":"",
+      "Morning Detox":normBool(r.morning_detox)===true?"Yes":normBool(r.morning_detox)===false?"No":"",
+      "Deep Breathing":normBool(r.deep_breathing)===true?"Yes":normBool(r.deep_breathing)===false?"No":"",
+      Multivitamin:normBool(r.multivitamin)===true?"Yes":normBool(r.multivitamin)===false?"No":"",
+      Isabgol:normIsabgolCount(r), Notes:r.notes||"",
+    };
+    customIds.forEach(id=>{ row[trackerLabel(id)] = (r.custom||{})[id] ?? ""; });
+    return row;
+  });
+
+  const weightTrend = recs.filter(r=>r.weight!=null).map(r=>({
+    Date:r.date, "Weight (kg)":r.weight, "To Goal (65.0kg)":Math.round((r.weight-GOAL_WEIGHT)*10)/10
+  }));
+
+  const fasting = recs.filter(r=>r.fasting_hours!=null).map(r=>({
+    Date:r.date, "Fasting (hrs)":r.fasting_hours, "Hit 16h Target":r.fasting_hours>=16?"Yes":"No"
+  }));
+
+  const habits = recs.map(r=>({
+    Date:r.date,
+    Water:normWater(r)===true?"Yes":normWater(r)===false?"No":"",
+    "Morning Detox":normBool(r.morning_detox)===true?"Yes":normBool(r.morning_detox)===false?"No":"",
+    "Deep Breathing":normBool(r.deep_breathing)===true?"Yes":normBool(r.deep_breathing)===false?"No":"",
+    Multivitamin:normBool(r.multivitamin)===true?"Yes":normBool(r.multivitamin)===false?"No":"",
+    Isabgol:normIsabgolCount(r)??"",
+  }));
+
+  const workouts = recs.filter(r=>r.workout||r.run_miles!=null).map(r=>({
+    Date:r.date, Workout:r.workout||"", "Run (mi)":r.run_miles
+  }));
+
+  const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
+  const monthlySummary = months.map(m=>{
+    const mRecs = recs.filter(r=>r.date.slice(0,7)===m);
+    const mWeights = mRecs.filter(r=>r.weight!=null).map(r=>r.weight);
+    const mSteps = mRecs.filter(r=>r.steps!=null).map(r=>r.steps);
+    const mFasting = mRecs.filter(r=>r.fasting_hours!=null);
+    const mRunMiles = mRecs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
+    return {
+      Month:monthLabel(m), "Days Logged":mRecs.length,
+      "Avg Weight (kg)":mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10:"",
+      "Avg Steps":mSteps.length?Math.round(mSteps.reduce((a,b)=>a+b,0)/mSteps.length):"",
+      "16h Fasting Rate":mFasting.length?Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100)+"%":"",
+      "Run Miles":mRunMiles?Math.round(mRunMiles*10)/10:"",
+      "Workout Days":mRecs.filter(r=>r.workout).length,
+    };
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dailyLog), "Daily Log");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(weightTrend), "Weight Trend");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fasting), "Fasting");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(habits), "Habits");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(workouts), "Workouts");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(monthlySummary), "Monthly Summary");
+
+  const fname = `ihealth_export_${todayStr()}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  toast("Excel export downloaded");
 }
 
 // ===== Cloud Sync: private GitHub data repo =====
@@ -775,6 +911,7 @@ async function cloudConnect(){
     renderTrackers();
     updateWeightBadge();
     renderAllMealQuickPicks();
+    renderWorkoutAutocomplete();
     if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
   }catch(err){
     toast("Connect failed: "+err.message,"var(--red)");

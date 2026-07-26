@@ -3,6 +3,51 @@
 Plain-English log of what's built and what's still open, against the phases in
 `PROJECT_BRIEF.md` (Deep approved 2026-07-12).
 
+## UI/UX revamp (2026-07-16, on `develop`)
+
+Deep did a UI/UX pass on his expense tracker app and asked which of those changes
+translate to iHealth. Applied here (see full plan discussion for what was skipped
+and why — notably, no floating-"+"/discrete-entry-type restructuring, since this
+app's one-form-logs-the-whole-day model is intentional per the 2-minute daily-log
+acceptance criterion, not a gap to fix):
+
+- **Hero field first**: Weight is now its own lead section, bigger font, autofocused
+  on load. Date moved down (after My Trackers, before Notes) since "today" is almost
+  always correct. Each meal section now leads with food items/quick-picks; the time
+  input moved below as a secondary, optional field.
+- **Dismissible quick-pick chips**: breakfast/snack/dinner "Frequent" chips now have
+  a "×" to permanently hide one from future quick-picks (`ihealth_dev_hidden_items_v1`)
+  without touching history — autocomplete still includes hidden items, only the
+  tap-target row is decluttered.
+- **Workout autocomplete**: the Workout field now has a recency-ranked `<datalist>`
+  built from history (was plain free text with no assistance).
+- **Settings moved off the entry form**: Cloud Sync and Backup no longer live inside
+  the daily-log form — both now sit in a "⚙️ Settings" block at the top of the
+  Dashboard, reachable without touching the logging flow.
+- **Dashboard default tab flipped**: Monthly Detail (pre-selected to the current
+  month) is now the landing sub-tab instead of the all-time Summary (renamed from
+  "Overview") — "how am I doing this month" beats a lifetime aggregate as the first
+  thing you see.
+- **Excel export**: new "Export (.xlsx)" button next to Backup, client-side via
+  SheetJS — Daily Log, Weight Trend, Fasting, Habits, Workouts, and Monthly Summary
+  sheets. Same no-native-charts caveat as any lightweight export library; positioned
+  as clean data to pivot/chart yourself.
+- Fixed a real bug surfaced while wiring the above: `saveDay()` never refreshed the
+  meal quick-picks or (new) workout autocomplete after saving — a freshly-logged item
+  wouldn't show as a suggestion until you navigated to a different date and back.
+  Both now refresh immediately on save.
+
+Tested with 28 new scripted-browser checks across two suites (hero field/autofocus,
+reordered meal sections, chip dismiss + persistence + autocomplete-still-includes-
+hidden-items, workout autocomplete, settings relocated + inaccessible from Today tab,
+default Monthly Detail tab, Excel export — both the graceful-failure path when the
+CDN library is blocked, and a stubbed-library pass verifying the actual sheet/row
+data is correct: 6 sheets, correct names, full history row counts) — on top of the
+existing 37+9 checks from earlier passes, which still hold except where they
+asserted the specific behavior just changed on purpose (title text, Cloud Sync
+location, default dashboard tab); those are superseded by the new suite rather than
+fixed in place, since "fixing" them would mean reverting this revamp.
+
 ## Phase A — Data foundation: done (partial)
 
 - Found Deep's full daily-log history embedded in an uploaded `iHealthDashboard.html`

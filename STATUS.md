@@ -3,7 +3,7 @@
 Plain-English log of what's built and what's still open, against the phases in
 `PROJECT_BRIEF.md` (Deep approved 2026-07-12).
 
-## UI/UX revamp (2026-07-16, on `develop`)
+## UI/UX revamp (2026-07-26, on `develop`)
 
 Deep did a UI/UX pass on his expense tracker app and asked which of those changes
 translate to iHealth. Applied here (see full plan discussion for what was skipped

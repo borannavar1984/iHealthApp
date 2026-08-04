@@ -366,14 +366,14 @@ function userName(){ return user && user.name ? user.name : "Friend"; }
 // been migrated yet) without ever losing information =====
 function normWeightEntries(rec){
   if(!rec) return [];
-  if(Array.isArray(rec.weightEntries)) return rec.weightEntries;
-  if(rec.weight!=null) return [{id:"legacy-weight", time:null, weight:rec.weight, notes:null}];
+  if(Array.isArray(rec.weightEntries)) return rec.weightEntries.map(e=>({ ...e, weight: typeof e.weight==="string" ? parseFloat(e.weight) : e.weight }));
+  if(rec.weight!=null) return [{id:"legacy-weight", time:null, weight: typeof rec.weight==="string" ? parseFloat(rec.weight) : rec.weight, notes:null}];
   return [];
 }
 function normWorkoutEntries(rec){
   if(!rec) return [];
-  if(Array.isArray(rec.workoutEntries)) return rec.workoutEntries;
-  if(rec.workout) return [{id:"legacy-workout", time:null, workout:rec.workout, run_miles: rec.run_miles ?? null}];
+  if(Array.isArray(rec.workoutEntries)) return rec.workoutEntries.map(e=>({ ...e, run_miles: e.run_miles!=null && typeof e.run_miles==="string" ? parseFloat(e.run_miles) : e.run_miles }));
+  if(rec.workout) return [{id:"legacy-workout", time:null, workout:rec.workout, run_miles: rec.run_miles!=null ? (typeof rec.run_miles==="string" ? parseFloat(rec.run_miles) : rec.run_miles) : null}];
   return [];
 }
 function normHabitEvents(rec){
@@ -510,7 +510,7 @@ function openOverlay(id){ document.getElementById(id).style.display="block"; win
 function closeOverlay(id){ document.getElementById(id).style.display="none"; }
 function openAddPicker(){ openOverlay("addPickerOverlay"); }
 let currentEntryType = null;
-function backToPicker(){ closeOverlay("entryFormOverlay"); openOverlay("addPickerOverlay"); }
+function backToPicker(){ closeOverlay("entryFormOverlay"); renderDashboard(); }
 function closeAllOverlaysToHome(){
   closeOverlay("addPickerOverlay"); closeOverlay("entryFormOverlay");
   renderDashboard();
@@ -535,7 +535,7 @@ function setupTypeahead(inputEl, listEl, getSource, onPick){
   }
   inputEl.addEventListener("input", ()=>render(inputEl.value));
   inputEl.addEventListener("focus", ()=>{ if(inputEl.value) render(inputEl.value); });
-  document.addEventListener("click", (e)=>{ if(e.target!==inputEl && !listEl.contains(e.target)) { listEl.style.display="none"; } });
+  document.addEventListener("click", (e)=>{ if(!inputEl.isConnected) return; if(e.target!==inputEl && !listEl.contains(e.target)) { listEl.style.display="none"; } });
 }
 
 // ===== Frequent-item quick picks (meal items), dismissible =====
@@ -716,7 +716,7 @@ async function saveFoodEntry(){
   rec.dinner = { time: document.getElementById("dinnerTime").value||null, items: mealsDraft.dinner };
   rec.fasting_hours = fastingHours;
   const notes = document.getElementById("foodNotes").value.trim();
-  if(notes) rec.notes = notes;
+  rec.notes = notes || null;
   rec._source = "live";
   persistDays();
   renderAllMealQuickPicks();
@@ -743,8 +743,14 @@ function weightFormHtml(){
 }
 let weightEditSeed = null; // {weight, notes} pre-fill from a tapped historical entry
 function initWeightForm(){
-  document.getElementById("weightDate").value = todayStr();
+  const todayDate = todayStr();
+  document.getElementById("weightDate").value = todayDate;
   document.getElementById("weightTime").value = nowTimeStr();
+  // Pre-fill steps from existing record if available
+  const existingRec = days[todayDate];
+  if(existingRec && existingRec.steps!=null){
+    document.getElementById("weightSteps").value = existingRec.steps;
+  }
   if(weightEditSeed){
     document.getElementById("weightValue").value = weightEditSeed.weight ?? "";
     document.getElementById("weightNote").value = weightEditSeed.notes || "";
@@ -957,12 +963,13 @@ function renderMonthTab(){
   const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
   let habitDone=0, habitTotal=0;
   monthRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
+  const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
 
   document.getElementById("monthCards").innerHTML = `
     <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data yet"}</div></div>
     <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${mSteps.length?monthRecs.length+" days":"No data"}</div></div>
     <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${mFasting.length?mFasting.length+" days logged":"No data"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${monthRecs.length} days logged</div></div>
+    <div class="card orange"><div class="card-label">✅ Habit Rate</div><div class="card-value">${habitRate!=null?habitRate+"%":"—"}</div><div class="card-sub">${habitTotal?habitDone+"/"+habitTotal+" done":"No data"}</div></div>
   `;
 
   // Weight chart for this month
@@ -1036,7 +1043,7 @@ function renderDetailTab(){
   // Day-by-day table
   document.getElementById("detailTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;
 }
 

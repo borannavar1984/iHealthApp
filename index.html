@@ -178,9 +178,9 @@
   @media (min-width:1024px){
     html{background:var(--card2)}
     body{max-width:1100px;margin:24px auto;border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,.18)}
-    #dashMonthView,#dashDetailView,#dashOverallView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-    #dashMonthView>*,#dashDetailView>*,#dashOverallView>*{grid-column:1 / -1}
-    #dashMonthView>.chart-card,#dashDetailView>.chart-card,#dashOverallView>.chart-card{grid-column:span 1}
+    #dashWeekView,#dashMonthView,#dashOverallView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+    #dashWeekView>*,#dashMonthView>*,#dashOverallView>*{grid-column:1 / -1}
+    #dashWeekView>.chart-card,#dashMonthView>.chart-card,#dashOverallView>.chart-card{grid-column:span 1}
   }
 </style>
 </head>
@@ -215,24 +215,25 @@
 <!-- ===================== DASHBOARD (home screen) ===================== -->
 <div id="dashboardView">
   <div class="dash-tabs">
-    <button class="sel" id="dashMonthBtn" onclick="showDashTab('month')">This Month</button>
-    <button id="dashDetailBtn" onclick="showDashTab('detail')">Monthly Detail</button>
+    <button class="sel" id="dashWeekBtn" onclick="showDashTab('week')">Weekly</button>
+    <button id="dashMonthBtn" onclick="showDashTab('month')">Monthly</button>
     <button id="dashOverallBtn" onclick="showDashTab('overall')">Overall</button>
   </div>
 
-  <div id="dashMonthView">
-    <div class="cards" id="monthCards"></div>
-    <div class="chart-card"><h4>Weight Trend — This Month</h4><canvas id="monthWeightChart" height="160"></canvas><div class="dash-empty" id="monthWeightChartEmpty" style="display:none"></div></div>
-    <div class="dtable-wrap"><div class="tw-head">Last 7 Days</div><div id="monthRecentTable"></div></div>
+  <div id="dashWeekView">
+    <div class="cards" id="weekCards"></div>
+    <div class="chart-card"><h4>Weight Trend — Last 7 Days</h4><canvas id="weekWeightChart" height="160"></canvas><div class="dash-empty" id="weekWeightChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Habit Checklist — This Week</h4><div id="weekHabitGrid"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Day by Day — Last 7 Days</div><div id="weekTable"></div></div>
   </div>
 
-  <div id="dashDetailView" style="display:none">
+  <div id="dashMonthView" style="display:none">
     <div class="dash-month">
-      <select id="detailMonthPicker" onchange="renderDetailTab()"></select>
+      <select id="monthPicker" onchange="renderMonthTab()"></select>
     </div>
-    <div class="cards" id="detailCards"></div>
-    <div class="chart-card"><h4>Weight Trend — Selected Month</h4><canvas id="detailWeightChart" height="160"></canvas><div class="dash-empty" id="detailWeightChartEmpty" style="display:none"></div></div>
-    <div class="dtable-wrap"><div class="tw-head">Day by Day</div><div id="detailTable"></div></div>
+    <div class="cards" id="monthCards"></div>
+    <div class="chart-card"><h4>Weight Trend — Selected Month</h4><canvas id="monthWeightChart" height="160"></canvas><div class="dash-empty" id="monthWeightChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Day by Day</div><div id="monthTable"></div></div>
   </div>
 
   <div id="dashOverallView" style="display:none">
@@ -968,23 +969,23 @@ function showChartFallback(id, msg){ const c=document.getElementById(id); if(!c)
 function showChartCanvas(id){ const c=document.getElementById(id); if(!c) return; c.style.display="block"; const e=document.getElementById(id+"Empty"); if(e) e.style.display="none"; }
 
 function showDashTab(tab){
+  document.getElementById("dashWeekView").style.display = tab==="week" ? "block" : "none";
   document.getElementById("dashMonthView").style.display = tab==="month" ? "block" : "none";
-  document.getElementById("dashDetailView").style.display = tab==="detail" ? "block" : "none";
   document.getElementById("dashOverallView").style.display = tab==="overall" ? "block" : "none";
+  document.getElementById("dashWeekBtn").classList.toggle("sel", tab==="week");
   document.getElementById("dashMonthBtn").classList.toggle("sel", tab==="month");
-  document.getElementById("dashDetailBtn").classList.toggle("sel", tab==="detail");
   document.getElementById("dashOverallBtn").classList.toggle("sel", tab==="overall");
   renderDashboard();
 }
 function activeDashTab(){
+  if(document.getElementById("dashWeekView").style.display!=="none") return "week";
   if(document.getElementById("dashMonthView").style.display!=="none") return "month";
-  if(document.getElementById("dashDetailView").style.display!=="none") return "detail";
   return "overall";
 }
 function renderDashboard(){
   const tab = activeDashTab();
-  if(tab==="month") renderMonthTab();
-  else if(tab==="detail") renderDetailTab();
+  if(tab==="week") renderWeeklyTab();
+  else if(tab==="month") renderMonthTab();
   else renderOverallTab();
   updateHeaderMenu();
 }
@@ -992,26 +993,107 @@ function renderDashboard(){
 function currentMonthStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
 function daysAgoStr(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 
-function renderMonthTab(){
-  const cm = currentMonthStr();
+function renderWeeklyTab(){
   const recs = allSortedRecords();
-  const monthRecs = recs.filter(r=>r.date.startsWith(cm));
   const gw = goalWeight();
+  const last7Start = daysAgoStr(6);
+  const weekRecs = recs.filter(r=>r.date>=last7Start);
+  const wWeights = weekRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
+  const wSteps = weekRecs.filter(r=>r.steps!=null).map(r=>r.steps);
+  const wWorkouts = weekRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
+  const wRuns = weekRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
+  const wFasting = weekRecs.filter(r=>r.fasting_hours!=null);
+  const fastingRate = wFasting.length ? Math.round(wFasting.filter(r=>r.fasting_hours>=16).length/wFasting.length*100) : null;
+  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  let habitDone=0, habitTotal=0;
+  weekRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
+  const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
+  const latestW = wWeights.length ? wWeights[wWeights.length-1] : null;
+
+  document.getElementById("weekCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${latestW?latestW+"kg":"—"}</div><div class="card-sub">${latestW?"Goal: "+gw.toFixed(1)+"kg":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${wSteps.length?wSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${wSteps.length?wSteps.length+" days":"No data"}</div></div>
+    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${wFasting.length?wFasting.length+" days logged":"No data"}</div></div>
+    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${wWorkouts}</div><div class="card-sub">${wRuns.length?wRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
+  `;
+
+  if(typeof Chart==="undefined"){ showChartFallback("weekWeightChart","📊 Chart couldn't load — data still saved"); }
+  else if(wWeights.length){
+    showChartCanvas("weekWeightChart");
+    if(charts.weekWeight) charts.weekWeight.destroy();
+    const weightData = weekRecs.flatMap(r=>normWeightEntries(r).map(e=>({date:r.date, weight:e.weight})));
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.weekWeight = new Chart(document.getElementById("weekWeightChart"), {
+      type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
+        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(163,230,53,.12)", fill:true, tension:.25, pointRadius:3 },
+        { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
+      ]},
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
+    });
+  } else showChartFallback("weekWeightChart","⚖️ No weight entries this week yet");
+
+  // Habit checklist grid
+  const todayDate = todayStr();
+  const dates7 = [];
+  for(let i=6;i>=0;i--) dates7.push(daysAgoStr(i));
+  const allHabits = BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type})));
+  let habitGridHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:360px"><thead><tr><th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase">Habit</th>';
+  dates7.forEach(d=>{ const dayLabel = d.slice(8); const isToday = d===todayDate; habitGridHtml += `<th style="text-align:center;padding:6px 4px;color:var(--muted);font-size:10px;${isToday?'color:var(--accent);font-weight:800':'#'}">${dayLabel}</th>`; });
+  habitGridHtml += '</tr></thead><tbody>';
+  allHabits.forEach(h=>{
+    habitGridHtml += `<tr><td style="padding:8px;font-size:12px;white-space:nowrap">${h.label}</td>`;
+    dates7.forEach(d=>{
+      const rec = days[d];
+      const val = habitDayValue(rec, h.key);
+      let cell = '—';
+      let color = 'var(--muted)';
+      if(val!==null){
+        if(h.type==="count"){
+          cell = val; color = val>0 ? 'var(--green)' : 'var(--muted)';
+        } else if(h.type==="number" || h.type==="text"){
+          cell = val; color = 'var(--text)';
+        } else {
+          cell = val ? '✓' : '·'; color = val ? 'var(--green)' : 'var(--muted)';
+        }
+      }
+      const isToday = d===todayDate;
+      habitGridHtml += `<td style="text-align:center;padding:8px 4px;color:${color};font-weight:${val?'700':'400'};${isToday?'background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:8px':''}">${cell}</td>`;
+    });
+    habitGridHtml += '</tr>';
+  });
+  habitGridHtml += '</tbody></table></div>';
+  document.getElementById("weekHabitGrid").innerHTML = habitGridHtml;
+
+  document.getElementById("weekTable").innerHTML = weekRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
+    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+  </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
+}
+
+function renderMonthTab(){
+  const recs = allSortedRecords();
+  const gw = goalWeight();
+  const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
+  if(!months.length) months.push(currentMonthStr());
+  const picker = document.getElementById("monthPicker");
+  if(!picker.options.length || picker.options.length !== months.length){
+    picker.innerHTML = months.map(m=>{ const [y,mo]=m.split("-"); const d=new Date(parseInt(y),parseInt(mo)-1,1); return `<option value="${m}">${d.toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`; }).join("");
+  }
+  const selectedMonth = picker.value || months[months.length-1] || currentMonthStr();
+  picker.value = selectedMonth;
+  const monthRecs = recs.filter(r=>r.date.startsWith(selectedMonth));
   const mWeights = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
   const mSteps = monthRecs.filter(r=>r.steps!=null).map(r=>r.steps);
   const mWorkouts = monthRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
+  const mRuns = monthRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
   const mFasting = monthRecs.filter(r=>r.fasting_hours!=null);
   const fastingRate = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
-  let habitDone=0, habitTotal=0;
-  monthRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
-  const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
 
   document.getElementById("monthCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data yet"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${mSteps.length?monthRecs.length+" days":"No data"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${mFasting.length?mFasting.length+" days logged":"No data"}</div></div>
-    <div class="card orange"><div class="card-label">✅ Habit Rate</div><div class="card-value">${habitRate!=null?habitRate+"%":"—"}</div><div class="card-sub">${habitTotal?habitDone+"/"+habitTotal+" done":"No data"}</div></div>
+    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
+    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
+    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
   `;
 
   if(typeof Chart==="undefined"){ showChartFallback("monthWeightChart","📊 Chart couldn't load — data still saved"); }
@@ -1027,58 +1109,9 @@ function renderMonthTab(){
       ]},
       options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
     });
-  } else showChartFallback("monthWeightChart","⚖️ No weight entries this month yet");
+  } else showChartFallback("monthWeightChart","⚖️ No weight entries for this month");
 
-  const last7Start = daysAgoStr(6);
-  const last7 = recs.filter(r=>r.date>=last7Start);
-  document.getElementById("monthRecentTable").innerHTML = last7.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workouts</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${last7.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount = BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length;
-      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td>${normWorkoutEntries(r).length}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
-  </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
-}
-
-function renderDetailTab(){
-  const recs = allSortedRecords();
-  const gw = goalWeight();
-  const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
-  if(!months.length) months.push(currentMonthStr());
-  const picker = document.getElementById("detailMonthPicker");
-  if(!picker.options.length || picker.options.length !== months.length){
-    picker.innerHTML = months.map(m=>{ const [y,mo]=m.split("-"); const d=new Date(parseInt(y),parseInt(mo)-1,1); return `<option value="${m}">${d.toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`; }).join("");
-  }
-  const selectedMonth = picker.value || months[months.length-1] || currentMonthStr();
-  picker.value = selectedMonth;
-  const monthRecs = recs.filter(r=>r.date.startsWith(selectedMonth));
-  const mWeights = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
-  const mSteps = monthRecs.filter(r=>r.steps!=null).map(r=>r.steps);
-  const mWorkouts = monthRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
-  const mRuns = monthRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
-  const mFasting = monthRecs.filter(r=>r.fasting_hours!=null);
-  const fastingRate = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-
-  document.getElementById("detailCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
-  `;
-
-  if(typeof Chart==="undefined"){ showChartFallback("detailWeightChart","📊 Chart couldn't load — data still saved"); }
-  else if(monthRecs.length){
-    showChartCanvas("detailWeightChart");
-    if(charts.detailWeight) charts.detailWeight.destroy();
-    const weightData = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>({date:r.date, weight:e.weight})));
-    const textColor=themeColor("--text"), gridColor=themeColor("--border");
-    charts.detailWeight = new Chart(document.getElementById("detailWeightChart"), {
-      type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
-        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(163,230,53,.12)", fill:true, tension:.25, pointRadius:2 },
-        { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
-      ]},
-      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
-    });
-  } else showChartFallback("detailWeightChart","⚖️ No weight entries for this month");
-
-  document.getElementById("detailTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
+  document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
       return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;

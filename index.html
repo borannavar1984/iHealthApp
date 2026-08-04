@@ -28,8 +28,9 @@
   body{
     background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(100px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
     max-width:560px;margin:0 auto;
+    position:relative;
   }
   header{
     display:flex;justify-content:space-between;align-items:center;
@@ -40,8 +41,8 @@
   }
   h1{font-size:22px;font-weight:700;letter-spacing:-.2px}
   h1 span{color:var(--accent)}
-  .badge{background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:12px;padding:4px 10px;border-radius:20px}
-  .badge b{color:var(--green)}
+  .dev-badge{background:var(--amber);color:#3a2a00;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;vertical-align:middle;letter-spacing:.5px;margin-left:6px}
+  .dev-banner{background:color-mix(in srgb, var(--amber) 15%, transparent);border:1px solid var(--amber);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.4}
   .label{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 8px}
   .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
   .section h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -73,11 +74,7 @@
   .btn-wa{background:#25D366;color:#06281c}
   .btn-ghost{background:var(--card2);color:var(--muted);font-size:14px;padding:12px;margin-top:10px}
   .btn-sm{padding:9px 14px;font-size:13px;margin-top:0;border-radius:10px;width:auto}
-  .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#06281c;padding:12px 22px;border-radius:24px;font-weight:700;font-size:14px;display:none;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:calc(100% - 48px);text-align:center}
-  .tabs{display:flex;gap:8px;margin-bottom:16px}
-  .tabs button{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:10px;font-size:14px;font-weight:600;cursor:pointer}
-  .tabs button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
-  .theme-toggle{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:20px;font-size:14px;cursor:pointer;line-height:1}
+  .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#06281c;padding:12px 22px;border-radius:24px;font-weight:700;font-size:14px;display:none;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:calc(100% - 48px);text-align:center}
   .fasting-box{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:12px 14px;margin-top:8px}
   .fasting-box .fh{font-size:20px;font-weight:700}
   .fasting-flag{font-size:12px;padding:3px 9px;border-radius:20px;font-weight:700}
@@ -116,182 +113,162 @@
   .entry-row:hover td{background:var(--card2)}
   .add-tracker-form{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--border)}
   .muted-note{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+
+  /* ===== Dashboard sub-tabs ===== */
+  .dash-tabs{display:flex;gap:8px;margin-bottom:16px}
+  .dash-tabs button{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:10px 4px;font-size:13px;font-weight:600;cursor:pointer}
+  .dash-tabs button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+
+  /* ===== Hamburger menu ===== */
+  .hamburger-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;line-height:1}
+  .hamburger-backdrop{position:fixed;inset:0;background:transparent;z-index:40;display:none}
+  .hamburger-panel{position:fixed;top:calc(60px + env(safe-area-inset-top));right:14px;width:240px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:41;display:none;overflow:hidden}
+  .hamburger-panel .hp-profile{padding:14px;border-bottom:1px solid var(--border)}
+  .hamburger-panel .hp-profile .hp-name{font-weight:700;font-size:14px}
+  .hamburger-panel .hp-profile .hp-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .hamburger-panel button.hp-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:12px 14px;font-size:14px;cursor:pointer}
+  .hamburger-panel button.hp-item:active{background:var(--card2)}
+  .hamburger-panel hr{border:none;border-top:1px solid var(--border)}
+
+  /* ===== Floating action button ===== */
+  .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:50%;background:var(--accent2);color:#fff;border:none;font-size:30px;font-weight:400;line-height:1;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:30}
+  .fab:active{transform:translateX(-50%) scale(.94)}
+
+  /* ===== Full-screen overlays (picker + entry forms) ===== */
+  .overlay{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;overflow-y:auto}
+  .overlay-inner{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(30px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+  .overlay-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .overlay-header .back-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:10px;font-size:20px;cursor:pointer;line-height:1;flex:0 0 auto}
+  .overlay-header h2{font-size:19px;font-weight:700}
+  .picker-list{display:flex;flex-direction:column;gap:10px}
+  .picker-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
+  .picker-row:active{transform:scale(.98)}
+  .picker-row .picker-icon{font-size:22px}
+
+  /* ===== Type-ahead (hidden until focused) ===== */
+  .typeahead-wrap{position:relative}
+  .typeahead-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:10;max-height:220px;overflow-y:auto;display:none}
+  .typeahead-list button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--card2)}
+  .typeahead-list button:last-child{border-bottom:none}
+  .typeahead-list button:active{background:var(--card2)}
 </style>
 </head>
 <body>
+
 <header>
-  <h1>i<span>Health</span> <span style="background:var(--amber);color:#3a2a00;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;vertical-align:middle;letter-spacing:.5px">🧪 DEV</span></h1>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div class="badge" id="weightBadge">—</div>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
-  </div>
+  <h1>i<span>Health</span><span class="dev-badge">🧪 DEV</span></h1>
+  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleHamburger()">☰</button>
 </header>
-<div style="background:color-mix(in srgb, var(--amber) 15%, transparent);border:1px solid var(--amber);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.4">
-  🧪 <b>Dev build</b> — separate storage and cloud config from the production app. Testing here never touches your real <code>health-data</code>.
-</div>
+<div class="dev-banner">🧪 <b>Dev build</b> — separate storage and cloud config from production. Testing here never touches your real <code>health-data</code>.</div>
 
-<div class="tabs">
-  <button class="sel" id="tabTodayBtn" onclick="showMainTab('today')">📝 Today</button>
-  <button id="tabDashboardBtn" onclick="showMainTab('dashboard')">📊 Dashboard</button>
-</div>
-
-<div id="todayView">
-
-<div class="section">
-  <h3>⚖️ Weight</h3>
-  <div class="val-wrap"><input type="tel" id="fWeight" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
-</div>
-
-<div class="section">
-  <h3>🏃 Activity</h3>
-  <div class="row3">
-    <div><div class="label" style="margin-top:0">Steps</div><input type="tel" id="fSteps" inputmode="numeric" placeholder="8000"></div>
-    <div><div class="label" style="margin-top:0">Nap (min)</div><input type="tel" id="fNap" inputmode="numeric" placeholder="20"></div>
-    <div><div class="label" style="margin-top:0">Run (mi)</div><input type="tel" id="fRunMiles" inputmode="decimal" placeholder="optional"></div>
+<div class="hamburger-backdrop" id="hamburgerBackdrop" onclick="closeHamburger()"></div>
+<div class="hamburger-panel" id="hamburgerPanel">
+  <div class="hp-profile">
+    <div class="hp-name">Deep</div>
+    <div class="hp-sub" id="hpWeightSummary">—</div>
   </div>
-  <div class="label">Workout</div>
-  <input type="text" id="fWorkout" list="workoutAutocomplete" placeholder="e.g. 45 min yoga">
-  <datalist id="workoutAutocomplete"></datalist>
+  <button class="hp-item" id="hpThemeToggle" onclick="toggleTheme()">🌙 Dark mode</button>
+  <hr>
+  <button class="hp-item" onclick="closeHamburger();showMainTab('settings')">⚙️ Settings</button>
 </div>
 
-<div class="section">
-  <h3>⏱️ Fasting</h3>
-  <div class="fasting-box">
-    <div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div>
-    <span class="fasting-flag none" id="fastingFlag">no data</span>
-  </div>
-  <div class="muted-note">Auto-calculated from yesterday's dinner time → today's breakfast time. Target: 16 hrs.</div>
-</div>
-
-<div class="section" id="mealBreakfast" data-meal="breakfast">
-  <h3>🍳 Breakfast</h3>
-  <div class="chip-row" id="breakfastChips"></div>
-  <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
-  <datalist id="breakfastAutocomplete"></datalist>
-  <div class="label" style="margin:10px 0 6px">Frequent</div>
-  <div class="chip-row" id="breakfastQuick"></div>
-  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
-  <input type="time" id="breakfastTime" onchange="recalcFasting()">
-</div>
-
-<div class="section" id="mealSnack" data-meal="snack">
-  <h3>🥗 Snack</h3>
-  <div class="chip-row" id="snackChips"></div>
-  <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
-  <datalist id="snackAutocomplete"></datalist>
-  <div class="label" style="margin:10px 0 6px">Frequent</div>
-  <div class="chip-row" id="snackQuick"></div>
-  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
-  <input type="time" id="snackTime">
-</div>
-
-<div class="section" id="mealDinner" data-meal="dinner">
-  <h3>🍽️ Dinner</h3>
-  <div class="chip-row" id="dinnerChips"></div>
-  <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
-  <datalist id="dinnerAutocomplete"></datalist>
-  <div class="label" style="margin:10px 0 6px">Frequent</div>
-  <div class="chip-row" id="dinnerQuick"></div>
-  <div class="label" style="margin:12px 0 6px">Time (optional)</div>
-  <input type="time" id="dinnerTime" onchange="recalcFasting()">
-</div>
-
-<div class="section">
-  <h3>✅ Habits</h3>
-  <div class="habit-grid">
-    <div class="habit-row"><span>💧 Water</span><button class="opt" id="habitWater" onclick="toggleHabit('water')">Done</button></div>
-    <div class="habit-row"><span>🌅 Morning Detox</span><button class="opt" id="habitDetox" onclick="toggleHabit('morning_detox')">Done</button></div>
-    <div class="habit-row"><span>🫁 Deep Breathing</span><button class="opt" id="habitBreathing" onclick="toggleHabit('deep_breathing')">Done</button></div>
-    <div class="habit-row"><span>💊 Multivitamin</span><button class="opt" id="habitMultivit" onclick="toggleHabit('multivitamin')">Done</button></div>
-  </div>
-  <div class="habit-row" style="margin-top:8px">
-    <span>🌾 Isabgol (2x target)</span>
-    <div class="stepper" id="isabgolStepper"></div>
-  </div>
-</div>
-
-<div class="section" id="trackerSection">
-  <h3>🧩 My Trackers</h3>
-  <div id="trackerList"></div>
-  <button class="btn btn-ghost btn-sm" onclick="toggleAddTrackerForm()">+ Add tracker</button>
-  <div class="add-tracker-form" id="addTrackerForm" style="display:none">
-    <input type="text" id="newTrackerName" placeholder="e.g. Knee physio exercises">
-    <select id="newTrackerType">
-      <option value="boolean">Yes / No</option>
-      <option value="count">Count (0-5)</option>
-      <option value="number">Number</option>
-      <option value="text">Text</option>
-    </select>
-    <button class="btn btn-save btn-sm" onclick="addTracker()">Save Tracker</button>
-  </div>
-</div>
-
-<div class="section">
-  <h3>📅 Date</h3>
-  <input type="date" id="fDate" onchange="onDateChange()">
-  <div class="muted-note">Defaults to today — only change this to log or edit a past day.</div>
-</div>
-
-<div class="section">
-  <h3>📝 Notes</h3>
-  <textarea id="fNotes" placeholder="Anything else about today…"></textarea>
-</div>
-
-<button class="btn btn-save" id="saveBtn" onclick="saveDay()">Save Today's Log</button>
-
-<div class="section" style="margin-top:14px">
-  <h3>💬 WhatsApp Message</h3>
-  <div class="muted-note">Draft template — this is my best guess at your format from the migrated history. Tell me how it should differ and I'll adjust it.</div>
-  <button class="btn btn-wa" onclick="generateWhatsApp()">Generate Message</button>
-  <div class="wa-preview" id="waPreview" style="display:none"></div>
-  <button class="btn btn-ghost btn-sm" id="copyWaBtn" style="display:none" onclick="copyWhatsApp()">Copy to Clipboard</button>
-</div>
-
-</div>
-
-<div id="dashboardView" style="display:none">
-
-<div class="section">
-  <h3>⚙️ Settings</h3>
-  <div class="label" style="margin-top:0">☁️ Cloud Sync</div>
-  <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
-  <div id="cloudSetup">
-    <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
-    <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
-    <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
-    <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
-  </div>
-  <div id="cloudControls" style="display:none">
-    <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
-  </div>
-  <div class="label">💾 Backup &amp; Export</div>
-  <div class="row2">
-    <button class="btn btn-ghost btn-sm" style="width:100%" onclick="backupData()">Backup (.json)</button>
-    <button class="btn btn-ghost btn-sm" style="width:100%" onclick="exportExcel()">Export (.xlsx)</button>
-  </div>
-</div>
-
+<!-- ===================== DASHBOARD (home screen) ===================== -->
+<div id="dashboardView">
   <div class="dash-tabs">
-    <button id="dashOverviewBtn" onclick="showDashTab('overview')">Summary</button>
-    <button class="sel" id="dashMonthlyBtn" onclick="showDashTab('monthly')">Monthly Detail</button>
+    <button class="sel" id="dashTodayBtn" onclick="showDashTab('today')">Today</button>
+    <button id="dashTrendBtn" onclick="showDashTab('trend')">Weekly Trend</button>
+    <button id="dashStreaksBtn" onclick="showDashTab('streaks')">Habit Streaks</button>
   </div>
 
-  <div id="dashOverviewView" style="display:none">
-    <div class="cards" id="ovCards"></div>
-    <div class="chart-card"><h4>Weight Trend toward 65.0 kg</h4><canvas id="weightChart" height="200"></canvas><div class="dash-empty" id="weightChartEmpty" style="display:none"></div></div>
-    <div class="chart-card"><h4>Fasting Hours (16 hr target)</h4><canvas id="fastingChart" height="180"></canvas><div class="dash-empty" id="fastingChartEmpty" style="display:none"></div></div>
-    <div class="chart-card"><h4>Steps</h4><canvas id="stepsChart" height="180"></canvas><div class="dash-empty" id="stepsChartEmpty" style="display:none"></div></div>
-    <div class="chart-card"><h4>Running (miles per run)</h4><canvas id="runChart" height="180"></canvas><div class="dash-empty" id="runChartEmpty" style="display:none"></div></div>
-    <div class="chart-card"><h4>Habit Adherence (all logged days)</h4><canvas id="habitChart" height="200"></canvas><div class="dash-empty" id="habitChartEmpty" style="display:none"></div></div>
-    <div class="dtable-wrap"><div class="tw-head">Month over Month</div><div id="ovMonthlyTable"></div></div>
+  <div id="dashTodayView">
+    <div class="cards" id="todayCards"></div>
+    <div class="chart-card"><h4>Weight, Last 14 Days</h4><canvas id="todayWeightChart" height="160"></canvas><div class="dash-empty" id="todayWeightChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Today's Activity</div><div id="todayTable"></div></div>
   </div>
 
-  <div id="dashMonthlyView">
-    <div class="dash-month">
-      <select id="dashMonthSel" onchange="renderMonthlyDetail()"></select>
+  <div id="dashTrendView" style="display:none">
+    <div class="cards" id="trendCards"></div>
+    <div class="chart-card"><h4>Weight & Steps, This Week vs Last</h4><canvas id="trendChart" height="180"></canvas><div class="dash-empty" id="trendChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Day by Day (Last 7 Days)</div><div id="trendTable"></div></div>
+  </div>
+
+  <div id="dashStreaksView" style="display:none">
+    <div class="cards" id="streaksCards"></div>
+    <div class="chart-card"><h4>Habit Adherence (All Logged Days)</h4><canvas id="streaksChart" height="200"></canvas><div class="dash-empty" id="streaksChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Current Streaks</div><div id="streaksTable"></div></div>
+  </div>
+</div>
+
+<!-- ===================== SETTINGS (reached via hamburger) ===================== -->
+<div id="settingsView" style="display:none">
+  <div class="section">
+    <h3>⚙️ Settings</h3>
+    <div class="label" style="margin-top:0">☁️ Cloud Sync</div>
+    <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
+    <div id="cloudSetup">
+      <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
+      <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
+      <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
+      <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
     </div>
-    <div class="cards" id="monCards"></div>
-    <div class="dtable-wrap"><div class="tw-head" id="monDayHead">Days</div><div id="monDayTable"></div></div>
+    <div id="cloudControls" style="display:none">
+      <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
+    </div>
+    <div class="label">💾 Backup &amp; Export</div>
+    <div class="row2">
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="backupData()">Backup (.json)</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="exportExcel()">Export (.xlsx)</button>
+    </div>
+    <div class="label">🧩 My Trackers</div>
+    <div id="trackerList"></div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleAddTrackerForm()">+ Add tracker</button>
+    <div class="add-tracker-form" id="addTrackerForm" style="display:none">
+      <input type="text" id="newTrackerName" placeholder="e.g. Knee physio exercises">
+      <select id="newTrackerType">
+        <option value="boolean">Yes / No</option>
+        <option value="count">Count (0-5)</option>
+        <option value="number">Number</option>
+        <option value="text">Text</option>
+      </select>
+      <button class="btn btn-save btn-sm" onclick="addTracker()">Save Tracker</button>
+    </div>
+    <div class="label">💬 WhatsApp Message</div>
+    <div class="muted-note">Draft template — this is my best guess at your format from the migrated history. Tell me how it should differ and I'll adjust it.</div>
+    <input type="date" id="waDate" style="margin-top:8px">
+    <button class="btn btn-wa" onclick="generateWhatsApp()">Generate Message for This Date</button>
+    <div class="wa-preview" id="waPreview" style="display:none"></div>
+    <button class="btn btn-ghost btn-sm" id="copyWaBtn" style="display:none" onclick="copyWhatsApp()">Copy to Clipboard</button>
+    <button class="btn btn-ghost" onclick="showMainTab('dashboard')">‹ Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- ===================== Floating "+" ===================== -->
+<button class="fab" id="fabBtn" onclick="openAddPicker()">+</button>
+
+<!-- ===================== Add-type picker (full screen) ===================== -->
+<div class="overlay" id="addPickerOverlay">
+  <div class="overlay-inner">
+    <div class="overlay-header">
+      <button class="back-btn" onclick="closeOverlay('addPickerOverlay')">‹</button>
+      <h2>Log</h2>
+    </div>
+    <div class="picker-list">
+      <button class="picker-row" onclick="openEntryForm('food')"><span class="picker-icon">🍽️</span> Log Food</button>
+      <button class="picker-row" onclick="openEntryForm('weight')"><span class="picker-icon">⚖️</span> Log Weight</button>
+      <button class="picker-row" onclick="openEntryForm('habit')"><span class="picker-icon">✅</span> Log Habit</button>
+      <button class="picker-row" onclick="openEntryForm('workout')"><span class="picker-icon">🏃</span> Log Workout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Entry form (full screen, body rendered per type) ===================== -->
+<div class="overlay" id="entryFormOverlay">
+  <div class="overlay-inner">
+    <div class="overlay-header">
+      <button class="back-btn" onclick="backToPicker()">‹</button>
+      <h2 id="entryFormTitle">Log</h2>
+    </div>
+    <div id="entryFormBody"></div>
   </div>
 </div>
 
@@ -299,73 +276,167 @@
 
 <script>
 const GOAL_WEIGHT = 65.0;
-const LS_DAYS = "ihealth_dev_days_v2";
+const LS_DAYS = "ihealth_dev_days_v3";
 const LS_TRACKERS = "ihealth_dev_trackers_v1";
 const CLOUD_KEY = "ihealth_dev_cloud_cfg_v2";
 const HIDDEN_ITEMS_KEY = "ihealth_dev_hidden_items_v1";
 
-let days = loadDays();       // { "YYYY-MM-DD": record }
-let trackers = loadTrackers(); // [{id,label,type}]
-let meals = { breakfast: [], snack: [], dinner: [] };
-let habits = { water:false, morning_detox:false, deep_breathing:false, multivitamin:false, isabgol_count:0 };
-let customValues = {};
+let days = loadDays();          // { "YYYY-MM-DD": record }
+let trackers = loadTrackers();  // [{id,label,type}]
 
 function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
 function persistDays(){ try{ localStorage.setItem(LS_DAYS, JSON.stringify(days)); }catch(e){} }
 function loadTrackers(){ try{ return JSON.parse(localStorage.getItem(LS_TRACKERS)||"[]"); }catch(e){ return []; } }
 function persistTrackers(){ try{ localStorage.setItem(LS_TRACKERS, JSON.stringify(trackers)); }catch(e){} }
-function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function nowTimeStr(){ const d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 function prevDateStr(dateStr){ const d=new Date(dateStr+"T00:00:00"); d.setDate(d.getDate()-1); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function ensureDay(date){ if(!days[date]) days[date] = { date }; return days[date]; }
 function toast(msg,color){
   const t=document.getElementById("toast");
   const icon = color==="var(--red)" ? "⚠️ " : color==="var(--amber)" ? "ℹ️ " : "✅ ";
   t.textContent=icon+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2400);
 }
 
-// normalize a meal field from either legacy shape (array of strings) or
-// current shape ({time, items}) so history and live data render the same way
+// ===== Append-only normalizers: read either the new array-shaped fields or the
+// legacy single-value fields (pre-migration data, or data from a repo that hasn't
+// been migrated yet) without ever losing information =====
+function normWeightEntries(rec){
+  if(!rec) return [];
+  if(Array.isArray(rec.weightEntries)) return rec.weightEntries;
+  if(rec.weight!=null) return [{id:"legacy-weight", time:null, weight:rec.weight, notes:null}];
+  return [];
+}
+function normWorkoutEntries(rec){
+  if(!rec) return [];
+  if(Array.isArray(rec.workoutEntries)) return rec.workoutEntries;
+  if(rec.workout) return [{id:"legacy-workout", time:null, workout:rec.workout, run_miles: rec.run_miles ?? null}];
+  return [];
+}
+function normHabitEvents(rec){
+  if(!rec) return [];
+  if(Array.isArray(rec.habitEvents)) return rec.habitEvents;
+  const out=[];
+  if(rec.water==="completed") out.push({id:"legacy-water",time:null,habitKey:"water",value:true});
+  if(rec.morning_detox!=null) out.push({id:"legacy-detox",time:null,habitKey:"morning_detox",value:!!rec.morning_detox});
+  if(rec.deep_breathing!=null) out.push({id:"legacy-breathing",time:null,habitKey:"deep_breathing",value:!!rec.deep_breathing});
+  if(rec.multivitamin!=null) out.push({id:"legacy-multivit",time:null,habitKey:"multivitamin",value:!!rec.multivitamin});
+  const isabgolCount = rec.isabgol_count!=null ? rec.isabgol_count : (rec.isabgol===true?2:rec.isabgol===false?0:null);
+  if(isabgolCount!=null) for(let i=0;i<isabgolCount;i++) out.push({id:"legacy-isabgol-"+i,time:null,habitKey:"isabgol",value:1});
+  Object.entries(rec.custom||{}).forEach(([k,v])=>{ if(v!=null && v!=="") out.push({id:"legacy-custom-"+k,time:null,habitKey:k,value:v}); });
+  return out;
+}
+const BUILTIN_HABITS = [
+  {key:"water", label:"💧 Water", type:"boolean"},
+  {key:"morning_detox", label:"🌅 Morning Detox", type:"boolean"},
+  {key:"deep_breathing", label:"🫁 Deep Breathing", type:"boolean"},
+  {key:"isabgol", label:"🌾 Isabgol (2x target)", type:"count"},
+  {key:"multivitamin", label:"💊 Multivitamin", type:"boolean"},
+];
+function habitDef(key){
+  const b = BUILTIN_HABITS.find(h=>h.key===key);
+  if(b) return b;
+  const t = trackers.find(t=>t.id===key);
+  if(t) return {key:t.id, label:t.label, type:t.type};
+  return {key, label:key, type:"boolean"};
+}
+// aggregate a habit's value for one day from its events
+function habitDayValue(rec, key){
+  const events = normHabitEvents(rec).filter(e=>e.habitKey===key);
+  if(!events.length) return null;
+  const def = habitDef(key);
+  if(key==="isabgol" || def.type==="count") return events.reduce((s,e)=>s+(Number(e.value)||0),0);
+  if(def.type==="number" || def.type==="text") return events[events.length-1].value;
+  return events.some(e=>e.value===true);
+}
+function normBool(v){ return v===true ? true : v===false ? false : null; }
 function normMeal(v){
   if(Array.isArray(v)) return { time:null, items:v };
   if(v && typeof v==="object") return { time:v.time||null, items:v.items||[] };
   return { time:null, items:[] };
 }
-// isabgol: legacy boolean -> count-equivalent (2=yes, 0=no); current int stays as-is
-function normIsabgolCount(rec){
-  if(rec.isabgol_count!=null) return rec.isabgol_count;
-  if(rec.isabgol===true) return 2;
-  if(rec.isabgol===false) return 0;
+function allSortedRecords(){
+  return Object.values(days).filter(d=>d && d.date).sort((a,b)=>a.date.localeCompare(b.date));
+}
+function latestWeightOverall(){
+  const recs = allSortedRecords();
+  for(let i=recs.length-1;i>=0;i--){
+    const entries = normWeightEntries(recs[i]);
+    if(entries.length) return { date: recs[i].date, entry: entries[entries.length-1] };
+  }
   return null;
 }
-function normBool(v){ return v===true ? true : v===false ? false : null; }
-function normWater(rec){ return rec.water==="completed" ? true : (rec.water==null ? null : false); }
 
-// ===== Meal item chips =====
-function renderMealChips(meal){
-  const box=document.getElementById(meal+"Chips"); box.innerHTML="";
-  meals[meal].forEach((item,idx)=>{
-    const c=document.createElement("div"); c.className="chip";
-    c.innerHTML = `<span></span><button aria-label="Remove">×</button>`;
-    c.querySelector("span").textContent = item;
-    c.querySelector("button").onclick=()=>{ meals[meal].splice(idx,1); renderMealChips(meal); };
-    box.appendChild(c);
-  });
+// ===== Toast helper for weight badge in hamburger =====
+function updateHamburgerSummary(){
+  const latest = latestWeightOverall();
+  const el = document.getElementById("hpWeightSummary");
+  if(latest){
+    const diff = Math.round((latest.entry.weight-GOAL_WEIGHT)*10)/10;
+    el.textContent = `${latest.entry.weight}kg · ${diff>0?"−"+diff+"kg to goal":"Goal reached 🎯"}`;
+  } else {
+    el.textContent = `Goal: ${GOAL_WEIGHT.toFixed(1)}kg`;
+  }
 }
-function addMealItem(meal, itemOverride){
-  const input=document.getElementById(meal+"Input");
-  const v=(itemOverride!=null ? itemOverride : input.value).trim();
-  if(!v) return;
-  if(itemOverride==null) input.value="";
-  if(meals[meal].some(x=>x.toLowerCase()===v.toLowerCase())) return; // already added today
-  meals[meal].push(v);
-  renderMealChips(meal);
-}
-["breakfast","snack","dinner"].forEach(meal=>{
-  document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
-});
 
-// ===== Frequent-item quick picks, learned from history (exact-string match — similar
-// phrasing counts separately, so this favors items you log the same way each time) =====
+// ===== Hamburger menu =====
+function toggleHamburger(){
+  const panel=document.getElementById("hamburgerPanel"), backdrop=document.getElementById("hamburgerBackdrop");
+  const isOpen = panel.style.display==="block";
+  panel.style.display = isOpen ? "none" : "block";
+  backdrop.style.display = isOpen ? "none" : "block";
+  if(!isOpen) updateHamburgerSummary();
+}
+function closeHamburger(){
+  document.getElementById("hamburgerPanel").style.display="none";
+  document.getElementById("hamburgerBackdrop").style.display="none";
+}
+
+// ===== Main view switching: dashboard (home) vs settings =====
+function showMainTab(tab){
+  const isSettings = tab==="settings";
+  document.getElementById("dashboardView").style.display = isSettings ? "none" : "block";
+  document.getElementById("settingsView").style.display = isSettings ? "block" : "none";
+  document.getElementById("fabBtn").style.display = isSettings ? "none" : "block";
+  if(!isSettings) renderDashboard();
+  else { renderTrackers(); document.getElementById("waDate").value = todayStr(); }
+}
+
+// ===== Full-screen overlay plumbing =====
+function openOverlay(id){ document.getElementById(id).style.display="block"; window.scrollTo({top:0}); }
+function closeOverlay(id){ document.getElementById(id).style.display="none"; }
+function openAddPicker(){ openOverlay("addPickerOverlay"); }
+let currentEntryType = null;
+function backToPicker(){ closeOverlay("entryFormOverlay"); openOverlay("addPickerOverlay"); }
+function closeAllOverlaysToHome(){
+  closeOverlay("addPickerOverlay"); closeOverlay("entryFormOverlay");
+  renderDashboard();
+}
+
+// ===== Type-ahead (hidden until focused, prefix-match then substring) =====
+function setupTypeahead(inputEl, listEl, getSource, onPick){
+  function render(query){
+    const q = (query||"").trim().toLowerCase();
+    const source = getSource();
+    let results;
+    if(!q){ listEl.style.display="none"; listEl.innerHTML=""; return; }
+    const starts = source.filter(s=>s.toLowerCase().startsWith(q));
+    const contains = source.filter(s=>!s.toLowerCase().startsWith(q) && s.toLowerCase().includes(q));
+    results = [...starts, ...contains].slice(0,8);
+    if(!results.length){ listEl.style.display="none"; listEl.innerHTML=""; return; }
+    listEl.innerHTML = results.map(r=>`<button type="button">${r.replace(/</g,"&lt;")}</button>`).join("");
+    [...listEl.children].forEach((btn,i)=>{
+      btn.onclick=()=>{ inputEl.value = results[i]; listEl.style.display="none"; listEl.innerHTML=""; onPick && onPick(results[i]); };
+    });
+    listEl.style.display="block";
+  }
+  inputEl.addEventListener("input", ()=>render(inputEl.value));
+  inputEl.addEventListener("focus", ()=>{ if(inputEl.value) render(inputEl.value); });
+  document.addEventListener("click", (e)=>{ if(e.target!==inputEl && !listEl.contains(e.target)) { listEl.style.display="none"; } });
+}
+
+// ===== Frequent-item quick picks (meal items), dismissible =====
 function loadHiddenItems(){ try{ return JSON.parse(localStorage.getItem(HIDDEN_ITEMS_KEY)||"[]"); }catch(e){ return []; } }
 function saveHiddenItems(list){ try{ localStorage.setItem(HIDDEN_ITEMS_KEY, JSON.stringify(list)); }catch(e){} }
 function hideQuickItem(meal, item){
@@ -375,7 +446,6 @@ function hideQuickItem(meal, item){
   saveHiddenItems(hidden);
   renderMealQuickPicks(meal);
 }
-
 function mealItemFrequency(meal){
   const counts = new Map();
   Object.values(days).forEach(rec=>{
@@ -392,6 +462,7 @@ function renderMealQuickPicks(meal){
   const hidden = new Set(loadHiddenItems());
   const visible = freq.filter(([item])=>!hidden.has(meal+"::"+item));
   const quickBox = document.getElementById(meal+"Quick");
+  if(!quickBox) return;
   quickBox.innerHTML="";
   if(!visible.length){ quickBox.innerHTML = '<div class="muted-note">Nothing logged yet — items you add will show up here next time.</div>'; }
   visible.slice(0,12).forEach(([item])=>{
@@ -403,312 +474,539 @@ function renderMealQuickPicks(meal){
     x.onclick=(ev)=>{ ev.stopPropagation(); hideQuickItem(meal, item); };
     wrap.appendChild(b); wrap.appendChild(x); quickBox.appendChild(wrap);
   });
-  // autocomplete always includes everything, even items dismissed from the quick-pick row —
-  // dismissing only declutters the tap-targets, it never hides history from search
-  const datalist = document.getElementById(meal+"Autocomplete");
-  datalist.innerHTML = freq.map(([item])=>`<option value="${item.replace(/"/g,"&quot;")}">`).join("");
 }
-function renderAllMealQuickPicks(){
-  ["breakfast","snack","dinner"].forEach(renderMealQuickPicks);
-}
+function renderAllMealQuickPicks(){ ["breakfast","snack","dinner"].forEach(renderMealQuickPicks); }
 
-// Workout is free text with no fixed list — autocomplete from history, most-recent first
+let mealsDraft = { breakfast: [], snack: [], dinner: [] };
+function renderMealChips(meal){
+  const box=document.getElementById(meal+"Chips"); if(!box) return; box.innerHTML="";
+  mealsDraft[meal].forEach((item,idx)=>{
+    const c=document.createElement("div"); c.className="chip";
+    c.innerHTML = `<span></span><button aria-label="Remove">×</button>`;
+    c.querySelector("span").textContent = item;
+    c.querySelector("button").onclick=()=>{ mealsDraft[meal].splice(idx,1); renderMealChips(meal); };
+    box.appendChild(c);
+  });
+}
+function addMealItem(meal, itemOverride){
+  const input=document.getElementById(meal+"Input");
+  const v=(itemOverride!=null ? itemOverride : input.value).trim();
+  if(!v) return;
+  if(itemOverride==null) input.value="";
+  if(mealsDraft[meal].some(x=>x.toLowerCase()===v.toLowerCase())) return;
+  mealsDraft[meal].push(v);
+  renderMealChips(meal);
+}
 function workoutRecency(){
   const seen = [];
-  Object.values(days).filter(r=>r&&r.date).sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
-    if(r.workout && !seen.includes(r.workout)) seen.push(r.workout);
+  allSortedRecords().slice().reverse().forEach(r=>{
+    normWorkoutEntries(r).slice().reverse().forEach(e=>{
+      if(e.workout && !seen.includes(e.workout)) seen.push(e.workout);
+    });
   });
   return seen;
 }
-function renderWorkoutAutocomplete(){
-  const list = workoutRecency();
-  document.getElementById("workoutAutocomplete").innerHTML = list.map(w=>`<option value="${w.replace(/"/g,"&quot;")}">`).join("");
+
+// ===================== ENTRY FORMS =====================
+function openEntryForm(type){
+  currentEntryType = type;
+  closeOverlay("addPickerOverlay");
+  document.getElementById("entryFormTitle").textContent =
+    type==="food" ? "Log Food" : type==="weight" ? "Log Weight" : type==="habit" ? "Log Habit" : "Log Workout";
+  const body = document.getElementById("entryFormBody");
+  if(type==="food") body.innerHTML = foodFormHtml();
+  else if(type==="weight") body.innerHTML = weightFormHtml();
+  else if(type==="habit") body.innerHTML = habitFormHtml();
+  else body.innerHTML = workoutFormHtml();
+  openOverlay("entryFormOverlay");
+  if(type==="food") initFoodForm();
+  else if(type==="weight") initWeightForm();
+  else if(type==="habit") initHabitForm();
+  else initWorkoutForm();
 }
 
-// ===== Habits =====
-function toggleHabit(key){
-  habits[key] = !habits[key];
-  renderHabitButtons();
+// ---------- FOOD ----------
+function foodFormHtml(){
+  return `
+    <div class="section"><h3>⏱️ Fasting</h3>
+      <div class="fasting-box"><div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div><span class="fasting-flag none" id="fastingFlag">no data</span></div>
+      <div class="muted-note">Auto-calculated from yesterday's dinner time → today's breakfast time. Target: 16 hrs.</div>
+    </div>
+    <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
+      <div class="chip-row" id="breakfastChips"></div>
+      <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
+      <datalist id="breakfastAutocomplete"></datalist>
+      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="breakfastQuick"></div>
+      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="breakfastTime" onchange="recalcFasting()">
+    </div>
+    <div class="section" id="mealSnack" data-meal="snack"><h3>🥗 Snack</h3>
+      <div class="chip-row" id="snackChips"></div>
+      <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
+      <datalist id="snackAutocomplete"></datalist>
+      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="snackQuick"></div>
+      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="snackTime">
+    </div>
+    <div class="section" id="mealDinner" data-meal="dinner"><h3>🍽️ Dinner</h3>
+      <div class="chip-row" id="dinnerChips"></div>
+      <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
+      <datalist id="dinnerAutocomplete"></datalist>
+      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="dinnerQuick"></div>
+      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="dinnerTime" onchange="recalcFasting()">
+    </div>
+    <div class="section"><h3>📅 Date</h3><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div></div>
+    <button class="btn btn-save" onclick="saveFoodEntry()">Save Food Log</button>
+  `;
 }
-function renderHabitButtons(){
-  document.getElementById("habitWater").classList.toggle("sel", !!habits.water);
-  document.getElementById("habitDetox").classList.toggle("sel", !!habits.morning_detox);
-  document.getElementById("habitBreathing").classList.toggle("sel", !!habits.deep_breathing);
-  document.getElementById("habitMultivit").classList.toggle("sel", !!habits.multivitamin);
+function initFoodForm(){
+  document.getElementById("foodDate").value = todayStr();
+  const date = todayStr();
+  const rec = days[date];
+  mealsDraft = { breakfast: normMeal(rec&&rec.breakfast).items.slice(), snack: normMeal(rec&&rec.snack).items.slice(), dinner: normMeal(rec&&rec.dinner).items.slice() };
+  document.getElementById("breakfastTime").value = normMeal(rec&&rec.breakfast).time || "";
+  document.getElementById("snackTime").value = normMeal(rec&&rec.snack).time || "";
+  document.getElementById("dinnerTime").value = normMeal(rec&&rec.dinner).time || "";
+  ["breakfast","snack","dinner"].forEach(renderMealChips);
+  renderAllMealQuickPicks();
+  ["breakfast","snack","dinner"].forEach(meal=>{
+    document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
+  });
+  document.getElementById("foodDate").addEventListener("change", ()=>{
+    const d = document.getElementById("foodDate").value || todayStr();
+    const r = days[d];
+    mealsDraft = { breakfast: normMeal(r&&r.breakfast).items.slice(), snack: normMeal(r&&r.snack).items.slice(), dinner: normMeal(r&&r.dinner).items.slice() };
+    document.getElementById("breakfastTime").value = normMeal(r&&r.breakfast).time || "";
+    document.getElementById("snackTime").value = normMeal(r&&r.snack).time || "";
+    document.getElementById("dinnerTime").value = normMeal(r&&r.dinner).time || "";
+    ["breakfast","snack","dinner"].forEach(renderMealChips);
+    recalcFasting();
+  });
+  recalcFasting();
 }
-function renderIsabgolStepper(){
-  const box=document.getElementById("isabgolStepper"); box.innerHTML="";
-  [0,1,2].forEach(n=>{
-    const b=document.createElement("button"); b.textContent=n;
-    b.className = habits.isabgol_count===n ? "sel" : "";
-    b.onclick=()=>{ habits.isabgol_count=n; renderIsabgolStepper(); };
-    box.appendChild(b);
+function recalcFasting(){
+  const date = document.getElementById("foodDate").value || todayStr();
+  const prevDate = prevDateStr(date);
+  const prevRec = days[prevDate];
+  const prevDinner = prevRec ? normMeal(prevRec.dinner).time : null;
+  const todayBreakfast = document.getElementById("breakfastTime").value;
+  const flagEl = document.getElementById("fastingFlag"), hoursEl = document.getElementById("fastingHours");
+  if(!prevDinner || !todayBreakfast){ hoursEl.textContent="—"; flagEl.textContent="no data"; flagEl.className="fasting-flag none"; return null; }
+  const dinnerDt = new Date(prevDate+"T"+prevDinner+":00");
+  const breakfastDt = new Date(date+"T"+todayBreakfast+":00");
+  let hrs = (breakfastDt - dinnerDt) / 3600000;
+  if(hrs<0) hrs += 24;
+  hrs = Math.round(hrs*10)/10;
+  hoursEl.textContent = hrs;
+  if(hrs>=16){ flagEl.textContent="✅ 16h+"; flagEl.className="fasting-flag ok"; } else { flagEl.textContent="⚠️ under 16h"; flagEl.className="fasting-flag low"; }
+  return hrs;
+}
+async function saveFoodEntry(){
+  const date = document.getElementById("foodDate").value || todayStr();
+  const fastingHours = recalcFasting();
+  const rec = ensureDay(date);
+  rec.breakfast = { time: document.getElementById("breakfastTime").value||null, items: mealsDraft.breakfast };
+  rec.snack = { time: document.getElementById("snackTime").value||null, items: mealsDraft.snack };
+  rec.dinner = { time: document.getElementById("dinnerTime").value||null, items: mealsDraft.dinner };
+  rec.fasting_hours = fastingHours;
+  rec._source = "live";
+  persistDays();
+  renderAllMealQuickPicks();
+  toast("Food log saved ✓");
+  if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
+  closeAllOverlaysToHome();
+}
+
+// ---------- WEIGHT (append-only) ----------
+function weightFormHtml(){
+  return `
+    <div class="section"><h3>⚖️ Weight</h3>
+      <div class="val-wrap"><input type="tel" id="weightValue" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
+      <div class="muted-note" id="weightPrefillNote"></div>
+    </div>
+    <div class="section"><h3>👟 Steps (optional)</h3><input type="tel" id="weightSteps" inputmode="numeric" placeholder="8000"></div>
+    <div class="section row2" style="display:grid">
+      <div><div class="label" style="margin-top:0">Date</div><input type="date" id="weightDate"></div>
+      <div><div class="label" style="margin-top:0">Time</div><input type="time" id="weightTime"></div>
+    </div>
+    <div class="section"><h3>📝 Note (optional)</h3><textarea id="weightNote" placeholder="e.g. after workout"></textarea></div>
+    <button class="btn btn-save" onclick="saveWeightEntry()">Save Weight</button>
+  `;
+}
+let weightEditSeed = null; // {weight, notes} pre-fill from a tapped historical entry
+function initWeightForm(){
+  document.getElementById("weightDate").value = todayStr();
+  document.getElementById("weightTime").value = nowTimeStr();
+  if(weightEditSeed){
+    document.getElementById("weightValue").value = weightEditSeed.weight ?? "";
+    document.getElementById("weightNote").value = weightEditSeed.notes || "";
+    document.getElementById("weightPrefillNote").textContent = "Pre-filled from your last reading — editing this saves as a brand-new entry, it never overwrites the old one.";
+    weightEditSeed = null;
+  } else {
+    const latest = latestWeightOverall();
+    if(latest){
+      document.getElementById("weightValue").value = latest.entry.weight;
+      document.getElementById("weightPrefillNote").textContent = `Pre-filled with your last reading (${latest.date}) — adjust and save; this always adds a new entry.`;
+    }
+  }
+}
+async function saveWeightEntry(){
+  const weight = parseFloat(document.getElementById("weightValue").value);
+  if(!weight || weight<=0){ toast("Enter a weight","var(--red)"); return; }
+  const date = document.getElementById("weightDate").value || todayStr();
+  const rec = ensureDay(date);
+  if(!Array.isArray(rec.weightEntries)) rec.weightEntries = normWeightEntries(rec); // migrate legacy scalar in place
+  rec.weightEntries.push({ id: genId(), time: document.getElementById("weightTime").value||null, weight, notes: document.getElementById("weightNote").value.trim()||null });
+  delete rec.weight; // superseded by weightEntries
+  const steps = parseInt(document.getElementById("weightSteps").value,10);
+  if(steps) rec.steps = steps;
+  rec._source = "live";
+  persistDays();
+  toast("Weight saved ✓");
+  if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
+  closeAllOverlaysToHome();
+}
+
+// ---------- HABIT (append-only events, whole habit set in one sitting) ----------
+let habitDraft = {}; // key -> value for this session
+function habitFormHtml(){
+  const today = days[todayStr()];
+  habitDraft = {};
+  BUILTIN_HABITS.forEach(h=>{ habitDraft[h.key] = habitDayValue(today, h.key); });
+  trackers.forEach(t=>{ habitDraft[t.id] = habitDayValue(today, t.id); });
+
+  const rows = BUILTIN_HABITS.map(h=>habitRowHtml(h)).join("") +
+    trackers.map(t=>habitRowHtml({key:t.id, label:t.label, type:t.type})).join("");
+  return `
+    <div class="section"><h3>✅ Today's Habits</h3>
+      <div id="habitRows">${rows}</div>
+      <div class="muted-note">Saving only adds new entries for habits you've changed — it never erases what was already logged today.</div>
+    </div>
+    <button class="btn btn-save" onclick="saveHabitEntry()">Save Habits</button>
+  `;
+}
+function habitRowHtml(h){
+  if(h.type==="count"){
+    return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><div class="stepper" data-habit="${h.key}">
+      ${[0,1,2].map(n=>`<button data-n="${n}">${n}</button>`).join("")}</div></div>`;
+  }
+  if(h.type==="number" || h.type==="text"){
+    return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><input type="${h.type==='number'?'tel':'text'}" data-habit="${h.key}" style="width:110px" placeholder="${h.type==='number'?'0':'…'}"></div>`;
+  }
+  return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><button class="opt" data-habit="${h.key}">Done</button></div>`;
+}
+function initHabitForm(){
+  const container = document.getElementById("habitRows");
+  [...container.querySelectorAll("[data-habit]")].forEach(el=>{
+    const key = el.dataset.habit;
+    const cur = habitDraft[key];
+    if(el.classList.contains("stepper")){
+      [...el.children].forEach(btn=>{ btn.classList.toggle("sel", Number(btn.dataset.n)===cur);
+        btn.onclick=()=>{ habitDraft[key]=Number(btn.dataset.n); [...el.children].forEach(b=>b.classList.toggle("sel",b===btn)); }; });
+    } else if(el.tagName==="BUTTON"){
+      el.classList.toggle("sel", cur===true);
+      el.onclick=()=>{ habitDraft[key] = habitDraft[key]===true ? false : true; el.classList.toggle("sel", habitDraft[key]===true); };
+    } else {
+      el.value = cur ?? "";
+      el.addEventListener("input", ()=>{ habitDraft[key]=el.value; });
+    }
   });
 }
+async function saveHabitEntry(){
+  const date = todayStr();
+  const rec = ensureDay(date);
+  if(!Array.isArray(rec.habitEvents)) rec.habitEvents = normHabitEvents(rec);
+  const already = {};
+  rec.habitEvents.forEach(e=>{ already[e.habitKey] = (already[e.habitKey]||0) + (typeof e.value==="number"?e.value:0); });
+  const time = nowTimeStr();
+  let appended = 0;
 
-// ===== Custom trackers =====
-function toggleAddTrackerForm(){
-  const f=document.getElementById("addTrackerForm");
-  f.style.display = f.style.display==="none" ? "flex" : "none";
+  BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type}))).forEach(h=>{
+    const val = habitDraft[h.key];
+    if(val==null || val===false || val==="") return;
+    if(h.key==="isabgol" || h.type==="count"){
+      const target = Number(val)||0;
+      const already_count = already[h.key]||0;
+      for(let i=already_count;i<target;i++){ rec.habitEvents.push({id:genId(), time, habitKey:h.key, value:1}); appended++; }
+    } else if(h.type==="number" || h.type==="text"){
+      const lastVal = habitDayValue(rec, h.key);
+      if(String(lastVal??"")!==String(val)){ rec.habitEvents.push({id:genId(), time, habitKey:h.key, value: h.type==="number"?Number(val):val}); appended++; }
+    } else {
+      const already_true = habitDayValue(rec, h.key)===true;
+      if(val===true && !already_true){ rec.habitEvents.push({id:genId(), time, habitKey:h.key, value:true}); appended++; }
+    }
+  });
+  delete rec.water; delete rec.morning_detox; delete rec.deep_breathing; delete rec.multivitamin; delete rec.isabgol_count; delete rec.isabgol; delete rec.custom;
+  rec._source = "live";
+  persistDays();
+  toast(appended ? `Habits saved (${appended} new) ✓` : "No changes to save");
+  if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
+  closeAllOverlaysToHome();
 }
-function addTracker(){
+
+// ---------- WORKOUT (append-only) ----------
+function workoutFormHtml(){
+  return `
+    <div class="section"><h3>🏃 Workout</h3>
+      <div class="typeahead-wrap">
+        <input type="text" id="workoutValue" placeholder="e.g. 45 min yoga" class="hero-input" style="font-size:17px;font-weight:600;padding:14px" autofocus>
+        <div class="typeahead-list" id="workoutTypeahead"></div>
+      </div>
+      <div class="muted-note" id="workoutPrefillNote"></div>
+    </div>
+    <div class="section"><h3>Run distance (optional)</h3><div class="val-wrap"><input type="tel" id="workoutRunMiles" inputmode="decimal" placeholder="optional"><span class="unit">mi</span></div></div>
+    <div class="section row2" style="display:grid">
+      <div><div class="label" style="margin-top:0">Date</div><input type="date" id="workoutDate"></div>
+      <div><div class="label" style="margin-top:0">Time</div><input type="time" id="workoutTime"></div>
+    </div>
+    <div class="section"><h3>📝 Note (optional)</h3><textarea id="workoutNote" placeholder="anything about how it went…"></textarea></div>
+    <button class="btn btn-save" onclick="saveWorkoutEntry()">Save Workout</button>
+  `;
+}
+let workoutEditSeed = null;
+function initWorkoutForm(){
+  document.getElementById("workoutDate").value = todayStr();
+  document.getElementById("workoutTime").value = nowTimeStr();
+  const input = document.getElementById("workoutValue"), list = document.getElementById("workoutTypeahead");
+  setupTypeahead(input, list, workoutRecency, (picked)=>{
+    // pre-fill related field (run miles) from that workout's last entry, per the type-ahead spec
+    const recs = allSortedRecords().slice().reverse();
+    for(const r of recs){ const es = normWorkoutEntries(r).slice().reverse(); const found = es.find(e=>e.workout===picked); if(found){ if(found.run_miles!=null) document.getElementById("workoutRunMiles").value = found.run_miles; break; } }
+  });
+  if(workoutEditSeed){
+    input.value = workoutEditSeed.workout || "";
+    document.getElementById("workoutRunMiles").value = workoutEditSeed.run_miles ?? "";
+    document.getElementById("workoutPrefillNote").textContent = "Pre-filled from a past entry — saving adds a brand-new workout, it never overwrites the old one.";
+    workoutEditSeed = null;
+  }
+}
+async function saveWorkoutEntry(){
+  const workout = document.getElementById("workoutValue").value.trim();
+  if(!workout){ toast("Enter a workout","var(--red)"); return; }
+  const date = document.getElementById("workoutDate").value || todayStr();
+  const rec = ensureDay(date);
+  if(!Array.isArray(rec.workoutEntries)) rec.workoutEntries = normWorkoutEntries(rec);
+  rec.workoutEntries.push({ id: genId(), time: document.getElementById("workoutTime").value||null, workout, run_miles: parseFloat(document.getElementById("workoutRunMiles").value)||null });
+  delete rec.workout; delete rec.run_miles;
+  const note = document.getElementById("workoutNote").value.trim();
+  if(note) rec.notes = (rec.notes ? rec.notes+" | " : "") + note;
+  rec._source = "live";
+  persistDays();
+  toast("Workout saved ✓");
+  if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
+  closeAllOverlaysToHome();
+}
+
+// ===================== DASHBOARD =====================
+let charts = {};
+function themeColor(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function showChartFallback(id, msg){ const c=document.getElementById(id); if(!c) return; c.style.display="none"; const e=document.getElementById(id+"Empty"); if(e){ e.textContent=msg; e.style.display="block"; } }
+function showChartCanvas(id){ const c=document.getElementById(id); if(!c) return; c.style.display="block"; const e=document.getElementById(id+"Empty"); if(e) e.style.display="none"; }
+
+function showDashTab(tab){
+  document.getElementById("dashTodayView").style.display = tab==="today" ? "block" : "none";
+  document.getElementById("dashTrendView").style.display = tab==="trend" ? "block" : "none";
+  document.getElementById("dashStreaksView").style.display = tab==="streaks" ? "block" : "none";
+  document.getElementById("dashTodayBtn").classList.toggle("sel", tab==="today");
+  document.getElementById("dashTrendBtn").classList.toggle("sel", tab==="trend");
+  document.getElementById("dashStreaksBtn").classList.toggle("sel", tab==="streaks");
+  renderDashboard();
+}
+function activeDashTab(){
+  if(document.getElementById("dashTodayView").style.display!=="none") return "today";
+  if(document.getElementById("dashTrendView").style.display!=="none") return "trend";
+  return "streaks";
+}
+function renderDashboard(){
+  const tab = activeDashTab();
+  if(tab==="today") renderTodayTab();
+  else if(tab==="trend") renderTrendTab();
+  else renderStreaksTab();
+}
+
+function renderTodayTab(){
+  const today = days[todayStr()];
+  const wEntries = normWeightEntries(today);
+  const latestToday = wEntries.length ? wEntries[wEntries.length-1] : null;
+  const overall = latestWeightOverall();
+  const wo = normWorkoutEntries(today);
+  const habitsToday = BUILTIN_HABITS.filter(h=>habitDayValue(today,h.key));
+
+  document.getElementById("todayCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Weight Today</div><div class="card-value">${latestToday?latestToday.weight+"kg":"—"}</div><div class="card-sub">${overall?"Latest overall: "+overall.entry.weight+"kg ("+overall.date+")":"No entries yet"}</div></div>
+    <div class="card purple"><div class="card-label">👟 Steps</div><div class="card-value">${today&&today.steps!=null?today.steps.toLocaleString():"—"}</div></div>
+    <div class="card green"><div class="card-label">🏃 Workouts Today</div><div class="card-value">${wo.length}</div></div>
+    <div class="card orange"><div class="card-label">✅ Habits Done</div><div class="card-value">${habitsToday.length}/${BUILTIN_HABITS.length}</div></div>
+  `;
+
+  const recs = allSortedRecords();
+  const last14 = recs.filter(r=>r.date >= prevDateStr14()).flatMap(r=>normWeightEntries(r).map(e=>({date:r.date, weight:e.weight})));
+  if(typeof Chart==="undefined"){ showChartFallback("todayWeightChart","📊 Chart couldn't load — data still saved"); }
+  else if(last14.length){
+    showChartCanvas("todayWeightChart");
+    if(charts.todayWeight) charts.todayWeight.destroy();
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.todayWeight = new Chart(document.getElementById("todayWeightChart"), {
+      type:"line", data:{ labels:last14.map(e=>e.date), datasets:[{ label:"Weight", data:last14.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,.12)", fill:true, tension:.25, pointRadius:2 }] },
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
+    });
+  } else showChartFallback("todayWeightChart","⚖️ No weight entries in the last 14 days");
+
+  const rows = [];
+  wEntries.forEach(e=>rows.push({time:e.time||"", type:"⚖️ Weight", detail:`${e.weight}kg${e.notes?" — "+e.notes:""}`}));
+  wo.forEach(e=>rows.push({time:e.time||"", type:"🏃 Workout", detail:`${e.workout}${e.run_miles?" ("+e.run_miles+"mi)":""}`}));
+  normHabitEvents(today).forEach(e=>{ const d=habitDef(e.habitKey); rows.push({time:e.time||"", type:"✅ "+d.label.replace(/^[^\s]+\s/,""), detail: typeof e.value==="boolean"?(e.value?"Done":"—"):String(e.value)}); });
+  normMeal(today&&today.breakfast).items.forEach(i=>rows.push({time:normMeal(today&&today.breakfast).time||"", type:"🍳 Breakfast", detail:i}));
+  normMeal(today&&today.snack).items.forEach(i=>rows.push({time:normMeal(today&&today.snack).time||"", type:"🥗 Snack", detail:i}));
+  normMeal(today&&today.dinner).items.forEach(i=>rows.push({time:normMeal(today&&today.dinner).time||"", type:"🍽️ Dinner", detail:i}));
+  rows.sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99"));
+  document.getElementById("todayTable").innerHTML = rows.length ? `<table><thead><tr><th>Time</th><th>Type</th><th>Detail</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${r.time||"—"}</td><td>${r.type}</td><td>${r.detail}</td></tr>`).join("")}
+  </tbody></table>` : `<div class="dash-empty">📭 Nothing logged today yet — tap + to start</div>`;
+}
+function prevDateStr14(){ const d=new Date(); d.setDate(d.getDate()-14); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function daysAgoStr(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+
+function renderTrendTab(){
+  const thisWeekStart = daysAgoStr(6), lastWeekStart = daysAgoStr(13), lastWeekEnd = daysAgoStr(7);
+  const recs = allSortedRecords();
+  const thisWeek = recs.filter(r=>r.date>=thisWeekStart);
+  const lastWeek = recs.filter(r=>r.date>=lastWeekStart && r.date<=lastWeekEnd);
+  function avgWeight(rs){ const ws = rs.flatMap(r=>normWeightEntries(r).map(e=>e.weight)); return ws.length? Math.round(ws.reduce((a,b)=>a+b,0)/ws.length*10)/10 : null; }
+  function totalSteps(rs){ return rs.reduce((s,r)=>s+(r.steps||0),0); }
+  function workoutCount(rs){ return rs.reduce((s,r)=>s+normWorkoutEntries(r).length,0); }
+  function habitPct(rs){ const total=rs.length*BUILTIN_HABITS.length; if(!total) return null; let done=0; rs.forEach(r=>BUILTIN_HABITS.forEach(h=>{ if(habitDayValue(r,h.key)) done++; })); return Math.round(done/total*100); }
+
+  const twAvg=avgWeight(thisWeek), lwAvg=avgWeight(lastWeek);
+  const wDiff = (twAvg!=null && lwAvg!=null) ? Math.round((twAvg-lwAvg)*10)/10 : null;
+
+  document.getElementById("trendCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${twAvg??"—"}${twAvg!=null?"kg":""}</div><div class="card-sub">${wDiff!=null?(wDiff>0?"+":"")+wDiff+"kg vs last wk":""}</div></div>
+    <div class="card purple"><div class="card-label">👟 Steps</div><div class="card-value">${totalSteps(thisWeek).toLocaleString()}</div><div class="card-sub">vs ${totalSteps(lastWeek).toLocaleString()} last wk</div></div>
+    <div class="card green"><div class="card-label">🏃 Workouts</div><div class="card-value">${workoutCount(thisWeek)}</div><div class="card-sub">vs ${workoutCount(lastWeek)} last wk</div></div>
+    <div class="card orange"><div class="card-label">✅ Habit Rate</div><div class="card-value">${habitPct(thisWeek)??"—"}${habitPct(thisWeek)!=null?"%":""}</div><div class="card-sub">vs ${habitPct(lastWeek)??"—"}${habitPct(lastWeek)!=null?"%":""} last wk</div></div>
+  `;
+
+  const last7 = recs.filter(r=>r.date>=thisWeekStart);
+  if(typeof Chart==="undefined"){ showChartFallback("trendChart","📊 Chart couldn't load — data still saved"); }
+  else if(last7.length){
+    showChartCanvas("trendChart");
+    if(charts.trend) charts.trend.destroy();
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    const weightByDate = last7.map(r=>{ const es=normWeightEntries(r); return es.length?es[es.length-1].weight:null; });
+    charts.trend = new Chart(document.getElementById("trendChart"), {
+      data:{ labels:last7.map(r=>r.date), datasets:[
+        { type:"line", label:"Weight", data:weightByDate, borderColor:themeColor("--accent"), yAxisID:"y", tension:.25, pointRadius:3, spanGaps:true },
+        { type:"bar", label:"Steps", data:last7.map(r=>r.steps||0), backgroundColor:themeColor("--purple"), yAxisID:"y1" },
+      ]},
+      options:{ responsive:true, scales:{
+        x:{ticks:{color:textColor}, grid:{display:false}},
+        y:{ticks:{color:textColor}, grid:{color:gridColor}, position:"left"},
+        y1:{ticks:{color:textColor}, grid:{display:false}, position:"right"},
+      }, plugins:{legend:{position:"bottom", labels:{color:textColor}}} }
+    });
+  } else showChartFallback("trendChart","📊 No data in the last 7 days");
+
+  document.getElementById("trendTable").innerHTML = last7.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workouts</th><th>Habits</th></tr></thead><tbody>
+    ${last7.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount = BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length;
+      return `<tr><td>${r.date}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td>${normWorkoutEntries(r).length}</td><td>${hCount}/${BUILTIN_HABITS.length}</td></tr>`; }).join("")}
+  </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
+}
+
+function renderStreaksTab(){
+  const recs = allSortedRecords();
+  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  function currentStreak(key){
+    let streak=0;
+    for(let i=recs.length-1;i>=0;i--){ if(habitDayValue(recs[i],key)){ streak++; } else break; }
+    return streak;
+  }
+  const streaks = habitList.map(h=>({label:h.label, streak:currentStreak(h.key)})).sort((a,b)=>b.streak-a.streak);
+
+  document.getElementById("streaksCards").innerHTML = streaks.slice(0,4).map(s=>`
+    <div class="card ${s.streak>0?"green":"orange"}"><div class="card-label">${s.label}</div><div class="card-value">${s.streak}</div><div class="card-sub">day streak</div></div>
+  `).join("");
+
+  const habitStats = habitList.map(h=>{
+    const tracked = recs.map(r=>habitDayValue(r,h.key)).filter(v=>v!==null);
+    const yes = tracked.filter(v=>v===true || (typeof v==="number" && v>0)).length;
+    return { label:h.label, pct: tracked.length ? Math.round(yes/tracked.length*100) : null };
+  }).filter(h=>h.pct!==null);
+
+  if(typeof Chart==="undefined"){ showChartFallback("streaksChart","📊 Chart couldn't load — data still saved"); }
+  else if(habitStats.length){
+    showChartCanvas("streaksChart");
+    if(charts.streaks) charts.streaks.destroy();
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.streaks = new Chart(document.getElementById("streaksChart"), {
+      type:"bar", data:{ labels:habitStats.map(h=>h.label), datasets:[{ label:"Adherence %", data:habitStats.map(h=>h.pct), backgroundColor:themeColor("--green") }] },
+      options:{ indexAxis:"y", responsive:true, plugins:{legend:{display:false}}, scales:{ x:{min:0,max:100,ticks:{color:textColor},grid:{color:gridColor}}, y:{ticks:{color:textColor},grid:{display:false}} } }
+    });
+  } else showChartFallback("streaksChart","✅ No habit data yet");
+
+  document.getElementById("streaksTable").innerHTML = streaks.length ? `<table><thead><tr><th>Habit</th><th>Current Streak</th><th>All-time Adherence</th></tr></thead><tbody>
+    ${streaks.map(s=>{ const stat = habitStats.find(h=>h.label===s.label); return `<tr><td>${s.label}</td><td>${s.streak} days</td><td>${stat?stat.pct+"%":"—"}</td></tr>`; }).join("")}
+  </tbody></table>` : `<div class="dash-empty">✅ No habit data yet</div>`;
+}
+
+// ===================== Custom trackers (settings) =====================
+function toggleAddTrackerForm(){ const f=document.getElementById("addTrackerForm"); f.style.display = f.style.display==="none"?"flex":"none"; }
+async function addTracker(){
   const name=document.getElementById("newTrackerName").value.trim();
   const type=document.getElementById("newTrackerType").value;
   if(!name){ toast("Enter a tracker name","var(--red)"); return; }
-  const t = { id:genId(), label:name, type, addedDate:todayStr() };
-  trackers.push(t);
+  trackers.push({ id:genId(), label:name, type, addedDate:todayStr() });
   persistTrackers();
-  document.getElementById("newTrackerName").value="";
-  document.getElementById("addTrackerForm").style.display="none";
+  document.getElementById("newTrackerName").value=""; document.getElementById("addTrackerForm").style.display="none";
   renderTrackers();
   toast(`Added tracker "${name}"`);
   if(cloudCfg) cloudSaveTrackers().catch(()=>toast("Tracker saved locally — cloud sync failed","var(--amber)"));
 }
 function renderTrackers(){
-  const box=document.getElementById("trackerList"); box.innerHTML="";
-  if(!trackers.length){ box.innerHTML='<div class="muted-note">No custom trackers yet — add one below (e.g. "Knee physio exercises").</div>'; return; }
+  const box=document.getElementById("trackerList"); if(!box) return; box.innerHTML="";
+  if(!trackers.length){ box.innerHTML='<div class="muted-note">No custom trackers yet — add one below.</div>'; return; }
   trackers.forEach(t=>{
     const row=document.createElement("div"); row.className="tracker-row";
-    let control="";
-    if(t.type==="boolean"){
-      control = `<button class="opt${customValues[t.id]===true?" sel":""}" data-tid="${t.id}">Done</button>`;
-    } else if(t.type==="count"){
-      control = `<div class="stepper" data-tid="${t.id}">${[0,1,2,3,4,5].map(n=>`<button data-n="${n}" class="${customValues[t.id]===n?"sel":""}">${n}</button>`).join("")}</div>`;
-    } else if(t.type==="number"){
-      control = `<input type="tel" inputmode="decimal" data-tid="${t.id}" style="width:90px" value="${customValues[t.id]??""}" placeholder="0">`;
-    } else {
-      control = `<input type="text" data-tid="${t.id}" style="width:140px" value="${customValues[t.id]??""}" placeholder="…">`;
-    }
-    row.innerHTML = `<span>${t.label}</span>${control}`;
+    row.innerHTML = `<span>${t.label}</span><span class="muted-note" style="margin:0">${t.type}</span>`;
     box.appendChild(row);
-
-    if(t.type==="boolean"){
-      row.querySelector("button").onclick=()=>{ customValues[t.id] = customValues[t.id]===true ? null : true; renderTrackers(); };
-    } else if(t.type==="count"){
-      row.querySelectorAll(".stepper button").forEach(b=>{
-        b.onclick=()=>{ customValues[t.id]=Number(b.dataset.n); renderTrackers(); };
-      });
-    } else {
-      row.querySelector("input").addEventListener("input", e=>{ customValues[t.id]=e.target.value; });
-    }
   });
 }
 
-// ===== Fasting auto-calc =====
-function recalcFasting(){
-  const date = document.getElementById("fDate").value || todayStr();
-  const prevDate = prevDateStr(date);
-  const prevRec = days[prevDate];
-  const prevDinner = prevRec ? normMeal(prevRec.dinner).time : null;
-  const todayBreakfast = document.getElementById("breakfastTime").value;
-  const flagEl = document.getElementById("fastingFlag");
-  const hoursEl = document.getElementById("fastingHours");
-  if(!prevDinner || !todayBreakfast){
-    hoursEl.textContent = "—";
-    flagEl.textContent = "no data";
-    flagEl.className = "fasting-flag none";
-    return null;
-  }
-  const dinnerDt = new Date(prevDate+"T"+prevDinner+":00");
-  const breakfastDt = new Date(date+"T"+todayBreakfast+":00");
-  let hrs = (breakfastDt - dinnerDt) / 3600000;
-  if(hrs < 0) hrs += 24;
-  hrs = Math.round(hrs*10)/10;
-  hoursEl.textContent = hrs;
-  if(hrs >= 16){ flagEl.textContent="✅ 16h+"; flagEl.className="fasting-flag ok"; }
-  else { flagEl.textContent="⚠️ under 16h"; flagEl.className="fasting-flag low"; }
-  return hrs;
-}
-
-// ===== Load a date into the form (existing entry or blank) =====
-function loadDateIntoForm(date){
-  const rec = days[date];
-  meals = { breakfast: normMeal(rec?.breakfast).items.slice(), snack: normMeal(rec?.snack).items.slice(), dinner: normMeal(rec?.dinner).items.slice() };
-  document.getElementById("breakfastTime").value = normMeal(rec?.breakfast).time || "";
-  document.getElementById("snackTime").value = normMeal(rec?.snack).time || "";
-  document.getElementById("dinnerTime").value = normMeal(rec?.dinner).time || "";
-  ["breakfast","snack","dinner"].forEach(renderMealChips);
-  renderAllMealQuickPicks();
-  renderWorkoutAutocomplete();
-
-  document.getElementById("fWeight").value = rec?.weight ?? "";
-  document.getElementById("fSteps").value = rec?.steps ?? "";
-  document.getElementById("fNap").value = rec?.power_nap_min ?? "";
-  document.getElementById("fWorkout").value = rec?.workout ?? "";
-  document.getElementById("fRunMiles").value = rec?.run_miles ?? "";
-  document.getElementById("fNotes").value = rec?.notes ?? "";
-
-  habits = {
-    water: rec ? normWater(rec)===true : false,
-    morning_detox: rec ? !!rec.morning_detox : false,
-    deep_breathing: rec ? !!rec.deep_breathing : false,
-    multivitamin: rec ? !!rec.multivitamin : false,
-    isabgol_count: rec ? (normIsabgolCount(rec) ?? 0) : 0,
-  };
-  renderHabitButtons(); renderIsabgolStepper();
-
-  customValues = rec?.custom ? { ...rec.custom } : {};
-  renderTrackers();
-
-  document.getElementById("waPreview").style.display="none";
-  document.getElementById("copyWaBtn").style.display="none";
-  recalcFasting();
-  updateWeightBadge();
-}
-
-function onDateChange(){
-  const date = document.getElementById("fDate").value;
-  loadDateIntoForm(date);
-}
-
-function updateWeightBadge(){
-  const dates = Object.keys(days).sort();
-  const latest = dates.length ? days[dates[dates.length-1]] : null;
-  const el = document.getElementById("weightBadge");
-  if(latest && latest.weight!=null){
-    const diff = Math.round((latest.weight - GOAL_WEIGHT)*10)/10;
-    el.innerHTML = `${latest.weight}kg <b>${diff>0?"−"+diff:"🎯"}</b>`;
-  } else {
-    el.textContent = `Goal: ${GOAL_WEIGHT.toFixed(1)}kg`;
-  }
-}
-
-// ===== Save =====
-async function saveDay(){
-  const date = document.getElementById("fDate").value || todayStr();
-
-  if(date !== todayStr()){
-    const existing = days[todayStr()];
-    const lastLogged = Object.keys(days).sort().pop();
-    if(lastLogged && date.slice(0,7) !== lastLogged.slice(0,7)){
-      if(!confirm(`You're logging for ${date} (a different month than your last entry, ${lastLogged}) — continue?`)) return;
-    } else if(!confirm(`You're logging for ${date}, not today — continue?`)){
-      return;
-    }
-  }
-
-  const fastingHours = recalcFasting();
-  const record = {
-    date,
-    weight: parseFloat(document.getElementById("fWeight").value) || null,
-    steps: parseInt(document.getElementById("fSteps").value,10) || null,
-    power_nap_min: parseInt(document.getElementById("fNap").value,10) || null,
-    workout: document.getElementById("fWorkout").value.trim() || null,
-    run_miles: parseFloat(document.getElementById("fRunMiles").value) || null,
-    breakfast: { time: document.getElementById("breakfastTime").value||null, items: meals.breakfast },
-    snack: { time: document.getElementById("snackTime").value||null, items: meals.snack },
-    dinner: { time: document.getElementById("dinnerTime").value||null, items: meals.dinner },
-    fasting_hours: fastingHours,
-    water: habits.water ? "completed" : null,
-    morning_detox: habits.morning_detox,
-    deep_breathing: habits.deep_breathing,
-    multivitamin: habits.multivitamin,
-    isabgol_count: habits.isabgol_count,
-    custom: { ...customValues },
-    notes: document.getElementById("fNotes").value.trim(),
-    _source: "live",
-  };
-
-  days[date] = { ...(days[date]||{}), ...record };
-  persistDays();
-  updateWeightBadge();
-  renderAllMealQuickPicks();
-  renderWorkoutAutocomplete();
-  toast("Saved ✓");
-
-  if(cloudCfg){
-    try{
-      await cloudSaveDay(days[date]);
-      setCloudStatus(true);
-    }catch(err){
-      setCloudStatus(false, "Saved locally — cloud sync failed, reconnect or retry later");
-    }
-  }
-}
-
-// ===== WhatsApp message =====
-function fmtDateLong(dateStr){
-  const d = new Date(dateStr+"T00:00:00");
-  return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"});
-}
-function fmtTime12(t){
-  if(!t) return "";
-  const [h,m] = t.split(":").map(Number);
-  const ampm = h>=12 ? "PM" : "AM";
-  const h12 = h%12===0 ? 12 : h%12;
-  return `${h12}:${String(m).padStart(2,"0")} ${ampm}`;
-}
-function buildWhatsAppMessage(){
-  const date = document.getElementById("fDate").value || todayStr();
-  const weight = document.getElementById("fWeight").value;
-  const steps = document.getElementById("fSteps").value;
-  const fastingHours = document.getElementById("fastingHours").textContent;
-  const bkTime = document.getElementById("breakfastTime").value;
-  const snTime = document.getElementById("snackTime").value;
-  const dnTime = document.getElementById("dinnerTime").value;
-  const workout = document.getElementById("fWorkout").value.trim();
-  const runMiles = document.getElementById("fRunMiles").value;
-  const nap = document.getElementById("fNap").value;
-  const notes = document.getElementById("fNotes").value.trim();
-
+// ===================== WhatsApp message (settings, pick a date) =====================
+function fmtDateLong(dateStr){ const d=new Date(dateStr+"T00:00:00"); return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"}); }
+function fmtTime12(t){ if(!t) return ""; const [h,m]=t.split(":").map(Number); const ampm=h>=12?"PM":"AM"; const h12=h%12===0?12:h%12; return `${h12}:${String(m).padStart(2,"0")} ${ampm}`; }
+function buildWhatsAppMessage(date){
+  const rec = days[date] || {};
+  const wEntries = normWeightEntries(rec), woEntries = normWorkoutEntries(rec);
+  const latestW = wEntries.length ? wEntries[wEntries.length-1] : null;
   let lines = [];
-  lines.push(`📅 ${fmtDateLong(date)}`);
+  lines.push(`📅 ${fmtDateLong(date)}`); lines.push("");
+  if(latestW) lines.push(`⚖️ Weight: ${latestW.weight} kg (Goal: ${GOAL_WEIGHT} kg)`);
+  if(rec.steps) lines.push(`👟 Steps: ${Number(rec.steps).toLocaleString()}`);
+  if(rec.fasting_hours!=null) lines.push(`⏱️ Fasting: ${rec.fasting_hours} hrs`);
   lines.push("");
-  if(weight) lines.push(`⚖️ Weight: ${weight} kg (Goal: ${GOAL_WEIGHT} kg)`);
-  if(steps) lines.push(`👟 Steps: ${Number(steps).toLocaleString()}`);
-  if(fastingHours && fastingHours!=="—") lines.push(`⏱️ Fasting: ${fastingHours} hrs`);
-  if(lines[lines.length-1]!=="") lines.push("");
-
-  if(meals.breakfast.length){
-    lines.push(`🍳 Breakfast${bkTime?" ("+fmtTime12(bkTime)+")":""}`);
-    meals.breakfast.forEach(i=>lines.push(`• ${i}`));
-    lines.push("");
-  }
-  if(meals.snack.length){
-    lines.push(`🥗 Snack${snTime?" ("+fmtTime12(snTime)+")":""}`);
-    meals.snack.forEach(i=>lines.push(`• ${i}`));
-    lines.push("");
-  }
-  if(meals.dinner.length){
-    lines.push(`🍽️ Dinner${dnTime?" ("+fmtTime12(dnTime)+")":""}`);
-    meals.dinner.forEach(i=>lines.push(`• ${i}`));
-    lines.push("");
-  }
-
+  const bk=normMeal(rec.breakfast), sn=normMeal(rec.snack), dn=normMeal(rec.dinner);
+  if(bk.items.length){ lines.push(`🍳 Breakfast${bk.time?" ("+fmtTime12(bk.time)+")":""}`); bk.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
+  if(sn.items.length){ lines.push(`🥗 Snack${sn.time?" ("+fmtTime12(sn.time)+")":""}`); sn.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
+  if(dn.items.length){ lines.push(`🍽️ Dinner${dn.time?" ("+fmtTime12(dn.time)+")":""}`); dn.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
   const habitParts = [];
-  if(habits.water) habitParts.push("Water ✓");
-  habitParts.push(`Isabgol ${habits.isabgol_count}/2${habits.isabgol_count>=2?" ✓":""}`);
-  if(habits.morning_detox) habitParts.push("Morning Detox ✓");
-  if(habits.deep_breathing) habitParts.push("Deep Breathing ✓");
-  if(habits.multivitamin) habitParts.push("Multivitamin ✓");
+  BUILTIN_HABITS.forEach(h=>{ const v=habitDayValue(rec,h.key); if(h.key==="isabgol"){ if(v!=null) habitParts.push(`Isabgol ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(h.label.replace(/^[^\s]+\s/,"")+" ✓"); });
   if(habitParts.length) lines.push(`✅ ${habitParts.join(" · ")}`);
-
-  if(workout) lines.push(`🏋️ Workout: ${workout}${runMiles?` (${runMiles} mi)`:""}`);
-  if(nap) lines.push(`😴 Power Nap: ${nap} min`);
-  if(notes){ lines.push(""); lines.push(`📝 ${notes}`); }
-
+  woEntries.forEach(e=>lines.push(`🏃 Workout: ${e.workout}${e.run_miles?` (${e.run_miles} mi)`:""}`));
+  if(rec.notes){ lines.push(""); lines.push(`📝 ${rec.notes}`); }
   return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
 }
 function generateWhatsApp(){
-  const msg = buildWhatsAppMessage();
-  const box = document.getElementById("waPreview");
-  box.textContent = msg;
-  box.style.display = "block";
-  document.getElementById("copyWaBtn").style.display = "block";
+  const date = document.getElementById("waDate").value || todayStr();
+  const msg = buildWhatsAppMessage(date);
+  const box=document.getElementById("waPreview"); box.textContent=msg; box.style.display="block";
+  document.getElementById("copyWaBtn").style.display="block";
 }
 async function copyWhatsApp(){
-  const msg = document.getElementById("waPreview").textContent;
-  try{
-    await navigator.clipboard.writeText(msg);
-    toast("Copied — paste into WhatsApp");
-  }catch(e){
-    const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta);
-    ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-    toast("Copied — paste into WhatsApp");
-  }
+  const msg=document.getElementById("waPreview").textContent;
+  try{ await navigator.clipboard.writeText(msg); toast("Copied — paste into WhatsApp"); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); toast("Copied — paste into WhatsApp"); }
 }
 
-// ===== Backup =====
+// ===================== Backup / Export =====================
 function backupData(){
   const payload = { backup:new Date().toISOString(), source:"iHealth", days, trackers };
   const blob = new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
@@ -716,125 +1014,62 @@ function backupData(){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
   toast("Backup downloaded");
 }
-
-// ===== Excel export (client-side, SheetJS) — clean raw data to pivot/chart yourself;
-// this lightweight library can't produce native embedded charts =====
-function trackerLabel(id){ const t=trackers.find(t=>t.id===id); return t ? t.label : id; }
-
+function trackerLabel(id){ const t=trackers.find(t=>t.id===id); return t?t.label:id; }
 function exportExcel(){
   if(typeof XLSX==="undefined"){ toast("Export library couldn't load — check your connection","var(--red)"); return; }
-  const recs = Object.values(days).filter(d=>d&&d.date).sort((a,b)=>a.date.localeCompare(b.date));
+  const recs = allSortedRecords();
   if(!recs.length){ toast("Nothing to export yet","var(--amber)"); return; }
-
-  const customIds = [...new Set(recs.flatMap(r=>Object.keys(r.custom||{})))];
-
-  const dailyLog = recs.map(r=>{
-    const bk=normMeal(r.breakfast), sn=normMeal(r.snack), dn=normMeal(r.dinner);
-    const row = {
-      Date:r.date, "Weight (kg)":r.weight, Steps:r.steps, "Power Nap (min)":r.power_nap_min,
-      Workout:r.workout, "Run (mi)":r.run_miles,
-      "Breakfast Time":bk.time, "Breakfast Items":bk.items.join("; "),
-      "Snack Time":sn.time, "Snack Items":sn.items.join("; "),
-      "Dinner Time":dn.time, "Dinner Items":dn.items.join("; "),
-      "Fasting (hrs)":r.fasting_hours, Water:normWater(r)===true?"Yes":normWater(r)===false?"No":"",
-      "Morning Detox":normBool(r.morning_detox)===true?"Yes":normBool(r.morning_detox)===false?"No":"",
-      "Deep Breathing":normBool(r.deep_breathing)===true?"Yes":normBool(r.deep_breathing)===false?"No":"",
-      Multivitamin:normBool(r.multivitamin)===true?"Yes":normBool(r.multivitamin)===false?"No":"",
-      Isabgol:normIsabgolCount(r), Notes:r.notes||"",
-    };
-    customIds.forEach(id=>{ row[trackerLabel(id)] = (r.custom||{})[id] ?? ""; });
-    return row;
-  });
-
-  const weightTrend = recs.filter(r=>r.weight!=null).map(r=>({
-    Date:r.date, "Weight (kg)":r.weight, "To Goal (65.0kg)":Math.round((r.weight-GOAL_WEIGHT)*10)/10
-  }));
-
-  const fasting = recs.filter(r=>r.fasting_hours!=null).map(r=>({
-    Date:r.date, "Fasting (hrs)":r.fasting_hours, "Hit 16h Target":r.fasting_hours>=16?"Yes":"No"
-  }));
-
-  const habits = recs.map(r=>({
-    Date:r.date,
-    Water:normWater(r)===true?"Yes":normWater(r)===false?"No":"",
-    "Morning Detox":normBool(r.morning_detox)===true?"Yes":normBool(r.morning_detox)===false?"No":"",
-    "Deep Breathing":normBool(r.deep_breathing)===true?"Yes":normBool(r.deep_breathing)===false?"No":"",
-    Multivitamin:normBool(r.multivitamin)===true?"Yes":normBool(r.multivitamin)===false?"No":"",
-    Isabgol:normIsabgolCount(r)??"",
-  }));
-
-  const workouts = recs.filter(r=>r.workout||r.run_miles!=null).map(r=>({
-    Date:r.date, Workout:r.workout||"", "Run (mi)":r.run_miles
-  }));
-
+  const weightRows = recs.flatMap(r=>normWeightEntries(r).map(e=>({Date:r.date, Time:e.time||"", "Weight (kg)":e.weight, "To Goal":Math.round((e.weight-GOAL_WEIGHT)*10)/10, Notes:e.notes||""})));
+  const workoutRows = recs.flatMap(r=>normWorkoutEntries(r).map(e=>({Date:r.date, Time:e.time||"", Workout:e.workout, "Run (mi)":e.run_miles})));
+  const habitRows = recs.flatMap(r=>normHabitEvents(r).map(e=>({Date:r.date, Time:e.time||"", Habit:trackerLabel(e.habitKey)||habitDef(e.habitKey).label, Value:String(e.value)})));
+  const dailyLog = recs.map(r=>{ const bk=normMeal(r.breakfast), sn=normMeal(r.snack), dn=normMeal(r.dinner); return {
+    Date:r.date, Steps:r.steps, "Fasting (hrs)":r.fasting_hours,
+    "Breakfast Items":bk.items.join("; "), "Snack Items":sn.items.join("; "), "Dinner Items":dn.items.join("; "), Notes:r.notes||"" }; });
   const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
   const monthlySummary = months.map(m=>{
     const mRecs = recs.filter(r=>r.date.slice(0,7)===m);
-    const mWeights = mRecs.filter(r=>r.weight!=null).map(r=>r.weight);
+    const mW = mRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
     const mSteps = mRecs.filter(r=>r.steps!=null).map(r=>r.steps);
-    const mFasting = mRecs.filter(r=>r.fasting_hours!=null);
-    const mRunMiles = mRecs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
-    return {
-      Month:monthLabel(m), "Days Logged":mRecs.length,
-      "Avg Weight (kg)":mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10:"",
-      "Avg Steps":mSteps.length?Math.round(mSteps.reduce((a,b)=>a+b,0)/mSteps.length):"",
-      "16h Fasting Rate":mFasting.length?Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100)+"%":"",
-      "Run Miles":mRunMiles?Math.round(mRunMiles*10)/10:"",
-      "Workout Days":mRecs.filter(r=>r.workout).length,
-    };
+    return { Month:m, "Days Logged":mRecs.length, "Avg Weight":mW.length?Math.round(mW.reduce((a,b)=>a+b,0)/mW.length*10)/10:"", "Avg Steps":mSteps.length?Math.round(mSteps.reduce((a,b)=>a+b,0)/mSteps.length):"", "Workout Entries":mRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0) };
   });
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dailyLog), "Daily Log");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(weightTrend), "Weight Trend");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fasting), "Fasting");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(habits), "Habits");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(workouts), "Workouts");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(weightRows), "Weight Log");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(workoutRows), "Workout Log");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(habitRows), "Habit Log");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(monthlySummary), "Monthly Summary");
-
-  const fname = `ihealth_export_${todayStr()}.xlsx`;
-  XLSX.writeFile(wb, fname);
+  XLSX.writeFile(wb, `ihealth_export_${todayStr()}.xlsx`);
   toast("Excel export downloaded");
 }
 
-// ===== Cloud Sync: private GitHub data repo =====
+// ===================== Cloud Sync (unchanged mechanics, same day-file shape) =====================
 function loadCloudCfg(){ try{ return JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); }catch(e){ return null; } }
 function saveCloudCfg(cfg){ localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg)); }
 function clearCloudCfg(){ localStorage.removeItem(CLOUD_KEY); }
 let cloudCfg = loadCloudCfg();
-
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,"")))); }
 function contentsUrl(cfg, path){ return `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`; }
-
 async function cloudGetJson(cfg, path){
   const res = await fetch(contentsUrl(cfg,path), { headers:{ Authorization:`Bearer ${cfg.token}`, Accept:"application/vnd.github+json" } });
   if(res.status===404) return { data:null, sha:null };
   if(!res.ok) throw new Error(`GitHub read failed (${res.status})`);
   const body = await res.json();
-  let data=null;
-  try{ data = JSON.parse(b64ToUtf8(body.content)); }catch(e){ data=null; }
+  let data=null; try{ data = JSON.parse(b64ToUtf8(body.content)); }catch(e){ data=null; }
   return { data, sha: body.sha };
 }
 async function cloudPutJson(cfg, path, data, sha, message){
   const body = { message: message||"iHealth sync", content: utf8ToB64(JSON.stringify(data,null,1)) };
   if(sha) body.sha = sha;
-  const res = await fetch(contentsUrl(cfg,path), {
-    method:"PUT",
-    headers:{ Authorization:`Bearer ${cfg.token}`, Accept:"application/vnd.github+json", "Content-Type":"application/json" },
-    body: JSON.stringify(body)
-  });
+  const res = await fetch(contentsUrl(cfg,path), { method:"PUT", headers:{ Authorization:`Bearer ${cfg.token}`, Accept:"application/vnd.github+json", "Content-Type":"application/json" }, body: JSON.stringify(body) });
   if(res.status===409){ const err=new Error("Conflict — retrying"); err.conflict=true; throw err; }
   if(!res.ok) throw new Error(`GitHub write failed (${res.status})`);
 }
-
 async function cloudSaveDay(record, attempts){
   attempts = attempts || 3;
   if(!cloudCfg) return;
-  // write the per-day file (unique path, low conflict risk)
   const { sha:daySha } = await cloudGetJson(cloudCfg, `days/${record.date}.json`);
   await cloudPutJson(cloudCfg, `days/${record.date}.json`, record, daySha, `iHealth: log ${record.date}`);
-  // update the index.json mirror, retrying on conflict
   let lastErr;
   for(let i=0;i<attempts;i++){
     try{
@@ -845,49 +1080,29 @@ async function cloudSaveDay(record, attempts){
       arr.sort((a,b)=>a.date.localeCompare(b.date));
       await cloudPutJson(cloudCfg, "index.json", arr, indexSha, `iHealth: index update ${record.date}`);
       return;
-    }catch(err){
-      lastErr = err;
-      if(!err.conflict) throw err;
-    }
+    }catch(err){ lastErr=err; if(!err.conflict) throw err; }
   }
   throw lastErr;
 }
-
 async function cloudSaveTrackers(attempts){
   attempts = attempts || 3;
   if(!cloudCfg) return;
   let lastErr;
   for(let i=0;i<attempts;i++){
-    try{
-      const { sha } = await cloudGetJson(cloudCfg, "trackers.json");
-      await cloudPutJson(cloudCfg, "trackers.json", trackers, sha, "iHealth: tracker definitions update");
-      return;
-    }catch(err){
-      lastErr = err;
-      if(!err.conflict) throw err;
-    }
+    try{ const { sha } = await cloudGetJson(cloudCfg, "trackers.json"); await cloudPutJson(cloudCfg, "trackers.json", trackers, sha, "iHealth: tracker definitions update"); return; }
+    catch(err){ lastErr=err; if(!err.conflict) throw err; }
   }
   throw lastErr;
 }
-
 function setCloudStatus(ok, msg){
-  const el = document.getElementById("cloudStatus");
+  const el = document.getElementById("cloudStatus"); if(!el) return;
   if(!cloudCfg){ el.textContent="Not connected — saving on this device only"; el.className="cloud-status off"; return; }
   if(ok){ el.textContent=`Connected to ${cloudCfg.owner}/${cloudCfg.repo} — last synced ${new Date().toLocaleTimeString()}`; el.className="cloud-status on"; }
   else { el.textContent = msg || "Cloud sync error"; el.className="cloud-status off"; }
 }
-
 function mergeDaysFromCloud(remoteArr){
-  (remoteArr||[]).forEach(rec=>{
-    // local live edits win over cloud on merge conflicts for the same date+source;
-    // otherwise take the cloud copy (handles a second device's changes)
-    const local = days[rec.date];
-    if(!local || (local._source==="migrated" && rec._source!=="migrated") || !local._justEdited){
-      days[rec.date] = rec;
-    }
-  });
+  (remoteArr||[]).forEach(rec=>{ days[rec.date] = rec; });
 }
-
 async function cloudConnect(){
   const owner=document.getElementById("cloudOwner").value.trim();
   const repo=document.getElementById("cloudRepo").value.trim();
@@ -898,10 +1113,8 @@ async function cloudConnect(){
   try{
     const { data: index } = await cloudGetJson(cfg, "index.json");
     const { data: remoteTrackers } = await cloudGetJson(cfg, "trackers.json");
-    cloudCfg = cfg;
-    saveCloudCfg(cfg);
-    mergeDaysFromCloud(index);
-    persistDays();
+    cloudCfg = cfg; saveCloudCfg(cfg);
+    mergeDaysFromCloud(index); persistDays();
     if(Array.isArray(remoteTrackers) && remoteTrackers.length) { trackers = remoteTrackers; persistTrackers(); }
     document.getElementById("cloudSetup").style.display="none";
     document.getElementById("cloudControls").style.display="block";
@@ -909,275 +1122,54 @@ async function cloudConnect(){
     toast(`Connected — ${(index||[]).length} days loaded`);
     setCloudStatus(true);
     renderTrackers();
-    updateWeightBadge();
-    renderAllMealQuickPicks();
-    renderWorkoutAutocomplete();
-    if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
-  }catch(err){
-    toast("Connect failed: "+err.message,"var(--red)");
-    setCloudStatus(false, "Not connected — check token/repo and try again");
-  }
+    updateHamburgerSummary();
+    renderDashboard();
+  }catch(err){ toast("Connect failed: "+err.message,"var(--red)"); setCloudStatus(false, "Not connected — check token/repo and try again"); }
 }
-
 function cloudDisconnect(){
   cloudCfg=null; clearCloudCfg();
   document.getElementById("cloudSetup").style.display="block";
   document.getElementById("cloudControls").style.display="none";
-  document.getElementById("cloudOwner").value="";
-  document.getElementById("cloudRepo").value="";
+  document.getElementById("cloudOwner").value=""; document.getElementById("cloudRepo").value="";
   setCloudStatus(false);
   toast("Disconnected — saving on this device only","var(--amber)");
 }
-
 async function cloudPullOnLoad(){
   try{
     const { data: index } = await cloudGetJson(cloudCfg, "index.json");
     const { data: remoteTrackers } = await cloudGetJson(cloudCfg, "trackers.json");
-    mergeDaysFromCloud(index);
-    persistDays();
+    mergeDaysFromCloud(index); persistDays();
     if(Array.isArray(remoteTrackers)) { trackers = remoteTrackers; persistTrackers(); }
-    setCloudStatus(true);
-    updateWeightBadge();
-    renderTrackers();
-  }catch(err){
-    setCloudStatus(false, "Offline or cloud unreachable — using local copy");
-  }
+    setCloudStatus(true); updateHamburgerSummary(); renderTrackers(); renderDashboard();
+  }catch(err){ setCloudStatus(false, "Offline or cloud unreachable — using local copy"); }
 }
 
-// ===== Tabs =====
-function showMainTab(tab){
-  const isDash = tab==="dashboard";
-  document.getElementById("todayView").style.display = isDash ? "none" : "block";
-  document.getElementById("dashboardView").style.display = isDash ? "block" : "none";
-  document.getElementById("tabTodayBtn").classList.toggle("sel", !isDash);
-  document.getElementById("tabDashboardBtn").classList.toggle("sel", isDash);
-  if(isDash) renderDashboard();
-}
-
-// ===== Dashboard =====
-let charts = { weight:null, fasting:null, steps:null, run:null, habit:null };
-function themeColor(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-function showChartFallback(id, msg){ document.getElementById(id).style.display="none"; const e=document.getElementById(id+"Empty"); e.textContent=msg; e.style.display="block"; }
-function showChartCanvas(id){ document.getElementById(id).style.display="block"; document.getElementById(id+"Empty").style.display="none"; }
-
-function allSortedRecords(){
-  return Object.values(days).filter(d=>d && d.date).sort((a,b)=>a.date.localeCompare(b.date));
-}
-
-function monthLabel(m){
-  const [y,mo]=m.split("-").map(Number);
-  return new Date(y, mo-1, 1).toLocaleString(undefined,{month:"long",year:"numeric"});
-}
-// every month that has data, plus the real current month, sorted oldest-first
-function allMonths(){
-  const months = [...new Set(allSortedRecords().map(r=>r.date.slice(0,7)))];
-  const cur = todayStr().slice(0,7);
-  if(!months.includes(cur)) months.push(cur);
-  return months.sort();
-}
-
-function showDashTab(tab){
-  const isOverview = tab==="overview";
-  document.getElementById("dashOverviewView").style.display = isOverview ? "block" : "none";
-  document.getElementById("dashMonthlyView").style.display = isOverview ? "none" : "block";
-  document.getElementById("dashOverviewBtn").classList.toggle("sel", isOverview);
-  document.getElementById("dashMonthlyBtn").classList.toggle("sel", !isOverview);
-  if(isOverview) renderOverview(); else renderMonthlyDetail();
-}
-
-function renderDashboard(){
-  const overviewActive = document.getElementById("dashOverviewView").style.display !== "none";
-  if(overviewActive) renderOverview(); else renderMonthlyDetail();
-}
-
-function renderOverview(){
-  const recs = allSortedRecords();
-  const withWeight = recs.filter(r=>r.weight!=null);
-  const latest = withWeight.length ? withWeight[withWeight.length-1] : null;
-  const first = withWeight.length ? withWeight[0] : null;
-  const change = (latest && first && withWeight.length>1) ? Math.round((latest.weight-first.weight)*10)/10 : null;
-  const toGoal = latest ? Math.round((latest.weight-GOAL_WEIGHT)*10)/10 : null;
-
-  const withFasting = recs.filter(r=>r.fasting_hours!=null);
-  const fastingAdherence = withFasting.length ? Math.round(withFasting.filter(r=>r.fasting_hours>=16).length/withFasting.length*100) : null;
-
-  document.getElementById("ovCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${latest?latest.weight+"kg":"—"}</div><div class="card-sub">${latest?latest.date:"No entries yet"}</div></div>
-    <div class="card ${toGoal!==null && toGoal<=0 ? "green":"orange"}"><div class="card-label">🎯 To Goal (65.0kg)</div><div class="card-value">${toGoal!==null ? (toGoal>0?"−"+toGoal:"Reached ✓") : "—"}</div><div class="card-sub">${toGoal!==null?"kg to go":""}</div></div>
-    <div class="card purple"><div class="card-label">📆 Days Logged</div><div class="card-value">${recs.length}</div><div class="card-sub">${recs.length?recs[0].date+" → "+recs[recs.length-1].date:""}</div></div>
-    <div class="card ${fastingAdherence!==null && fastingAdherence>=70 ? "green":"orange"}"><div class="card-label">⏱️ 16h Fasting Rate</div><div class="card-value">${fastingAdherence!==null?fastingAdherence+"%":"—"}</div><div class="card-sub">Of days with fasting logged</div></div>
-  `;
-
-  if(typeof Chart==="undefined"){
-    const msg="📊 Chart couldn't load (check your connection) — data is still saved";
-    ["weightChart","fastingChart","stepsChart","runChart","habitChart"].forEach(id=>showChartFallback(id,msg));
-  } else {
-  const textColor = themeColor("--text");
-  const gridColor = themeColor("--border");
-
-  if(withWeight.length){
-    showChartCanvas("weightChart");
-    if(charts.weight) charts.weight.destroy();
-    charts.weight = new Chart(document.getElementById("weightChart"), {
-      type:"line",
-      data:{ labels: withWeight.map(r=>r.date), datasets:[
-        { label:"Weight (kg)", data: withWeight.map(r=>r.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,0.12)", fill:true, tension:.25, pointRadius:2 },
-        { label:"Goal", data: withWeight.map(()=>GOAL_WEIGHT), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0 }
-      ]},
-      options:{ responsive:true, plugins:{ legend:{ position:"bottom", labels:{ color:textColor } } },
-        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ color:gridColor } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
-    });
-  } else showChartFallback("weightChart","⚖️ No weight entries yet");
-
-  if(withFasting.length){
-    showChartCanvas("fastingChart");
-    if(charts.fasting) charts.fasting.destroy();
-    charts.fasting = new Chart(document.getElementById("fastingChart"), {
-      type:"bar",
-      data:{ labels: withFasting.map(r=>r.date), datasets:[{ label:"Fasting hrs", data: withFasting.map(r=>r.fasting_hours),
-        backgroundColor: withFasting.map(r=>r.fasting_hours>=16?themeColor("--green"):themeColor("--amber")) }] },
-      options:{ responsive:true, plugins:{ legend:{ display:false } },
-        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
-    });
-  } else showChartFallback("fastingChart","⏱️ No fasting data yet");
-
-  const withSteps = recs.filter(r=>r.steps!=null);
-  if(withSteps.length){
-    showChartCanvas("stepsChart");
-    if(charts.steps) charts.steps.destroy();
-    charts.steps = new Chart(document.getElementById("stepsChart"), {
-      type:"bar",
-      data:{ labels: withSteps.map(r=>r.date), datasets:[{ label:"Steps", data: withSteps.map(r=>r.steps), backgroundColor: themeColor("--purple") }] },
-      options:{ responsive:true, plugins:{ legend:{ display:false } },
-        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
-    });
-  } else showChartFallback("stepsChart","👟 No step data yet");
-
-  const withRun = recs.filter(r=>r.run_miles!=null);
-  if(withRun.length){
-    showChartCanvas("runChart");
-    if(charts.run) charts.run.destroy();
-    charts.run = new Chart(document.getElementById("runChart"), {
-      type:"bar",
-      data:{ labels: withRun.map(r=>r.date), datasets:[{ label:"Miles", data: withRun.map(r=>r.run_miles), backgroundColor: themeColor("--red") }] },
-      options:{ responsive:true, plugins:{ legend:{ display:false } },
-        scales:{ x:{ ticks:{ color:textColor, maxRotation:60, autoSkip:true, maxTicksLimit:12 }, grid:{ display:false } }, y:{ ticks:{ color:textColor }, grid:{ color:gridColor } } } }
-    });
-  } else showChartFallback("runChart","🏃 No runs logged yet");
-
-  const habitDefs = [
-    { key:"water", label:"Water", get:r=>normWater(r) },
-    { key:"morning_detox", label:"Morning Detox", get:r=>normBool(r.morning_detox) },
-    { key:"deep_breathing", label:"Deep Breathing", get:r=>normBool(r.deep_breathing) },
-    { key:"multivitamin", label:"Multivitamin", get:r=>normBool(r.multivitamin) },
-    { key:"isabgol", label:"Isabgol (any)", get:r=>{ const c=normIsabgolCount(r); return c==null?null:c>0; } },
-  ];
-  const habitStats = habitDefs.map(h=>{
-    const tracked = recs.map(h.get).filter(v=>v!==null);
-    const yes = tracked.filter(v=>v===true).length;
-    return { label:h.label, pct: tracked.length ? Math.round(yes/tracked.length*100) : null };
-  }).filter(h=>h.pct!==null);
-  if(habitStats.length){
-    showChartCanvas("habitChart");
-    if(charts.habit) charts.habit.destroy();
-    charts.habit = new Chart(document.getElementById("habitChart"), {
-      type:"bar",
-      data:{ labels: habitStats.map(h=>h.label), datasets:[{ label:"Adherence %", data: habitStats.map(h=>h.pct), backgroundColor: themeColor("--green") }] },
-      options:{ indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } },
-        scales:{ x:{ min:0, max:100, ticks:{ color:textColor }, grid:{ color:gridColor } }, y:{ ticks:{ color:textColor }, grid:{ display:false } } } }
-    });
-  } else showChartFallback("habitChart","✅ No habit data yet");
-  } // end typeof Chart!=="undefined"
-
-  const months = allMonths();
-  const monthRows = months.map(m=>{
-    const mRecs = recs.filter(r=>r.date.slice(0,7)===m);
-    const mWeights = mRecs.filter(r=>r.weight!=null).map(r=>r.weight);
-    const avgWeight = mWeights.length ? (mWeights.reduce((a,b)=>a+b,0)/mWeights.length).toFixed(1) : "—";
-    const mSteps = mRecs.filter(r=>r.steps!=null).map(r=>r.steps);
-    const avgSteps = mSteps.length ? Math.round(mSteps.reduce((a,b)=>a+b,0)/mSteps.length) : "—";
-    const mFasting = mRecs.filter(r=>r.fasting_hours!=null);
-    const fastingPct = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-    const mRunMiles = mRecs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
-    const workoutDays = mRecs.filter(r=>r.workout).length;
-    return { m, daysLogged: mRecs.length, avgWeight, avgSteps, fastingPct, mRunMiles, workoutDays };
-  }).filter(r=>r.daysLogged>0);
-  document.getElementById("ovMonthlyTable").innerHTML = monthRows.length ? `<table><thead><tr><th>Month</th><th>Days Logged</th><th>Avg Weight</th><th>Avg Steps</th><th>16h Fasting</th><th>Run Miles</th><th>Workout Days</th></tr></thead><tbody>
-    ${monthRows.map(r=>`<tr><td>${monthLabel(r.m)}</td><td>${r.daysLogged}</td><td>${r.avgWeight}${r.avgWeight!=="—"?"kg":""}</td><td>${r.avgSteps}</td><td>${r.fastingPct!==null?r.fastingPct+"%":"—"}</td><td>${r.mRunMiles?r.mRunMiles.toFixed(1):"—"}</td><td>${r.workoutDays}</td></tr>`).join("")}
-  </tbody></table>` : `<div class="dash-empty">📊 No months logged yet</div>`;
-}
-
-function renderMonthlyDetail(){
-  const months = allMonths();
-  const sel = document.getElementById("dashMonthSel");
-  const prevVal = sel.value;
-  sel.innerHTML="";
-  months.slice().reverse().forEach(m=>{ const opt=document.createElement("option"); opt.value=m; opt.textContent=monthLabel(m); sel.appendChild(opt); });
-  const mostRecent = months[months.length-1];
-  sel.value = months.includes(prevVal) ? prevVal : mostRecent;
-
-  const month = sel.value;
-  const recs = allSortedRecords().filter(r=>r.date.slice(0,7)===month);
-
-  const mWeights = recs.filter(r=>r.weight!=null).map(r=>r.weight);
-  const avgWeight = mWeights.length ? (mWeights.reduce((a,b)=>a+b,0)/mWeights.length).toFixed(1) : "—";
-  const mSteps = recs.filter(r=>r.steps!=null).map(r=>r.steps);
-  const totalSteps = mSteps.length ? mSteps.reduce((a,b)=>a+b,0) : 0;
-  const mFasting = recs.filter(r=>r.fasting_hours!=null);
-  const fastingPct = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-  const totalRunMiles = recs.filter(r=>r.run_miles!=null).reduce((s,r)=>s+r.run_miles,0);
-  const workoutDays = recs.filter(r=>r.workout).length;
-
-  document.getElementById("monCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${avgWeight}${avgWeight!=="—"?"kg":""}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${totalSteps.toLocaleString()}</div></div>
-    <div class="card ${fastingPct!==null && fastingPct>=70 ? "green":"orange"}"><div class="card-label">⏱️ 16h Fasting</div><div class="card-value">${fastingPct!==null?fastingPct+"%":"—"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Run Miles</div><div class="card-value">${totalRunMiles?totalRunMiles.toFixed(1):"—"}</div><div class="card-sub">${workoutDays} workout day${workoutDays===1?"":"s"}</div></div>
-  `;
-
-  document.getElementById("monDayHead").textContent = `Days — ${monthLabel(month)} (${recs.length})`;
-  document.getElementById("monDayTable").innerHTML = recs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Fasting</th><th>Workout</th><th>Habits</th></tr></thead><tbody>
-    ${recs.map(r=>{
-      const habitFlags = [
-        normWater(r)===true?"💧":"", normBool(r.morning_detox)===true?"🌅":"", normBool(r.deep_breathing)===true?"🫁":"",
-        normBool(r.multivitamin)===true?"💊":"", (normIsabgolCount(r)||0)>0?"🌾":""
-      ].filter(Boolean).join(" ");
-      return `<tr><td>${r.date}</td><td>${r.weight!=null?r.weight+"kg":"—"}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td><td>${r.workout?r.workout+(r.run_miles?" ("+r.run_miles+"mi)":""):"—"}</td><td>${habitFlags||"—"}</td></tr>`;
-    }).join("")}
-  </tbody></table>` : `<div class="dash-empty">📊 No entries logged for this month</div>`;
-}
-
-// ===== Theme =====
+// ===================== Theme =====================
 function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
-  document.getElementById("themeToggle").textContent = theme==="light" ? "☀️" : "🌙";
+  document.getElementById("hpThemeToggle").textContent = theme==="light" ? "☀️ Light mode" : "🌙 Dark mode";
   try{ localStorage.setItem("ihealth_dev_theme", theme); }catch(e){}
-  if(document.getElementById("dashboardView").style.display!=="none") renderDashboard();
+  renderDashboard();
 }
 function toggleTheme(){
   const current = document.documentElement.getAttribute("data-theme")==="light" ? "light" : "dark";
   setTheme(current==="dark" ? "light" : "dark");
 }
 
-// ===== Init =====
-document.getElementById("fDate").value = todayStr();
-renderIsabgolStepper();
-renderHabitButtons();
+// ===================== Init =====================
+updateHamburgerSummary();
 renderTrackers();
-loadDateIntoForm(todayStr());
-updateWeightBadge();
+document.getElementById("waDate").value = todayStr();
+renderDashboard();
 if(cloudCfg){
   document.getElementById("cloudSetup").style.display="none";
   document.getElementById("cloudControls").style.display="block";
   document.getElementById("cloudOwner").value=cloudCfg.owner;
   document.getElementById("cloudRepo").value=cloudCfg.repo;
-  cloudPullOnLoad().then(()=>loadDateIntoForm(document.getElementById("fDate").value));
-} else {
-  setCloudStatus(false);
-}
+  cloudPullOnLoad();
+} else { setCloudStatus(false); }
 (function initTheme(){
-  let saved="dark";
-  try{ saved = localStorage.getItem("ihealth_dev_theme") || "dark"; }catch(e){}
+  let saved="dark"; try{ saved = localStorage.getItem("ihealth_dev_theme") || "dark"; }catch(e){}
   setTheme(saved);
 })();
 </script>

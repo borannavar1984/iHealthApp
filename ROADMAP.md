@@ -3,6 +3,49 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped to `develop` (2026-08-03)
+
+Major navigation and personalization overhaul:
+
+1. **Editable user profile.** The hamburger menu no longer hardcodes "Deep" —
+   the name and goal weight are stored in localStorage (`ihealth_dev_user_v1`)
+   and editable via a new Profile Edit overlay. Tapping the profile section in
+   the hamburger opens it. Goal weight is now dynamic everywhere (charts, cards,
+   WhatsApp message, Excel export) instead of the old `const GOAL_WEIGHT =
+   65.0`.
+
+2. **First-time onboarding.** When the app launches with no stored user
+   profile, a welcome screen appears asking for the user's name and goal weight.
+   Completing it saves the profile and initializes the dashboard. Subsequent
+   launches skip it automatically.
+
+3. **FAB removed, quick-log bar added.** The floating "+" button is gone.
+   Instead, a 4-button quick-log bar (Weight / Food / Habits / Workout) sits
+   at the top of the dashboard — direct entry, no picker overlay needed.
+
+4. **Dashboard tabs restructured.** Three new tabs replace the old
+   Today / Weekly Trend / Habit Streaks:
+   - **This Month** (default): current-month cards (avg weight, total steps,
+     fasting rate, workout count), weight chart with goal line, and a
+     last-7-days table.
+   - **Monthly Detail**: month picker, per-month cards, weight chart, and a
+     day-by-day table for the selected month.
+   - **Overall**: all-time cards (latest weight, days logged, fasting rate,
+     total workouts), full-history weight chart with goal line, habit
+     adherence bar chart, and a month-over-month comparison table.
+
+5. **Daily notes field** added to the food entry form (saves to `rec.notes`).
+
+6. **Date confirmation prompts** on food/weight/workout saves when logging
+   for a non-today date (house rule from the project brief).
+
+7. **Backup includes user profile** in the JSON export.
+
+Tested via Playwright screenshots at 390px mobile width: onboarding screen,
+post-onboarding dashboard (This Month tab), Monthly Detail tab, Overall tab,
+hamburger menu with editable name, and Profile Edit overlay — all rendered
+cleanly with no visual defects.
+
 ## Shipped to `develop`, awaiting Deep's try before promoting to `main` (2026-07-28)
 
 Adapting 4 UI/UX patterns from Deep's expense tracker (mechanics matched exactly,

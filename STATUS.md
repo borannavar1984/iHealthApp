@@ -3,6 +3,22 @@
 Plain-English log of what's built and what's still open, against the phases in
 `PROJECT_BRIEF.md` (Deep approved 2026-07-12).
 
+## Personalization and navigation overhaul (2026-08-03, on `develop`)
+
+- Editable user name and goal weight: hamburger profile section is now tappable,
+  opens a Profile Edit overlay. Name and goal stored in localStorage, no longer
+  hardcoded. Goal weight is dynamic across all charts, cards, WhatsApp message,
+  and Excel export.
+- First-time onboarding: new users see a welcome screen (name + goal weight)
+  before reaching the dashboard. Returning users skip it automatically.
+- FAB removed: the floating + button is gone. Replaced by a 4-button quick-log
+  bar (Weight / Food / Habits / Workout) at the top of the dashboard.
+- Dashboard tabs restructured: old Today / Weekly Trend / Habit Streaks became
+  This Month (default, with last-7-days table) / Monthly Detail (month picker,
+  day-by-day) / Overall (all-time charts + month-over-month table).
+- Daily notes field added to food entry form.
+- Date confirmation prompts when saving for a non-today date.
+
 ## UI/UX revamp (2026-07-26, on `develop`)
 
 Deep did a UI/UX pass on his expense tracker app and asked which of those changes

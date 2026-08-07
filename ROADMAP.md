@@ -3,6 +3,32 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped: FAB polish — tighter ring + real icons (2026-08-07, later same day)
+
+Deep's feedback after trying the entry-form overhaul: the fan-out ring sat
+too far from the FAB, and the emoji icons weren't "professional grade."
+
+- **Radius cut from 170px to 105px.** The 5 items now sit close to the FAB
+  (~45px edge gap) instead of far out at the edges of the screen.
+- **Label pills removed entirely.** They were the whole reason the ring
+  needed a wide radius in the first place — every previous overlap bug
+  traced back to label pills colliding. Icons now carry the meaning on
+  their own; `aria-label` covers screen readers and `title` gives a hover
+  tip on desktop.
+- **Emoji replaced with 5 hand-drawn inline SVG icons** (fork & knife,
+  bathroom scale, checkmark, dumbbell, speech bubble) in one consistent
+  line-icon style, using `currentColor` so they theme correctly in light
+  and dark mode — no more inconsistent emoji rendering across devices.
+- Verified with real circle-to-circle distance math (not square bounding-box
+  overlap, which false-positives on diagonally placed round buttons): no
+  two items overlap each other, none overlap the FAB, and the edge gap to
+  the FAB is under 60px (close) but over 20px (still clearly separate).
+
+Tested with 9 checks (SVG icons present, no emoji left, no circle overlaps
+via true circle-distance, FAB clearance in the right range, Message still
+top-center) plus the full 82-check suite from earlier today — all 91
+passed before merging to `main`.
+
 ## Shipped: entry-form overhaul, "make it click-click-done" (2026-08-07, later same day)
 
 Deep's core feedback: logging still felt slow and confusing in a few places,

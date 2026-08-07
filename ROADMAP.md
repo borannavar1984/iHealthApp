@@ -3,6 +3,51 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped: entry-form overhaul, "make it click-click-done" (2026-08-07, later same day)
+
+Deep's core feedback: logging still felt slow and confusing in a few places,
+and the FAB fan-menu wasn't a clean circle (screenshot showed labels/icons
+crowding together in an uneven "1-2-2 tiers" layout instead of one uniform
+arc).
+
+1. **FAB fan-menu is now one true uniform semicircle.** All 5 items (Food,
+   Weight, Message, Habit, Workout) sit on a single arc, evenly spaced 36°
+   apart — Message naturally lands at the top-center (most prominent) slot
+   instead of a separate stem. No overlap at any screen width tested.
+2. **Weight entry is minimal by default.** Just the weight number and Save
+   — steps/date/time/note are now behind a closed "+ More details"
+   disclosure, so the common case really is type-a-number-and-done.
+3. **Food form time chips are data-driven, not a wall of options.** Each
+   meal now shows just the 2 times you actually log most often (learned
+   from history) plus "Other…", instead of 6-7 fixed preset buttons.
+4. **Settings: Preset Menu Items.** A dietitian (or Deep) can pre-load
+   common food items per meal in Settings — these always show as instant
+   tap chips in the food form regardless of logging history, so a new user
+   isn't starting from a blank typing field. Synced to the cloud data repo
+   (`preset_items.json`) the same way custom trackers are.
+5. **Workout form rebuilt around activity type, not free text.** Pick a
+   type (Running/Walking/Cycling/Yoga/Swimming/Gym/Other) and only the
+   field that applies shows up — distance (mi) for the three you'd measure
+   in miles, duration (min) for the rest — plus an optional style/notes
+   field (e.g. "Vinyasa" for yoga). Supports multiple workouts in one visit
+   (log Yoga *and* a walk same day): "+ Add to Today's Log" stages each one
+   as a removable chip, "Save Workout" commits everything staged at once
+   (and auto-stages the in-progress selection if Save is tapped directly,
+   so a single quick entry never needs the extra tap). WhatsApp message and
+   Excel export both show duration alongside distance now.
+6. **Incidental fix:** dark/light theme toggle was silently non-functional
+   — it called an undefined `nsKey()` function that a try/catch was
+   swallowing, so the choice never actually persisted or restored. Fixed
+   to use the same key-prefix pattern as everything else.
+
+Tested with 21 new scripted-browser checks (weight minimal-flow + toggle,
+data-driven time chips reflecting seeded history, preset item add → shows
+as tap chip → adds to the meal, workout type-conditional fields, multi-entry
+queue with 2 different activity types saved as distinct entries with correct
+metrics, auto-stage safety net) plus the full 61-check suite from earlier
+today (habit toggles/fasting, FAB overlap, Message quick-action, real
+198-day-history regression) — all 82 passed before merging to `main`.
+
 ## Shipped: one-tap "Today's Message" (2026-08-07, later same day)
 
 Deep wants to hand the app to his dietitian and other clients, so sharing

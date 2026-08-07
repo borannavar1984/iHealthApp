@@ -162,16 +162,15 @@
   .fan-item .fan-label{position:absolute;bottom:-22px;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text);background:var(--card);padding:2px 8px;border-radius:12px;border:1px solid var(--border);white-space:nowrap;text-transform:uppercase}
   .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
   .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}
-  /* Positions 1-4: the classic 4-item umbrella arc (Food/Weight/Habit/Workout).
-     pos-message: its own stem straight above the FAB, clear above the arc's apex,
-     so it never crowds the umbrella. */
-  .fan-item.pos-1{--fan-x:-96px;--fan-y:-56px}
-  .fan-item.pos-2{--fan-x:-34px;--fan-y:-104px}
-  .fan-item.pos-3{--fan-x:34px;--fan-y:-104px}
-  .fan-item.pos-4{--fan-x:96px;--fan-y:-56px}
-  .fan-item.pos-message{--fan-x:0px;--fan-y:-166px}
-  /* Message is the topmost item — put its label above the circle instead of
-     below, so it doesn't hang down into the umbrella arc underneath it. */
+  /* One uniform semicircle, 5 items at 36deg apart (radius 150), reading
+     left-to-right: Food, Weight, Message (top-center), Habit, Workout. */
+  .fan-item.pos-1{--fan-x:-162px;--fan-y:-53px}
+  .fan-item.pos-2{--fan-x:-100px;--fan-y:-137px}
+  .fan-item.pos-3{--fan-x:100px;--fan-y:-137px}
+  .fan-item.pos-4{--fan-x:162px;--fan-y:-53px}
+  .fan-item.pos-message{--fan-x:0px;--fan-y:-170px}
+  /* Message sits at the very top of the arc — put its label above the circle
+     instead of below, so it doesn't hang down into the ring beneath it. */
   .fan-item.pos-message .fan-label{bottom:auto;top:-22px}
   .fan-backdrop.show ~ .fan-item.pos-1,
   .fan-backdrop.show ~ .fan-item.pos-2,
@@ -313,6 +312,18 @@
       </select>
       <button class="btn btn-save btn-sm" onclick="addTracker()">Save Tracker</button>
     </div>
+    <div class="label">🍽️ Preset Menu Items</div>
+    <div class="muted-note">Pre-load common items (or ones your dietitian suggests) so they're always a quick tap in the food form — no typing needed.</div>
+    <div id="presetMealPicker" class="chip-row" style="margin-top:8px">
+      <button type="button" class="opt sel" data-preset-meal="breakfast">Breakfast</button>
+      <button type="button" class="opt" data-preset-meal="snack">Snack</button>
+      <button type="button" class="opt" data-preset-meal="dinner">Dinner</button>
+    </div>
+    <div id="presetItemList" style="margin-top:8px"></div>
+    <div class="item-add" style="margin-top:8px">
+      <input type="text" id="newPresetItem" placeholder="e.g. Idli, Poha, Dal Rice" autocomplete="off">
+      <button onclick="addPresetItem()">Add</button>
+    </div>
     <div class="label">💬 WhatsApp Message</div>
     <div class="muted-note">Draft template — this is my best guess at your format from the migrated history. Tell me how it should differ and I'll adjust it.</div>
     <input type="date" id="waDate" style="margin-top:8px">
@@ -404,6 +415,7 @@ const CLOUD_KEY = KEY_PREFIX + "cloud_cfg_v2";
 const HIDDEN_ITEMS_KEY = KEY_PREFIX + "hidden_items_v1";
 const LS_USER = KEY_PREFIX + "user_v1";
 const LS_HABIT_PREFS = KEY_PREFIX + "habit_prefs_v1";
+const LS_PRESET_ITEMS = KEY_PREFIX + "preset_items_v1";
 
 // One-time migration: prior versions used "ihealth_dev_*" keys on BOTH dev and
 // prod due to a naming bug. On prod, if the new keys are empty but the legacy
@@ -430,6 +442,7 @@ let days = loadDays();
 let trackers = loadTrackers();
 let user = loadUser();
 let habitPrefs = loadHabitPrefs();
+let presetItems = loadPresetItems();
 
 function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
 function persistDays(){ try{ localStorage.setItem(LS_DAYS, JSON.stringify(days)); }catch(e){} }
@@ -439,6 +452,8 @@ function loadUser(){ try{ return JSON.parse(localStorage.getItem(LS_USER)||"null
 function saveUser(u){ try{ localStorage.setItem(LS_USER, JSON.stringify(u)); }catch(e){} }
 function loadHabitPrefs(){ try{ const v=JSON.parse(localStorage.getItem(LS_HABIT_PREFS)||"null"); return v || {}; }catch(e){ return {}; } }
 function persistHabitPrefs(){ try{ localStorage.setItem(LS_HABIT_PREFS, JSON.stringify(habitPrefs)); }catch(e){} }
+function loadPresetItems(){ try{ const v=JSON.parse(localStorage.getItem(LS_PRESET_ITEMS)||"null"); return v || {breakfast:[],snack:[],dinner:[]}; }catch(e){ return {breakfast:[],snack:[],dinner:[]}; } }
+function persistPresetItems(){ try{ localStorage.setItem(LS_PRESET_ITEMS, JSON.stringify(presetItems)); }catch(e){} }
 function isHabitEnabled(key){ return habitPrefs[key] !== false; }
 function setHabitEnabled(key, enabled){ habitPrefs[key] = enabled; persistHabitPrefs(); }
 function enabledBuiltins(){
@@ -621,7 +636,7 @@ function showMainTab(tab){
   document.getElementById("settingsView").style.display = isSettings ? "block" : "none";
   document.getElementById("fabAddBtn").style.display = isSettings ? "none" : "flex";
   if(!isSettings) renderDashboard();
-  else { renderTrackers(); document.getElementById("waDate").value = todayStr(); }
+  else { renderTrackers(); renderPresetItemList(); document.getElementById("waDate").value = todayStr(); }
 }
 
 // ===== Overlay plumbing (cat-picker-overlay pattern) =====
@@ -795,24 +810,32 @@ function addMealItem(meal, itemOverride){
   mealsDraft[meal].push(v);
   renderMealChips(meal);
 }
-function workoutRecency(){
-  const seen = [];
-  allSortedRecords().slice().reverse().forEach(r=>{
-    normWorkoutEntries(r).slice().reverse().forEach(e=>{
-      if(e.workout && !seen.includes(e.workout)) seen.push(e.workout);
-    });
-  });
-  return seen;
-}
 
 // ===================== ENTRY FORMS =====================
+// Your most-used time for each meal, learned from history — just 2 quick-tap
+// options instead of a long fixed list, plus "Other..." for anything else.
+function frequentMealTimes(meal, fallbacks){
+  const counts = {};
+  allSortedRecords().forEach(r=>{ const t = normMeal(r[meal]).time; if(t) counts[t] = (counts[t]||0)+1; });
+  const byFrequency = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([t])=>t);
+  const result = byFrequency.slice(0,2);
+  fallbacks.forEach(f=>{ if(result.length<2 && !result.includes(f)) result.push(f); });
+  return result.slice(0,2).sort();
+}
 function foodFormHtml(){
-  const timeChipsBreakfast = ["07:00","07:30","08:00","08:30","09:00","09:30"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="breakfast">${fmtTime12(t)}</button>`).join("");
-  const timeChipsSnack = ["15:00","15:30","16:00","16:30","17:00","17:30","18:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="snack">${fmtTime12(t)}</button>`).join("");
-  const timeChipsDinner = ["18:30","19:00","19:30","20:00","20:30","21:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="dinner">${fmtTime12(t)}</button>`).join("");
+  const timeChipsFor = meal => {
+    const fallback = meal==="breakfast" ? ["08:00","08:30"] : meal==="snack" ? ["16:00","17:00"] : ["19:00","19:30"];
+    return frequentMealTimes(meal, fallback).map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="${meal}">${fmtTime12(t)}</button>`).join("");
+  };
+  const presetChipsFor = meal => {
+    const items = presetItems[meal] || [];
+    if(!items.length) return "";
+    return `<div class="chip-row" id="${meal}PresetChips">${items.map(item=>`<button type="button" class="opt" data-preset-add="${meal}">${item}</button>`).join("")}</div>`;
+  };
   return `
     <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
       <div class="chip-row" id="breakfastChips"></div>
+      ${presetChipsFor("breakfast")}
       <div class="typeahead-wrap" style="margin-top:8px">
         <div class="item-add">
           <input type="text" id="breakfastInput" placeholder="Start typing…" autocomplete="off">
@@ -820,13 +843,12 @@ function foodFormHtml(){
         </div>
         <div class="typeahead-list" id="breakfastTypeahead"></div>
       </div>
-      <div class="muted-note">As you type, past items appear as suggestions. Tap Add to add anything new.</div>
-      <div class="label" style="margin:14px 0 6px">Time (AM)</div>
-      <div class="chip-row time-chip-row" id="breakfastTimeChips">${timeChipsBreakfast}<button type="button" class="opt time-other" data-meal="breakfast">Other…</button></div>
+      <div class="chip-row time-chip-row" id="breakfastTimeChips">${timeChipsFor("breakfast")}<button type="button" class="opt time-other" data-meal="breakfast">Other…</button></div>
       <input type="time" id="breakfastTime" style="display:none;margin-top:8px" onchange="onTimeChanged('breakfast')">
     </div>
     <div class="section" id="mealSnack" data-meal="snack"><h3>🥗 Snack</h3>
       <div class="chip-row" id="snackChips"></div>
+      ${presetChipsFor("snack")}
       <div class="typeahead-wrap" style="margin-top:8px">
         <div class="item-add">
           <input type="text" id="snackInput" placeholder="Start typing…" autocomplete="off">
@@ -834,12 +856,12 @@ function foodFormHtml(){
         </div>
         <div class="typeahead-list" id="snackTypeahead"></div>
       </div>
-      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
-      <div class="chip-row time-chip-row" id="snackTimeChips">${timeChipsSnack}<button type="button" class="opt time-other" data-meal="snack">Other…</button></div>
+      <div class="chip-row time-chip-row" id="snackTimeChips">${timeChipsFor("snack")}<button type="button" class="opt time-other" data-meal="snack">Other…</button></div>
       <input type="time" id="snackTime" style="display:none;margin-top:8px" onchange="onTimeChanged('snack')">
     </div>
     <div class="section" id="mealDinner" data-meal="dinner"><h3>🍽️ Dinner</h3>
       <div class="chip-row" id="dinnerChips"></div>
+      ${presetChipsFor("dinner")}
       <div class="typeahead-wrap" style="margin-top:8px">
         <div class="item-add">
           <input type="text" id="dinnerInput" placeholder="Start typing…" autocomplete="off">
@@ -847,8 +869,7 @@ function foodFormHtml(){
         </div>
         <div class="typeahead-list" id="dinnerTypeahead"></div>
       </div>
-      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
-      <div class="chip-row time-chip-row" id="dinnerTimeChips">${timeChipsDinner}<button type="button" class="opt time-other" data-meal="dinner">Other…</button></div>
+      <div class="chip-row time-chip-row" id="dinnerTimeChips">${timeChipsFor("dinner")}<button type="button" class="opt time-other" data-meal="dinner">Other…</button></div>
       <input type="time" id="dinnerTime" style="display:none;margin-top:8px" onchange="onTimeChanged('dinner')">
     </div>
     <div class="section"><h3>📝 Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
@@ -867,6 +888,11 @@ function initFoodForm(){
   document.getElementById("foodNotes").value = (rec&&rec.notes) || "";
   ["breakfast","snack","dinner"].forEach(meal=>{
     renderMealChips(meal);
+    // Preset menu item chips (curated in Settings) — tap to add directly
+    const presetBox = document.getElementById(meal+"PresetChips");
+    if(presetBox) presetBox.querySelectorAll("[data-preset-add]").forEach(btn=>{
+      btn.onclick = ()=>addMealItem(meal, btn.textContent);
+    });
     // Wire typeahead
     const input = document.getElementById(meal+"Input");
     const list = document.getElementById(meal+"Typeahead");
@@ -969,14 +995,23 @@ function weightFormHtml(){
       <div class="val-wrap"><input type="tel" id="weightValue" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
       <div class="muted-note" id="weightPrefillNote"></div>
     </div>
-    <div class="label">👟 Steps (optional)</div><input type="tel" id="weightSteps" inputmode="numeric" placeholder="8000">
-    <div class="row2" style="display:grid;margin-top:14px">
-      <div><div class="label" style="margin-top:0">Date</div><input type="date" id="weightDate"></div>
-      <div><div class="label" style="margin-top:0">Time</div><input type="time" id="weightTime"></div>
-    </div>
-    <div class="label" style="margin-top:14px">📝 Note (optional)</div><textarea id="weightNote" placeholder="e.g. after workout"></textarea>
     <button class="btn btn-save" onclick="saveWeightEntry()">Save Weight</button>
+    <button type="button" class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="toggleWeightMore()" id="weightMoreToggle">+ More details (steps, time, note)</button>
+    <div id="weightMoreFields" style="display:none;margin-top:10px">
+      <div class="label" style="margin-top:0">👟 Steps (optional)</div><input type="tel" id="weightSteps" inputmode="numeric" placeholder="8000">
+      <div class="row2" style="display:grid;margin-top:14px">
+        <div><div class="label" style="margin-top:0">Date</div><input type="date" id="weightDate"></div>
+        <div><div class="label" style="margin-top:0">Time</div><input type="time" id="weightTime"></div>
+      </div>
+      <div class="label" style="margin-top:14px">📝 Note (optional)</div><textarea id="weightNote" placeholder="e.g. after workout"></textarea>
+    </div>
   `;
+}
+function toggleWeightMore(){
+  const box = document.getElementById("weightMoreFields");
+  const open = box.style.display !== "none";
+  box.style.display = open ? "none" : "block";
+  document.getElementById("weightMoreToggle").textContent = open ? "+ More details (steps, time, note)" : "− Hide details";
 }
 let weightEditSeed = null;
 function initWeightForm(){
@@ -1100,56 +1135,116 @@ async function saveHabitEntry(){
   closeAllOverlaysToHome();
 }
 
+// Activity types: pick one, then only the field that actually applies shows up
+// (distance for things you measure in miles, duration for things you measure
+// in minutes) — no more guessing what a free-text "workout" field wants.
+const WORKOUT_TYPES = [
+  {key:"running", label:"🏃 Running", metric:"distance"},
+  {key:"walking", label:"🚶 Walking", metric:"distance"},
+  {key:"cycling", label:"🚴 Cycling", metric:"distance"},
+  {key:"yoga", label:"🧘 Yoga", metric:"duration"},
+  {key:"swimming", label:"🏊 Swimming", metric:"duration"},
+  {key:"gym", label:"🏋️ Gym", metric:"duration"},
+  {key:"other", label:"⚡ Other", metric:"duration"},
+];
 function workoutFormHtml(){
   return `
     <div class="section"><h3>🏃 Workout</h3>
-      <div class="typeahead-wrap">
-        <input type="text" id="workoutValue" placeholder="e.g. 45 min yoga" class="hero-input" style="font-size:17px;font-weight:600;padding:14px" autofocus>
-        <div class="typeahead-list" id="workoutTypeahead"></div>
-      </div>
-      <div class="muted-note" id="workoutPrefillNote"></div>
+      <div class="label" style="margin-top:0">Type</div>
+      <div class="chip-row" id="workoutTypeChips">${WORKOUT_TYPES.map(t=>`<button type="button" class="opt" data-workout-type="${t.key}">${t.label}</button>`).join("")}</div>
+      <div id="workoutMetricField" style="display:none;margin-top:14px"></div>
+      <div class="label" style="margin-top:14px">Time</div><input type="time" id="workoutTime">
+      <div class="label" style="margin-top:14px">📝 Style / notes (optional)</div><textarea id="workoutNote" placeholder="e.g. Vinyasa, felt strong today…"></textarea>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addWorkoutToQueue()">+ Add to Today's Log</button>
     </div>
-    <div class="label">Run distance (optional)</div><div class="val-wrap"><input type="tel" id="workoutRunMiles" inputmode="decimal" placeholder="optional"><span class="unit">mi</span></div>
-    <div class="row2" style="display:grid;margin-top:14px">
-      <div><div class="label" style="margin-top:0">Date</div><input type="date" id="workoutDate"></div>
-      <div><div class="label" style="margin-top:0">Time</div><input type="time" id="workoutTime"></div>
+    <div class="section" id="workoutQueueSection" style="display:none">
+      <div class="label" style="margin-top:0">Ready to Save</div>
+      <div class="chip-row" id="workoutQueueChips"></div>
+      <div class="muted-note">Did more than one thing today? Pick the next type above and tap "Add to Today's Log" again before saving.</div>
     </div>
-    <div class="label" style="margin-top:14px">📝 Note (optional)</div><textarea id="workoutNote" placeholder="anything about how it went…"></textarea>
+    <div class="label">Date</div><input type="date" id="workoutDate"><div class="muted-note">Defaults to today.</div>
     <button class="btn btn-save" onclick="saveWorkoutEntry()">Save Workout</button>
   `;
 }
-let workoutEditSeed = null;
+let workoutQueueDraft = [];
+let workoutSelectedType = null;
+function renderWorkoutMetricField(typeKey){
+  const box = document.getElementById("workoutMetricField");
+  const t = WORKOUT_TYPES.find(w=>w.key===typeKey);
+  if(!t){ box.style.display="none"; box.innerHTML=""; return; }
+  box.style.display = "block";
+  box.innerHTML = t.metric==="distance"
+    ? `<div class="label" style="margin-top:0">Distance</div><div class="val-wrap"><input type="tel" id="workoutMetricValue" inputmode="decimal" placeholder="2.5"><span class="unit">mi</span></div>`
+    : `<div class="label" style="margin-top:0">Duration</div><div class="val-wrap"><input type="tel" id="workoutMetricValue" inputmode="numeric" placeholder="30"><span class="unit">min</span></div>`;
+}
 function initWorkoutForm(){
+  workoutQueueDraft = [];
+  workoutSelectedType = null;
   document.getElementById("workoutDate").value = todayStr();
   document.getElementById("workoutTime").value = nowTimeStr();
-  const input = document.getElementById("workoutValue"), list = document.getElementById("workoutTypeahead");
-  setupTypeahead(input, list, workoutRecency, (picked)=>{
-    const recs = allSortedRecords().slice().reverse();
-    for(const r of recs){ const es = normWorkoutEntries(r).slice().reverse(); const found = es.find(e=>e.workout===picked); if(found){ if(found.run_miles!=null) document.getElementById("workoutRunMiles").value = found.run_miles; break; } }
+  document.getElementById("workoutTypeChips").querySelectorAll("[data-workout-type]").forEach(btn=>{
+    btn.onclick = ()=>{
+      workoutSelectedType = btn.dataset.workoutType;
+      document.getElementById("workoutTypeChips").querySelectorAll("[data-workout-type]").forEach(b=>b.classList.toggle("sel", b===btn));
+      renderWorkoutMetricField(workoutSelectedType);
+    };
   });
-  if(workoutEditSeed){
-    input.value = workoutEditSeed.workout || "";
-    document.getElementById("workoutRunMiles").value = workoutEditSeed.run_miles ?? "";
-    document.getElementById("workoutPrefillNote").textContent = "Pre-filled from a past entry — saving adds a brand-new workout, it never overwrites the old one.";
-    workoutEditSeed = null;
-  }
+  renderWorkoutQueueChips();
+}
+function addWorkoutToQueue(){
+  if(!workoutSelectedType){ toast("Pick a workout type","var(--red)"); return; }
+  const t = WORKOUT_TYPES.find(w=>w.key===workoutSelectedType);
+  const metricInput = document.getElementById("workoutMetricValue");
+  const metricVal = metricInput ? parseFloat(metricInput.value) : null;
+  const notes = document.getElementById("workoutNote").value.trim();
+  const time = document.getElementById("workoutTime").value || nowTimeStr();
+  const label = t.label.replace(/^[^\s]+\s/,"");
+  const workout = label + (notes ? " — " + notes : "");
+  workoutQueueDraft.push({
+    type: t.key, workout, time,
+    run_miles: t.metric==="distance" ? (metricVal||null) : null,
+    duration_min: t.metric==="duration" ? (metricVal||null) : null
+  });
+  renderWorkoutQueueChips();
+  workoutSelectedType = null;
+  document.getElementById("workoutTypeChips").querySelectorAll("[data-workout-type]").forEach(b=>b.classList.remove("sel"));
+  document.getElementById("workoutMetricField").style.display = "none";
+  document.getElementById("workoutNote").value = "";
+  toast(`Added ${label} — save now, or add another`);
+}
+function renderWorkoutQueueChips(){
+  const section = document.getElementById("workoutQueueSection");
+  const box = document.getElementById("workoutQueueChips");
+  if(!workoutQueueDraft.length){ section.style.display="none"; box.innerHTML=""; return; }
+  section.style.display = "block";
+  box.innerHTML = "";
+  workoutQueueDraft.forEach((e,idx)=>{
+    const c=document.createElement("div"); c.className="chip";
+    const metric = e.run_miles!=null ? `${e.run_miles} mi` : e.duration_min!=null ? `${e.duration_min} min` : "";
+    c.innerHTML = `<span></span><button aria-label="Remove">×</button>`;
+    c.querySelector("span").textContent = `${e.workout}${metric?" · "+metric:""}${e.time?" · "+fmtTime12(e.time):""}`;
+    c.querySelector("button").onclick=()=>{ workoutQueueDraft.splice(idx,1); renderWorkoutQueueChips(); };
+    box.appendChild(c);
+  });
 }
 async function saveWorkoutEntry(){
-  const workout = document.getElementById("workoutValue").value.trim();
-  if(!workout){ toast("Enter a workout","var(--red)"); return; }
+  if(workoutSelectedType) addWorkoutToQueue();
+  if(!workoutQueueDraft.length){ toast("Pick a workout type first","var(--red)"); return; }
   const date = document.getElementById("workoutDate").value || todayStr();
   if(date !== todayStr()){
-    if(!confirm(`Save workout for ${date}? (not today)`)) return;
+    if(!confirm(`Save workout(s) for ${date}? (not today)`)) return;
   }
   const rec = ensureDay(date);
   if(!Array.isArray(rec.workoutEntries)) rec.workoutEntries = normWorkoutEntries(rec);
-  rec.workoutEntries.push({ id: genId(), time: document.getElementById("workoutTime").value||null, workout, run_miles: parseFloat(document.getElementById("workoutRunMiles").value)||null });
+  workoutQueueDraft.forEach(e=>{
+    rec.workoutEntries.push({ id: genId(), time: e.time||null, workout: e.workout, run_miles: e.run_miles, duration_min: e.duration_min });
+  });
   delete rec.workout; delete rec.run_miles;
-  const note = document.getElementById("workoutNote").value.trim();
-  if(note) rec.notes = (rec.notes ? rec.notes+" | " : "") + note;
   rec._source = "live";
   persistDays();
-  toast("Workout saved ✓");
+  const count = workoutQueueDraft.length;
+  workoutQueueDraft = [];
+  toast(`${count} workout${count>1?"s":""} saved ✓`);
   if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
   closeAllOverlaysToHome();
 }
@@ -1373,6 +1468,50 @@ function renderOverallTab(){
 }
 
 // ===================== Custom trackers =====================
+// ===== Preset menu items (curated, e.g. by a dietitian) — always a quick tap =====
+let presetMealTab = "breakfast";
+function renderPresetItemList(){
+  const picker = document.getElementById("presetMealPicker"); if(!picker) return;
+  [...picker.querySelectorAll("[data-preset-meal]")].forEach(btn=>{
+    btn.classList.toggle("sel", btn.dataset.presetMeal===presetMealTab);
+    btn.onclick = ()=>{ presetMealTab = btn.dataset.presetMeal; renderPresetItemList(); };
+  });
+  const box = document.getElementById("presetItemList"); if(!box) return;
+  const items = presetItems[presetMealTab] || [];
+  box.innerHTML = "";
+  if(!items.length){
+    box.innerHTML = '<div class="muted-note">No preset items for this meal yet.</div>';
+    return;
+  }
+  items.forEach(item=>{
+    const wrap=document.createElement("div"); wrap.className="chip-wrap";
+    const b=document.createElement("button"); b.className="opt"; b.textContent=item; b.disabled=true;
+    const x=document.createElement("button"); x.type="button"; x.className="chip-remove"; x.textContent="×";
+    x.setAttribute("aria-label","Remove "+item+" from preset menu");
+    x.onclick=()=>removePresetItem(presetMealTab, item);
+    wrap.appendChild(b); wrap.appendChild(x); box.appendChild(wrap);
+  });
+}
+async function addPresetItem(){
+  const input = document.getElementById("newPresetItem");
+  const v = input.value.trim();
+  if(!v){ toast("Enter an item name","var(--red)"); return; }
+  if(!presetItems[presetMealTab]) presetItems[presetMealTab] = [];
+  if(presetItems[presetMealTab].some(i=>i.toLowerCase()===v.toLowerCase())){ toast("Already on the list","var(--amber)"); return; }
+  presetItems[presetMealTab].push(v);
+  persistPresetItems();
+  input.value = "";
+  renderPresetItemList();
+  toast(`Added "${v}" to ${presetMealTab} presets`);
+  if(cloudCfg) cloudSavePresetItems().catch(()=>toast("Saved locally — cloud sync failed","var(--amber)"));
+}
+async function removePresetItem(meal, item){
+  presetItems[meal] = (presetItems[meal]||[]).filter(i=>i!==item);
+  persistPresetItems();
+  renderPresetItemList();
+  if(cloudCfg) cloudSavePresetItems().catch(()=>toast("Removed locally — cloud sync failed","var(--amber)"));
+}
+
 function toggleAddTrackerForm(){ const f=document.getElementById("addTrackerForm"); f.style.display = f.style.display==="none"?"flex":"none"; }
 async function addTracker(){
   const name=document.getElementById("newTrackerName").value.trim();
@@ -1474,7 +1613,7 @@ function buildWhatsAppMessage(date){
   const habitParts = [];
   BUILTIN_HABITS.forEach(h=>{ const v=habitDayValue(rec,h.key); if(h.key==="isabgol"){ if(v!=null) habitParts.push(`Isabgol ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(h.label.replace(/^[^\s]+\s/,"")+" ✓"); });
   if(habitParts.length) lines.push(`✅ ${habitParts.join(" · ")}`);
-  woEntries.forEach(e=>lines.push(`🏃 Workout: ${e.workout}${e.run_miles?` (${e.run_miles} mi)`:""}`));
+  woEntries.forEach(e=>lines.push(`🏃 Workout: ${e.workout}${e.run_miles?` (${e.run_miles} mi)`:e.duration_min?` (${e.duration_min} min)`:""}`));
   if(rec.notes){ lines.push(""); lines.push(`📝 ${rec.notes}`); }
   return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
 }
@@ -1502,7 +1641,7 @@ function exportExcel(){
   const recs = allSortedRecords();
   if(!recs.length){ toast("Nothing to export yet","var(--amber)"); return; }
   const weightRows = recs.flatMap(r=>normWeightEntries(r).map(e=>({Date:r.date, Time:e.time||"", "Weight (kg)":e.weight, "To Goal":Math.round((e.weight-goalWeight())*10)/10, Notes:e.notes||""})));
-  const workoutRows = recs.flatMap(r=>normWorkoutEntries(r).map(e=>({Date:r.date, Time:e.time||"", Workout:e.workout, "Run (mi)":e.run_miles})));
+  const workoutRows = recs.flatMap(r=>normWorkoutEntries(r).map(e=>({Date:r.date, Time:e.time||"", Workout:e.workout, "Run (mi)":e.run_miles, "Duration (min)":e.duration_min})));
   const habitRows = recs.flatMap(r=>normHabitEvents(r).map(e=>({Date:r.date, Time:e.time||"", Habit:trackerLabel(e.habitKey)||habitDef(e.habitKey).label, Value:String(e.value)})));
   const dailyLog = recs.map(r=>{ const bk=normMeal(r.breakfast), sn=normMeal(r.snack), dn=normMeal(r.dinner); return {
     Date:r.date, Steps:r.steps, "Fasting (hrs)":r.fasting_hours,
@@ -1576,6 +1715,16 @@ async function cloudSaveTrackers(attempts){
   }
   throw lastErr;
 }
+async function cloudSavePresetItems(attempts){
+  attempts = attempts || 3;
+  if(!cloudCfg) return;
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{ const { sha } = await cloudGetJson(cloudCfg, "preset_items.json"); await cloudPutJson(cloudCfg, "preset_items.json", presetItems, sha, "iHealth: preset menu items update"); return; }
+    catch(err){ lastErr=err; if(!err.conflict) throw err; }
+  }
+  throw lastErr;
+}
 function setCloudStatus(ok, msg){
   const el = document.getElementById("cloudStatus"); if(!el) return;
   if(!cloudCfg){ el.textContent="Not connected — saving on this device only"; el.className="cloud-status off"; return; }
@@ -1595,15 +1744,18 @@ async function cloudConnect(){
   try{
     const { data: index } = await cloudGetJson(cfg, "index.json");
     const { data: remoteTrackers } = await cloudGetJson(cfg, "trackers.json");
+    const { data: remotePresets } = await cloudGetJson(cfg, "preset_items.json");
     cloudCfg = cfg; saveCloudCfg(cfg);
     mergeDaysFromCloud(index); persistDays();
     if(Array.isArray(remoteTrackers) && remoteTrackers.length) { trackers = remoteTrackers; persistTrackers(); }
+    if(remotePresets && typeof remotePresets==="object") { presetItems = remotePresets; persistPresetItems(); }
     document.getElementById("cloudSetup").style.display="none";
     document.getElementById("cloudControls").style.display="block";
     document.getElementById("cloudToken").value="";
     toast(`Connected — ${(index||[]).length} days loaded`);
     setCloudStatus(true);
     renderTrackers();
+    renderPresetItemList();
     updateHeaderMenu();
     renderDashboard();
   }catch(err){ toast("Connect failed: "+err.message,"var(--red)"); setCloudStatus(false, "Not connected — check token/repo and try again"); }
@@ -1620,9 +1772,11 @@ async function cloudPullOnLoad(){
   try{
     const { data: index } = await cloudGetJson(cloudCfg, "index.json");
     const { data: remoteTrackers } = await cloudGetJson(cloudCfg, "trackers.json");
+    const { data: remotePresets } = await cloudGetJson(cloudCfg, "preset_items.json");
     mergeDaysFromCloud(index); persistDays();
     if(Array.isArray(remoteTrackers)) { trackers = remoteTrackers; persistTrackers(); }
-    setCloudStatus(true); updateHeaderMenu(); renderTrackers(); renderDashboard();
+    if(remotePresets && typeof remotePresets==="object") { presetItems = remotePresets; persistPresetItems(); }
+    setCloudStatus(true); updateHeaderMenu(); renderTrackers(); renderPresetItemList(); renderDashboard();
   }catch(err){ setCloudStatus(false, "Offline or cloud unreachable — using local copy"); }
 }
 
@@ -1631,7 +1785,7 @@ function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
   document.getElementById("headerMenuDarkBtn").classList.toggle("sel", theme!=="light");
   document.getElementById("headerMenuLightBtn").classList.toggle("sel", theme==="light");
-  try{ localStorage.setItem(nsKey("ihealth_theme"), theme); }catch(e){}
+  try{ localStorage.setItem(KEY_PREFIX+"theme", theme); }catch(e){}
   if(document.getElementById("dashboardView").style.display !== "none") renderDashboard();
 }
 
@@ -1659,7 +1813,7 @@ function initAfterOnboarding(){
     if(document.visibilityState==="visible" && cloudCfg) cloudPullOnLoad();
   });
   (function initTheme(){
-    let saved="dark"; try{ saved = localStorage.getItem(nsKey("ihealth_theme")) || "dark"; }catch(e){}
+    let saved="dark"; try{ saved = localStorage.getItem(KEY_PREFIX+"theme") || "dark"; }catch(e){}
     setTheme(saved);
   })();
   showMainTab("dashboard");

@@ -149,7 +149,7 @@
   .header-menu-link{display:block;width:100%;background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;text-align:left;padding:2px 0;cursor:pointer}
 
   /* ===== FAB (+) button (matches iExpense pattern) ===== */
-  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
   .fab-add:active{transform:translateX(-50%) scale(.93)}
   .fab-add.open{transform:translateX(-50%) rotate(45deg);background:var(--red);color:#fff}
 
@@ -158,21 +158,26 @@
   .fan-backdrop.show{display:block;opacity:1}
 
   /* Fan-out arc menu items */
-  .fan-item{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);z-index:149;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
+  .fan-item{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);z-index:149;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
   .fan-item .fan-label{position:absolute;bottom:-22px;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text);background:var(--card);padding:2px 8px;border-radius:12px;border:1px solid var(--border);white-space:nowrap;text-transform:uppercase}
   .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
   .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}
-  /* Positions: 5 items arc from left to right, above the FAB. Center = FAB. */
-  .fan-item.pos-1{--fan-x:-105px;--fan-y:-34px}
-  .fan-item.pos-2{--fan-x:-65px;--fan-y:-89px}
-  .fan-item.pos-3{--fan-x:0px;--fan-y:-110px}
-  .fan-item.pos-4{--fan-x:65px;--fan-y:-89px}
-  .fan-item.pos-5{--fan-x:105px;--fan-y:-34px}
+  /* Positions 1-4: the classic 4-item umbrella arc (Food/Weight/Habit/Workout).
+     pos-message: its own stem straight above the FAB, clear above the arc's apex,
+     so it never crowds the umbrella. */
+  .fan-item.pos-1{--fan-x:-96px;--fan-y:-56px}
+  .fan-item.pos-2{--fan-x:-34px;--fan-y:-104px}
+  .fan-item.pos-3{--fan-x:34px;--fan-y:-104px}
+  .fan-item.pos-4{--fan-x:96px;--fan-y:-56px}
+  .fan-item.pos-message{--fan-x:0px;--fan-y:-166px}
+  /* Message is the topmost item — put its label above the circle instead of
+     below, so it doesn't hang down into the umbrella arc underneath it. */
+  .fan-item.pos-message .fan-label{bottom:auto;top:-22px}
   .fan-backdrop.show ~ .fan-item.pos-1,
   .fan-backdrop.show ~ .fan-item.pos-2,
   .fan-backdrop.show ~ .fan-item.pos-3,
   .fan-backdrop.show ~ .fan-item.pos-4,
-  .fan-backdrop.show ~ .fan-item.pos-5{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
+  .fan-backdrop.show ~ .fan-item.pos-message{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
 
   /* ===== Full-screen overlay pattern (cat-picker-overlay from iExpense) ===== */
   .cat-picker-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
@@ -326,7 +331,7 @@
 <button type="button" class="fan-item pos-2" onclick="chooseAdd('weight')" aria-label="Log Weight">⚖️<span class="fan-label">Weight</span></button>
 <button type="button" class="fan-item pos-3" onclick="chooseAdd('habit')" aria-label="Log Habit">✅<span class="fan-label">Habit</span></button>
 <button type="button" class="fan-item pos-4" onclick="chooseAdd('workout')" aria-label="Log Workout">🏃<span class="fan-label">Workout</span></button>
-<button type="button" class="fan-item pos-5" onclick="chooseAdd('message')" aria-label="Send Today's Message">💬<span class="fan-label">Message</span></button>
+<button type="button" class="fan-item pos-message" onclick="chooseAdd('message')" aria-label="Send Today's Message">💬<span class="fan-label">Message</span></button>
 
 <!-- ===================== Entry form overlay ===================== -->
 <div class="cat-picker-overlay" id="entryFormOverlay">

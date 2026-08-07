@@ -5,32 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="iHealth Dev">
-<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-title" content="iHealth">
+<meta name="theme-color" content="#121712">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>iHealth (Dev)</title>
+<title>iHealth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
-    --bg:#0f1117; --card:#1a1d27; --card2:#232736; --border:#2e3345;
-    --text:#e8eaf0; --muted:#8a90a5; --accent:#4f8cff; --accent2:#2563eb;
-    --green:#34d399; --red:#f87171; --amber:#fbbf24; --purple:#a78bfa;
+    --bg:#121712; --card:#1b231c; --card2:#242d25; --border:#37443a;
+    --text:#f1eee6; --muted:#9caa9e; --accent:#a3e635; --accent2:#1b4332;
+    --green:#4ade80; --red:#fb7185; --amber:#fbbf24; --purple:#c084fc;
+    --ctatext:#14210a;
   }
   :root[data-theme="light"]{
-    --bg:#f4f6fa; --card:#ffffff; --card2:#eef1f6; --border:#dde3ec;
-    --text:#20242c; --muted:#5b6472; --accent:#2E75B6; --accent2:#1F4E79;
-    --green:#1f7a4d; --red:#c0392b; --amber:#b8720a; --purple:#7c3aed;
+    --bg:#fbf6ec; --card:#ffffff; --card2:#f4eedf; --border:#e7dfc9;
+    --text:#2b2a20; --muted:#8a836e; --accent:#6b9c1b; --accent2:#1b4332;
+    --green:#15803d; --red:#dc2626; --amber:#c2790a; --purple:#8b5cf6;
+    --ctatext:#14210a;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-font-smoothing:antialiased}
   body{
     background:var(--bg);color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(30px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
-    max-width:560px;margin:0 auto;
-    position:relative;
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    max-width:520px;margin:0 auto;
   }
   header{
     display:flex;justify-content:space-between;align-items:center;
@@ -41,25 +45,38 @@
   }
   h1{font-size:22px;font-weight:700;letter-spacing:-.2px}
   h1 span{color:var(--accent)}
-  .dev-badge{background:var(--amber);color:#3a2a00;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;vertical-align:middle;letter-spacing:.5px;margin-left:6px}
-  .dev-banner{background:color-mix(in srgb, var(--amber) 15%, transparent);border:1px solid var(--amber);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.4}
+  .badge{background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:12px;padding:4px 10px;border-radius:20px}
+  .badge b{color:var(--amber)}
+  .dev-badge{background:var(--amber);color:#3a2a00;font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;vertical-align:middle;font-weight:800;margin-left:6px}
+  .dev-banner{background:color-mix(in srgb, var(--amber) 15%, transparent);border:1px solid var(--amber);color:var(--amber);border-radius:16px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.4}
   .label{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 8px}
-  .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+  .section{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(20,30,15,.05)}
   .section h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   input[type=text],input[type=date],input[type=tel],input[type=time],input[type=number],textarea,select{
-    width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px 13px;font-size:15px;outline:none;transition:border-color .12s,box-shadow .12s;font-family:inherit;
+    width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:16px;padding:13px 14px;font-size:16px;outline:none;transition:border-color .12s,box-shadow .12s;font-family:inherit;
   }
   input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)}
   textarea{resize:vertical;min-height:60px}
   .val-wrap{position:relative}
   .val-wrap .unit{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
-  .val-wrap input.hero-input{font-size:26px;font-weight:800;padding:16px 52px 16px 14px}
-  button.opt{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:11px 6px;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .1s ease,background .12s,border-color .12s}
-  button.opt.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+  .val-wrap input.hero-input{font-size:22px;font-weight:700;padding-left:32px}
+  .amount-wrap{position:relative}
+  .amount-wrap::before{content:var(--cur-sym,"");position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+  .amount-wrap input{padding-left:32px;font-size:22px;font-weight:700}
+  button.opt{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:16px;padding:12px 6px;font-size:13.5px;font-weight:500;cursor:pointer;transition:transform .1s ease,background .12s,border-color .12s}
+  button.opt.sel{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:700}
   button.opt:active{transform:scale(.95)}
   .chip-row{display:flex;flex-wrap:wrap;gap:8px}
+  .chip-row button.opt{padding:10px 14px;border-radius:999px;flex:0 0 auto}
+  .time-chip-row button.opt{padding:8px 12px;font-size:13px;font-weight:600}
+  .time-chip-row button.opt.sel{background:var(--accent);color:var(--ctatext);border-color:var(--accent)}
+  .typeahead-wrap{position:relative}
+  .typeahead-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--border);border-radius:12px;max-height:220px;overflow-y:auto;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+  .typeahead-list button{display:block;width:100%;text-align:left;background:transparent;color:var(--text);border:none;padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)}
+  .typeahead-list button:last-child{border-bottom:none}
+  .typeahead-list button:hover,.typeahead-list button:active{background:var(--card)}
   .chip-wrap{position:relative;display:inline-flex}
   .chip-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:2px solid var(--bg);font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;z-index:1}
   .chip-remove:active{transform:scale(.9)}
@@ -67,44 +84,50 @@
   .chip button{background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;padding:0;font-size:14px;line-height:1}
   .item-add{display:flex;gap:8px;margin-top:8px}
   .item-add input{flex:1}
-  .item-add button{background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:700;cursor:pointer}
-  .btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;margin-top:14px;transition:transform .1s ease,opacity .1s ease}
+  .item-add button{background:var(--accent2);color:#fff;border:none;border-radius:999px;padding:0 16px;font-weight:700;cursor:pointer}
+  .btn{width:100%;border:none;border-radius:999px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;margin-top:18px;transition:transform .1s ease,opacity .1s ease}
   .btn:active{transform:scale(.97);opacity:.85}
-  .btn-save{background:var(--accent2);color:#fff}
+  .btn-save{background:var(--accent);color:var(--ctatext)}
   .btn-wa{background:#25D366;color:#06281c}
-  .btn-ghost{background:var(--card2);color:var(--muted);font-size:14px;padding:12px;margin-top:10px}
-  .btn-sm{padding:9px 14px;font-size:13px;margin-top:0;border-radius:10px;width:auto}
+  .btn-ghost{background:var(--card2);color:var(--muted);font-size:14px;padding:12px;margin-top:10px;border-radius:999px}
+  .btn-sm{padding:9px 14px;font-size:13px;margin-top:0;border-radius:999px;width:auto}
   .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#06281c;padding:12px 22px;border-radius:24px;font-weight:700;font-size:14px;display:none;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:calc(100% - 48px);text-align:center}
-  .fasting-box{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:12px 14px;margin-top:8px}
+  .fasting-box{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:12px 14px;margin-top:8px}
   .fasting-box .fh{font-size:20px;font-weight:700}
   .fasting-flag{font-size:12px;padding:3px 9px;border-radius:20px;font-weight:700}
   .fasting-flag.ok{background:color-mix(in srgb, var(--green) 20%, transparent);color:var(--green)}
   .fasting-flag.low{background:color-mix(in srgb, var(--amber) 20%, transparent);color:var(--amber)}
   .fasting-flag.none{background:var(--card);color:var(--muted)}
   .habit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .habit-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:10px 12px}
+  .habit-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:10px 12px}
   .stepper{display:flex;gap:4px}
   .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:700;cursor:pointer}
-  .stepper button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
-  .tracker-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:12px;padding:10px 12px;margin-bottom:8px}
-  .wa-preview{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.5;margin-top:10px;max-height:400px;overflow-y:auto}
+  .stepper button.sel{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  .tracker-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+  .tracker-swipe{position:relative;overflow:hidden;border-radius:16px;margin-bottom:8px;background:var(--red);touch-action:pan-y}
+  .tracker-swipe-inner{background:var(--card2);border-radius:16px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;transform:translateX(0);transition:transform .18s ease;position:relative;z-index:2}
+  .tracker-swipe.revealed .tracker-swipe-inner{transform:translateX(-80px)}
+  .tracker-swipe-delete{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);color:#fff;border:none;font-weight:700;font-size:13px;z-index:1;cursor:pointer}
+  .tracker-swipe-badge{font-size:11px;color:var(--muted);margin-right:8px}
+  .wa-preview{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:14px;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.5;margin-top:10px;max-height:400px;overflow-y:auto}
   .cloud-status{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5}
   .cloud-status.on{color:var(--green)}
   .cloud-status.off{color:var(--amber)}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;border-left:4px solid var(--accent2)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;border-left:4px solid var(--accent2);transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 2px 10px rgba(20,30,15,.05)}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
   .card.green{border-left-color:var(--green)}
   .card.orange{border-left-color:var(--red)}
   .card.purple{border-left-color:var(--purple)}
   .card-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}
   .card-value{font-size:19px;font-weight:700;margin:4px 0 2px}
   .card-sub{font-size:11px;color:var(--muted)}
-  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:16px;box-shadow:0 2px 10px rgba(20,30,15,.05)}
   .chart-card h4{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
   .dash-empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
   .dash-month{display:flex;gap:8px;align-items:center;margin-bottom:14px}
-  .dash-month select{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-size:15px}
-  .dtable-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow-x:auto;margin-bottom:16px}
+  .dash-month select{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:16px;padding:12px;font-size:15px}
+  .dtable-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow-x:auto;margin-bottom:16px;box-shadow:0 2px 10px rgba(20,30,15,.05)}
   .dtable-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:420px}
   .dtable-wrap th{background:var(--card2);padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.4px;white-space:nowrap}
   .dtable-wrap td{padding:8px 10px;border-bottom:1px solid var(--card2);white-space:nowrap}
@@ -115,102 +138,134 @@
   .muted-note{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
 
   /* ===== Dashboard sub-tabs ===== */
-  .dash-tabs{display:flex;gap:8px;margin-bottom:16px}
-  .dash-tabs button{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:10px 4px;font-size:13px;font-weight:600;cursor:pointer}
-  .dash-tabs button.sel{background:var(--accent2);border-color:var(--accent);color:#fff}
+  .dash-tabs{display:flex;gap:6px;margin-bottom:16px}
+  .dash-tabs button{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:16px;padding:10px 4px;font-size:12.5px;font-weight:600;cursor:pointer;transition:transform .1s ease,background .12s,border-color .12s}
+  .dash-tabs button:active{transform:scale(.96)}
+  .dash-tabs button.sel{background:var(--accent2);border-color:var(--accent2);color:#fff}
 
-  /* ===== Hamburger menu ===== */
-  .hamburger-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;line-height:1}
-  .hamburger-backdrop{position:fixed;inset:0;background:transparent;z-index:40;display:none}
-  .hamburger-panel{position:fixed;top:calc(60px + env(safe-area-inset-top));right:14px;width:240px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:41;display:none;overflow:hidden}
-  .hamburger-panel .hp-profile{padding:14px;border-bottom:1px solid var(--border);cursor:pointer}
-  .hamburger-panel .hp-profile:active{background:var(--card2)}
-  .hamburger-panel .hp-profile .hp-name{font-weight:700;font-size:14px}
-  .hamburger-panel .hp-profile .hp-sub{font-size:12px;color:var(--muted);margin-top:2px}
-  .hamburger-panel .hp-profile .hp-edit-hint{font-size:10px;color:var(--accent);margin-top:4px;font-weight:600}
-  .hamburger-panel button.hp-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:12px 14px;font-size:14px;cursor:pointer}
-  .hamburger-panel button.hp-item:active{background:var(--card2)}
-  .hamburger-panel hr{border:none;border-top:1px solid var(--border)}
+  /* ===== Header hamburger menu (matches iExpense pattern) ===== */
+  .header-menu-backdrop{position:fixed;inset:0;z-index:150;display:none}
+  .header-menu{position:fixed;z-index:151;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:14px;width:240px;display:none}
+  .header-menu-name{font-weight:800;font-size:15px;margin-bottom:2px}
+  .header-menu-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .header-menu-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:10px 0 6px}
+  .header-menu-theme-row{display:flex;gap:8px}
+  .header-menu-theme-row button.opt{flex:1;padding:9px 6px;font-size:13px}
+  .header-menu-divider{border-top:1px solid var(--border);margin:12px 0}
+  .header-menu-link{display:block;width:100%;background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;text-align:left;padding:2px 0;cursor:pointer}
 
-  /* ===== Quick-log bar (replaces FAB) ===== */
-  .quick-log{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-  .quick-log button{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:14px 4px;font-size:11px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .1s ease,background .12s}
-  .quick-log button:active{transform:scale(.95);background:var(--card2)}
-  .quick-log button .ql-icon{font-size:22px}
+  /* ===== FAB (+) button (matches iExpense pattern) ===== */
+  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+  .fab-add:active{transform:translateX(-50%) scale(.93)}
+  .fab-add.open{transform:translateX(-50%) rotate(45deg);background:var(--red);color:#fff}
 
-  /* ===== Full-screen overlays (onboarding + picker + entry forms) ===== */
-  .overlay{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;overflow-y:auto}
-  .overlay-inner{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(30px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
-  .overlay-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-  .overlay-header .back-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:10px;font-size:20px;cursor:pointer;line-height:1;flex:0 0 auto}
-  .overlay-header h2{font-size:19px;font-weight:700}
-  .picker-list{display:flex;flex-direction:column;gap:10px}
-  .picker-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
-  .picker-row:active{transform:scale(.98)}
-  .picker-row .picker-icon{font-size:22px}
+  /* Fan-out backdrop */
+  .fan-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:145;display:none;opacity:0;transition:opacity .18s ease}
+  .fan-backdrop.show{display:block;opacity:1}
 
-  /* ===== Type-ahead (hidden until focused) ===== */
+  /* Fan-out arc menu items */
+  .fan-item{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);z-index:149;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
+  .fan-item .fan-label{position:absolute;bottom:-22px;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text);background:var(--card);padding:2px 8px;border-radius:12px;border:1px solid var(--border);white-space:nowrap;text-transform:uppercase}
+  .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
+  .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}
+  /* Positions: 4 items arc from left to right, above the FAB. Center = FAB. */
+  .fan-item.pos-1{--fan-x:-96px;--fan-y:-56px}
+  .fan-item.pos-2{--fan-x:-34px;--fan-y:-104px}
+  .fan-item.pos-3{--fan-x:34px;--fan-y:-104px}
+  .fan-item.pos-4{--fan-x:96px;--fan-y:-56px}
+  .fan-backdrop.show ~ .fan-item.pos-1,
+  .fan-backdrop.show ~ .fan-item.pos-2,
+  .fan-backdrop.show ~ .fan-item.pos-3,
+  .fan-backdrop.show ~ .fan-item.pos-4{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
+
+  /* ===== Full-screen overlay pattern (cat-picker-overlay from iExpense) ===== */
+  .cat-picker-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
+  .cat-picker-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(14px + env(safe-area-inset-top)) 14px 12px;border-bottom:1px solid var(--border);background:var(--bg)}
+  .cat-picker-back{background:var(--card2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;min-width:36px;border-radius:50%;font-size:20px;cursor:pointer;line-height:1}
+  .cat-picker-title{font-weight:700;font-size:17px}
+  .cat-picker-list{overflow-y:auto;flex:1;padding:8px 14px calc(24px + env(safe-area-inset-bottom))}
+  .cat-picker-row{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--card2);cursor:pointer}
+  .cat-picker-row:active{background:var(--card2)}
+  .cat-picker-row .cpr-icon{font-size:19px;width:24px;text-align:center;flex:none}
+  .cat-picker-row .cpr-label{flex:1;font-size:16px}
+
+  /* ===== Form header (matches iExpense add-form-header) ===== */
+  .add-form-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+
+  /* ===== Type-ahead ===== */
   .typeahead-wrap{position:relative}
-  .typeahead-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:10;max-height:220px;overflow-y:auto;display:none}
+  .typeahead-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:10;max-height:220px;overflow-y:auto;display:none}
   .typeahead-list button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--card2)}
   .typeahead-list button:last-child{border-bottom:none}
   .typeahead-list button:active{background:var(--card2)}
 
-  /* ===== Onboarding ===== */
-  .onboarding-logo{font-size:48px;text-align:center;margin:30px 0 10px}
-  .onboarding-title{font-size:24px;font-weight:800;text-align:center;margin-bottom:6px}
-  .onboarding-sub{font-size:14px;color:var(--muted);text-align:center;margin-bottom:30px;line-height:1.5}
+  /* ===== Onboarding body (matches iExpense ob-body pattern) ===== */
+  .ob-body{padding:16px 18px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;flex:1}
+  .ob-intro{font-size:14px;color:var(--muted);line-height:1.5;margin:2px 0 6px}
+
+  /* ===== Tablet/desktop layout ===== */
+  @media (min-width:700px){
+    body{max-width:680px}
+  }
+  @media (min-width:1024px){
+    html{background:var(--card2)}
+    body{max-width:1100px;margin:24px auto;border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,.18)}
+    #dashWeekView,#dashMonthView,#dashOverallView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+    #dashWeekView>*,#dashMonthView>*,#dashOverallView>*{grid-column:1 / -1}
+    #dashWeekView>.chart-card,#dashMonthView>.chart-card,#dashOverallView>.chart-card{grid-column:span 1}
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>i<span>Health</span><span class="dev-badge">🧪 DEV</span></h1>
-  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleHamburger()">☰</button>
-</header>
-<div class="dev-banner">🧪 <b>Dev build</b> — separate storage and cloud config from production. Testing here never touches your real <code>health-data</code>.</div>
-
-<div class="hamburger-backdrop" id="hamburgerBackdrop" onclick="closeHamburger()"></div>
-<div class="hamburger-panel" id="hamburgerPanel">
-  <div class="hp-profile" onclick="closeHamburger();openProfileEdit()">
-    <div class="hp-name" id="hpName">—</div>
-    <div class="hp-sub" id="hpWeightSummary">—</div>
-    <div class="hp-edit-hint">Tap to edit profile</div>
+  <div>
+    <h1>i<span>Health</span><span class="dev-badge" id="devBadge" style="display:none">🧪 DEV</span></h1>
+    <div id="helloName" style="display:none;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px"></div>
   </div>
-  <button class="hp-item" id="hpThemeToggle" onclick="toggleTheme()">🌙 Dark mode</button>
-  <hr>
-  <button class="hp-item" onclick="closeHamburger();showMainTab('settings')">⚙️ Settings</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="badge" id="todayBadge">Today: <b id="todaySummary">—</b></div>
+    <button class="opt" id="menuBtn" onclick="openHeaderMenu()" style="width:38px;height:38px;padding:0;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center">☰</button>
+  </div>
+</header>
+<div class="dev-banner" id="devBanner" style="display:none">🧪 <b>Dev build</b> — separate storage and cloud config from production. Testing here never touches your real <code>health-data</code>.</div>
+
+<div class="header-menu-backdrop" id="headerMenuBackdrop" onclick="closeHeaderMenu()"></div>
+<div class="header-menu" id="headerMenu">
+  <div class="header-menu-name" id="headerMenuName">👤 You</div>
+  <div class="header-menu-sub" id="headerMenuSub">—</div>
+  <div class="header-menu-label">Appearance</div>
+  <div class="header-menu-theme-row">
+    <button type="button" class="opt" id="headerMenuDarkBtn" onclick="setTheme('dark'); closeHeaderMenu();">🌙 Dark</button>
+    <button type="button" class="opt" id="headerMenuLightBtn" onclick="setTheme('light'); closeHeaderMenu();">☀️ Light</button>
+  </div>
+  <div class="header-menu-divider"></div>
+  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); openProfileEdit();">👤 Edit profile ›</button>
+  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); showMainTab('settings');">⚙️ Settings ›</button>
 </div>
 
 <!-- ===================== DASHBOARD (home screen) ===================== -->
 <div id="dashboardView">
-  <!-- Quick-log bar (replaces FAB) -->
-  <div class="quick-log" id="quickLogBar">
-    <button onclick="openEntryForm('weight')"><span class="ql-icon">⚖️</span>Weight</button>
-    <button onclick="openEntryForm('food')"><span class="ql-icon">🍽️</span>Food</button>
-    <button onclick="openEntryForm('habit')"><span class="ql-icon">✅</span>Habits</button>
-    <button onclick="openEntryForm('workout')"><span class="ql-icon">🏃</span>Workout</button>
-  </div>
-
   <div class="dash-tabs">
-    <button class="sel" id="dashMonthBtn" onclick="showDashTab('month')">This Month</button>
-    <button id="dashDetailBtn" onclick="showDashTab('detail')">Monthly Detail</button>
+    <button class="sel" id="dashWeekBtn" onclick="showDashTab('week')">Weekly</button>
+    <button id="dashMonthBtn" onclick="showDashTab('month')">Monthly</button>
     <button id="dashOverallBtn" onclick="showDashTab('overall')">Overall</button>
   </div>
 
-  <div id="dashMonthView">
-    <div class="cards" id="monthCards"></div>
-    <div class="chart-card"><h4>Weight Trend — This Month</h4><canvas id="monthWeightChart" height="160"></canvas><div class="dash-empty" id="monthWeightChartEmpty" style="display:none"></div></div>
-    <div class="dtable-wrap"><div class="tw-head">Last 7 Days</div><div id="monthRecentTable"></div></div>
+  <div id="dashWeekView">
+    <div class="cards" id="weekCards"></div>
+    <div class="chart-card"><h4>Weight Trend — Last 7 Days</h4><canvas id="weekWeightChart" height="160"></canvas><div class="dash-empty" id="weekWeightChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Habit Checklist — This Week</h4><div id="weekHabitGrid"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Day by Day — Last 7 Days</div><div id="weekTable"></div></div>
   </div>
 
-  <div id="dashDetailView" style="display:none">
+  <div id="dashMonthView" style="display:none">
     <div class="dash-month">
-      <select id="detailMonthPicker" onchange="renderDetailTab()"></select>
+      <select id="monthPicker" onchange="renderMonthTab()"></select>
     </div>
-    <div class="cards" id="detailCards"></div>
-    <div class="chart-card"><h4>Weight Trend — Selected Month</h4><canvas id="detailWeightChart" height="160"></canvas><div class="dash-empty" id="detailWeightChartEmpty" style="display:none"></div></div>
-    <div class="dtable-wrap"><div class="tw-head">Day by Day</div><div id="detailTable"></div></div>
+    <div class="cards" id="monthCards"></div>
+    <div class="chart-card"><h4>Weight Trend — Selected Month</h4><canvas id="monthWeightChart" height="160"></canvas><div class="dash-empty" id="monthWeightChartEmpty" style="display:none"></div></div>
+    <div class="dtable-wrap"><div class="tw-head">Day by Day</div><div id="monthTable"></div></div>
   </div>
 
   <div id="dashOverallView" style="display:none">
@@ -221,17 +276,20 @@
   </div>
 </div>
 
-<!-- ===================== SETTINGS (reached via hamburger) ===================== -->
+<!-- ===================== SETTINGS ===================== -->
 <div id="settingsView" style="display:none">
+  <div class="add-form-header">
+    <button type="button" class="cat-picker-back" onclick="showMainTab('dashboard')">‹</button>
+    <div class="cat-picker-title">Settings</div>
+  </div>
   <div class="section">
-    <h3>⚙️ Settings</h3>
     <div class="label" style="margin-top:0">☁️ Cloud Sync</div>
     <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
     <div id="cloudSetup">
       <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
       <input type="text" id="cloudRepo" placeholder="Private data repo (e.g. health-data-dev)" autocomplete="off" style="margin-top:8px">
       <input type="password" id="cloudToken" placeholder="Personal access token" autocomplete="off" style="margin-top:8px">
-      <button class="btn btn-wa" onclick="cloudConnect()">Connect &amp; Sync</button>
+      <button class="btn btn-save" onclick="cloudConnect()">Connect &amp; Sync</button>
     </div>
     <div id="cloudControls" style="display:none">
       <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
@@ -260,86 +318,110 @@
     <button class="btn btn-wa" onclick="generateWhatsApp()">Generate Message for This Date</button>
     <div class="wa-preview" id="waPreview" style="display:none"></div>
     <button class="btn btn-ghost btn-sm" id="copyWaBtn" style="display:none" onclick="copyWhatsApp()">Copy to Clipboard</button>
-    <button class="btn btn-ghost" onclick="showMainTab('dashboard')">‹ Back to Dashboard</button>
   </div>
 </div>
 
-<!-- ===================== Add-type picker (full screen) ===================== -->
-<div class="overlay" id="addPickerOverlay">
-  <div class="overlay-inner">
-    <div class="overlay-header">
-      <button class="back-btn" onclick="closeOverlay('addPickerOverlay')">‹</button>
-      <h2>Log</h2>
-    </div>
-    <div class="picker-list">
-      <button class="picker-row" onclick="openEntryForm('food')"><span class="picker-icon">🍽️</span> Log Food</button>
-      <button class="picker-row" onclick="openEntryForm('weight')"><span class="picker-icon">⚖️</span> Log Weight</button>
-      <button class="picker-row" onclick="openEntryForm('habit')"><span class="picker-icon">✅</span> Log Habit</button>
-      <button class="picker-row" onclick="openEntryForm('workout')"><span class="picker-icon">🏃</span> Log Workout</button>
-    </div>
-  </div>
-</div>
+<!-- ===================== FAB (+) button ===================== -->
+<button type="button" class="fab-add" id="fabAddBtn" onclick="toggleFanMenu()">+</button>
 
-<!-- ===================== Entry form (full screen, body rendered per type) ===================== -->
-<div class="overlay" id="entryFormOverlay">
-  <div class="overlay-inner">
-    <div class="overlay-header">
-      <button class="back-btn" onclick="backToPicker()">‹</button>
-      <h2 id="entryFormTitle">Log</h2>
-    </div>
-    <div id="entryFormBody"></div>
+<!-- ===================== Fan-out add menu (opens from FAB) ===================== -->
+<div class="fan-backdrop" id="fanBackdrop" onclick="closeFanMenu()"></div>
+<button type="button" class="fan-item pos-1" onclick="chooseAdd('food')" aria-label="Log Food">🍽️<span class="fan-label">Food</span></button>
+<button type="button" class="fan-item pos-2" onclick="chooseAdd('weight')" aria-label="Log Weight">⚖️<span class="fan-label">Weight</span></button>
+<button type="button" class="fan-item pos-3" onclick="chooseAdd('habit')" aria-label="Log Habit">✅<span class="fan-label">Habit</span></button>
+<button type="button" class="fan-item pos-4" onclick="chooseAdd('workout')" aria-label="Log Workout">🏃<span class="fan-label">Workout</span></button>
+
+<!-- ===================== Entry form overlay ===================== -->
+<div class="cat-picker-overlay" id="entryFormOverlay">
+  <div class="cat-picker-header">
+    <button type="button" class="cat-picker-back" onclick="backToPicker()">‹</button>
+    <div class="cat-picker-title" id="entryFormTitle">Log</div>
+    <div style="width:36px"></div>
   </div>
+  <div class="ob-body" id="entryFormBody"></div>
 </div>
 
 <!-- ===================== Profile edit overlay ===================== -->
-<div class="overlay" id="profileEditOverlay">
-  <div class="overlay-inner">
-    <div class="overlay-header">
-      <button class="back-btn" onclick="closeOverlay('profileEditOverlay')">‹</button>
-      <h2>Edit Profile</h2>
-    </div>
-    <div class="section">
-      <h3>👤 Your Name</h3>
-      <input type="text" id="profileName" placeholder="Your name" autocomplete="off">
-    </div>
-    <div class="section">
-      <h3>🎯 Goal Weight</h3>
-      <div class="val-wrap"><input type="tel" id="profileGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input"><span class="unit">kg</span></div>
-    </div>
+<div class="cat-picker-overlay" id="profileEditOverlay">
+  <div class="cat-picker-header">
+    <button type="button" class="cat-picker-back" onclick="closeOverlay('profileEditOverlay')">‹</button>
+    <div class="cat-picker-title">Edit Profile</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="ob-body">
+    <div class="label">👤 Your Name</div>
+    <input type="text" id="profileName" placeholder="Your name" autocomplete="off">
+    <div class="label" style="margin-top:14px">🎯 Goal Weight</div>
+    <div class="val-wrap"><input type="tel" id="profileGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input"><span class="unit">kg</span></div>
+    <div class="muted-note">You can change this anytime from the profile menu.</div>
     <button class="btn btn-save" onclick="saveProfile()">Save Profile</button>
   </div>
 </div>
 
 <!-- ===================== Onboarding overlay (first-time launch) ===================== -->
-<div class="overlay" id="onboardingOverlay">
-  <div class="overlay-inner">
-    <div class="onboarding-logo">🏥</div>
-    <div class="onboarding-title">Welcome to iHealth</div>
-    <div class="onboarding-sub">Your personal health tracker. Let's set things up — this takes less than a minute.</div>
-    <div class="section">
-      <h3>👤 What's your name?</h3>
-      <input type="text" id="onboardName" placeholder="Enter your name" autocomplete="off" autofocus>
-    </div>
-    <div class="section">
-      <h3>🎯 What's your goal weight?</h3>
-      <div class="val-wrap"><input type="tel" id="onboardGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input" value="65.0"><span class="unit">kg</span></div>
-      <div class="muted-note">You can change this anytime from the profile menu.</div>
-    </div>
-    <button class="btn btn-save" onclick="completeOnboarding()">Get Started →</button>
+<div class="cat-picker-overlay" id="onboardingOverlay">
+  <div class="cat-picker-header">
+    <div style="width:36px"></div>
+    <div class="cat-picker-title">Welcome to iHealth 👋</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="ob-body">
+    <div class="ob-intro">Your personal health tracker. Let's set things up — this takes less than a minute, saved only on this device.</div>
+    <div class="label">Your name</div>
+    <input type="text" id="onboardName" placeholder="e.g. Deepak" autocomplete="off">
+    <div class="label" style="margin-top:14px">Goal weight</div>
+    <div class="val-wrap"><input type="tel" id="onboardGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input" value="65.0"><span class="unit">kg</span></div>
+    <div class="muted-note">You can change this anytime from the profile menu.</div>
+    <button class="btn btn-save" onclick="completeOnboarding()">Get Started</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const LS_DAYS = "ihealth_dev_days_v3";
-const LS_TRACKERS = "ihealth_dev_trackers_v1";
-const CLOUD_KEY = "ihealth_dev_cloud_cfg_v2";
-const HIDDEN_ITEMS_KEY = "ihealth_dev_hidden_items_v1";
-const LS_USER = "ihealth_dev_user_v1";
+// Detect environment based on URL path.
+// Dev: any URL that contains "/dev/" (e.g. github.io/iHealthApp/dev/)
+// Prod: anything else (e.g. github.io/iHealthApp/ or root domain)
+const IS_DEV_PREVIEW = location.pathname.includes("/dev/");
 
-let days = loadDays();          // { "YYYY-MM-DD": record }
-let trackers = loadTrackers();  // [{id,label,type}]
+if(IS_DEV_PREVIEW){
+  document.title = "iHealth (DEV)";
+  document.getElementById("devBadge").style.display = "inline";
+  document.getElementById("devBanner").style.display = "block";
+}
+
+// localStorage keys are namespaced by environment so dev and prod never mix.
+// Prod: ihealth_*   |   Dev: ihealth_dev_*
+const KEY_PREFIX = IS_DEV_PREVIEW ? "ihealth_dev_" : "ihealth_";
+const LS_DAYS = KEY_PREFIX + "days_v3";
+const LS_TRACKERS = KEY_PREFIX + "trackers_v1";
+const CLOUD_KEY = KEY_PREFIX + "cloud_cfg_v2";
+const HIDDEN_ITEMS_KEY = KEY_PREFIX + "hidden_items_v1";
+const LS_USER = KEY_PREFIX + "user_v1";
+
+// One-time migration: prior versions used "ihealth_dev_*" keys on BOTH dev and
+// prod due to a naming bug. On prod, if the new keys are empty but the legacy
+// keys hold data, migrate them so no user data is lost.
+if(!IS_DEV_PREVIEW){
+  const legacyMap = {
+    "ihealth_days_v3": "ihealth_dev_days_v3",
+    "ihealth_trackers_v1": "ihealth_dev_trackers_v1",
+    "ihealth_cloud_cfg_v2": "ihealth_dev_cloud_cfg_v2",
+    "ihealth_hidden_items_v1": "ihealth_dev_hidden_items_v1",
+    "ihealth_user_v1": "ihealth_dev_user_v1"
+  };
+  try {
+    Object.entries(legacyMap).forEach(([newKey, legacyKey])=>{
+      if(!localStorage.getItem(newKey) && localStorage.getItem(legacyKey)){
+        localStorage.setItem(newKey, localStorage.getItem(legacyKey));
+        localStorage.removeItem(legacyKey);
+      }
+    });
+  } catch(e){ console.warn("Legacy key migration skipped:", e); }
+}
+
+let days = loadDays();
+let trackers = loadTrackers();
 let user = loadUser();
 
 function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
@@ -356,14 +438,11 @@ function ensureDay(date){ if(!days[date]) days[date] = { date }; return days[dat
 function toast(msg,color){
   const t=document.getElementById("toast");
   const icon = color==="var(--red)" ? "⚠️ " : color==="var(--amber)" ? "ℹ️ " : "✅ ";
-  t.textContent=icon+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2400);
+  t.textContent=icon+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2200);
 }
 function goalWeight(){ return user && user.goalWeight ? user.goalWeight : 65.0; }
-function userName(){ return user && user.name ? user.name : "Friend"; }
+function userName(){ return user && user.name ? user.name : "You"; }
 
-// ===== Append-only normalizers: read either the new array-shaped fields or the
-// legacy single-value fields (pre-migration data, or data from a repo that hasn't
-// been migrated yet) without ever losing information =====
 function normWeightEntries(rec){
   if(!rec) return [];
   if(Array.isArray(rec.weightEntries)) return rec.weightEntries.map(e=>({ ...e, weight: typeof e.weight==="string" ? parseFloat(e.weight) : e.weight }));
@@ -403,7 +482,6 @@ function habitDef(key){
   if(t) return {key:t.id, label:t.label, type:t.type};
   return {key, label:key, type:"boolean"};
 }
-// aggregate a habit's value for one day from its events
 function habitDayValue(rec, key){
   const events = normHabitEvents(rec).filter(e=>e.habitKey===key);
   if(!events.length) return null;
@@ -412,7 +490,6 @@ function habitDayValue(rec, key){
   if(def.type=="number" || def.type=="text") return events[events.length-1].value;
   return events.some(e=>e.value===true);
 }
-function normBool(v){ return v===true ? true : v===false ? false : null; }
 function normMeal(v){
   if(Array.isArray(v)) return { time:null, items:v };
   if(v && typeof v==="object") return { time:v.time||null, items:v.items||[] };
@@ -430,25 +507,49 @@ function latestWeightOverall(){
   return null;
 }
 
-// ===== Toast helper for weight badge in hamburger =====
-function updateHamburgerSummary(){
-  document.getElementById("hpName").textContent = userName();
+function updateHeaderMenu(){
+  document.getElementById("headerMenuName").textContent = "👤 " + userName();
   const latest = latestWeightOverall();
-  const el = document.getElementById("hpWeightSummary");
   const gw = goalWeight();
+  const el = document.getElementById("headerMenuSub");
   if(latest){
     const diff = Math.round((latest.entry.weight-gw)*10)/10;
     el.textContent = `${latest.entry.weight}kg · ${diff>0?"−"+diff+"kg to goal":"Goal reached 🎯"}`;
   } else {
     el.textContent = `Goal: ${gw.toFixed(1)}kg`;
   }
+  const hello = document.getElementById("helloName");
+  if(user && user.name){ hello.textContent = "👋 " + user.name; hello.style.display = ""; }
+  else hello.style.display = "none";
+  // Today badge
+  const todayRec = days[todayStr()];
+  let parts = [];
+  const wEntries = normWeightEntries(todayRec);
+  if(wEntries.length) parts.push(wEntries[wEntries.length-1].weight+"kg");
+  if(todayRec && todayRec.steps!=null) parts.push(todayRec.steps.toLocaleString()+" steps");
+  document.getElementById("todaySummary").textContent = parts.length ? parts.join(" · ") : "No entries";
+}
+
+// ===== Header hamburger menu (matches iExpense pattern) =====
+function openHeaderMenu(){
+  updateHeaderMenu();
+  const btnRect = document.getElementById("menuBtn").getBoundingClientRect();
+  const menu = document.getElementById("headerMenu");
+  menu.style.top = (btnRect.bottom + 8) + "px";
+  menu.style.right = (window.innerWidth - btnRect.right) + "px";
+  menu.style.display = "block";
+  document.getElementById("headerMenuBackdrop").style.display = "block";
+}
+function closeHeaderMenu(){
+  document.getElementById("headerMenu").style.display = "none";
+  document.getElementById("headerMenuBackdrop").style.display = "none";
 }
 
 // ===== Profile edit =====
 function openProfileEdit(){
-  document.getElementById("profileName").value = userName();
+  document.getElementById("profileName").value = userName()==="You"?"":userName();
   document.getElementById("profileGoalWeight").value = goalWeight();
-  openOverlay("profileEditOverlay");
+  showOverlay("profileEditOverlay");
 }
 function saveProfile(){
   const name = document.getElementById("profileName").value.trim();
@@ -458,15 +559,15 @@ function saveProfile(){
   user = { name, goalWeight: gw };
   saveUser(user);
   closeOverlay("profileEditOverlay");
-  updateHamburgerSummary();
+  updateHeaderMenu();
   renderDashboard();
   toast("Profile saved ✓");
 }
 
-// ===== Onboarding (first-time launch) =====
+// ===== Onboarding =====
 function checkOnboarding(){
   if(!user){
-    document.getElementById("onboardingOverlay").style.display = "block";
+    document.getElementById("onboardingOverlay").style.display = "flex";
     return false;
   }
   return true;
@@ -474,49 +575,77 @@ function checkOnboarding(){
 function completeOnboarding(){
   const name = document.getElementById("onboardName").value.trim();
   const gw = parseFloat(document.getElementById("onboardGoalWeight").value);
-  if(!name){ toast("Enter your name","var(--red)"); return; }
+  if(!name){ toast("Please enter your name","var(--red)"); return; }
   if(!gw || gw<=0){ toast("Enter a valid goal weight","var(--red)"); return; }
   user = { name, goalWeight: gw };
   saveUser(user);
   document.getElementById("onboardingOverlay").style.display = "none";
   initAfterOnboarding();
-  toast("Welcome, "+name+"! 🎉");
+  toast(`Welcome, ${name}! You're all set`);
 }
 
-// ===== Hamburger menu =====
-function toggleHamburger(){
-  const panel=document.getElementById("hamburgerPanel"), backdrop=document.getElementById("hamburgerBackdrop");
-  const isOpen = panel.style.display==="block";
-  panel.style.display = isOpen ? "none" : "block";
-  backdrop.style.display = isOpen ? "none" : "block";
-  if(!isOpen) updateHamburgerSummary();
-}
-function closeHamburger(){
-  document.getElementById("hamburgerPanel").style.display="none";
-  document.getElementById("hamburgerBackdrop").style.display="none";
-}
-
-// ===== Main view switching: dashboard (home) vs settings =====
+// ===== Main view switching =====
 function showMainTab(tab){
   const isSettings = tab==="settings";
   document.getElementById("dashboardView").style.display = isSettings ? "none" : "block";
   document.getElementById("settingsView").style.display = isSettings ? "block" : "none";
+  document.getElementById("fabAddBtn").style.display = isSettings ? "none" : "flex";
   if(!isSettings) renderDashboard();
   else { renderTrackers(); document.getElementById("waDate").value = todayStr(); }
 }
 
-// ===== Full-screen overlay plumbing =====
-function openOverlay(id){ document.getElementById(id).style.display="block"; window.scrollTo({top:0}); }
+// ===== Overlay plumbing (cat-picker-overlay pattern) =====
+function showOverlay(id){ document.getElementById(id).style.display="flex"; window.scrollTo({top:0}); }
 function closeOverlay(id){ document.getElementById(id).style.display="none"; }
-function openAddPicker(){ openOverlay("addPickerOverlay"); }
+
+// ===== Fan-out add menu =====
+function openFanMenu(){
+  document.getElementById("fabAddBtn").classList.add("open");
+  document.getElementById("fanBackdrop").classList.add("show");
+}
+function closeFanMenu(){
+  document.getElementById("fabAddBtn").classList.remove("open");
+  document.getElementById("fanBackdrop").classList.remove("show");
+}
+function toggleFanMenu(){
+  const open = document.getElementById("fabAddBtn").classList.contains("open");
+  if(open) closeFanMenu(); else openFanMenu();
+}
+function chooseAdd(type){
+  closeFanMenu();
+  setTimeout(()=>openEntryForm(type), 180);
+}
+// Back-compat shims
+function openAddPicker(){ openFanMenu(); }
+function closeAddPicker(){ closeFanMenu(); }
+
+// ===== Entry form =====
 let currentEntryType = null;
-function backToPicker(){ closeOverlay("entryFormOverlay"); renderDashboard(); }
+function backToPicker(){ closeOverlay("entryFormOverlay"); document.getElementById("fabAddBtn").style.display = "flex"; renderDashboard(); }
 function closeAllOverlaysToHome(){
-  closeOverlay("addPickerOverlay"); closeOverlay("entryFormOverlay");
+  closeFanMenu();
+  closeOverlay("entryFormOverlay");
+  document.getElementById("fabAddBtn").style.display = "flex";
   renderDashboard();
 }
 
-// ===== Type-ahead (hidden until focused, prefix-match then substring) =====
+function openEntryForm(type){
+  currentEntryType = type;
+  document.getElementById("entryFormTitle").textContent =
+    type==="food" ? "Log Food" : type==="weight" ? "Log Weight" : type==="habit" ? "Log Habit" : "Log Workout";
+  const body = document.getElementById("entryFormBody");
+  if(type==="food") body.innerHTML = foodFormHtml();
+  else if(type==="weight") body.innerHTML = weightFormHtml();
+  else if(type==="habit") body.innerHTML = habitFormHtml();
+  else body.innerHTML = workoutFormHtml();
+  showOverlay("entryFormOverlay");
+  if(type==="food") initFoodForm();
+  else if(type==="weight") initWeightForm();
+  else if(type==="habit") initHabitForm();
+  else initWorkoutForm();
+}
+
+// ===== Type-ahead =====
 function setupTypeahead(inputEl, listEl, getSource, onPick){
   function render(query){
     const q = (query||"").trim().toLowerCase();
@@ -538,7 +667,7 @@ function setupTypeahead(inputEl, listEl, getSource, onPick){
   document.addEventListener("click", (e)=>{ if(!inputEl.isConnected) return; if(e.target!==inputEl && !listEl.contains(e.target)) { listEl.style.display="none"; } });
 }
 
-// ===== Frequent-item quick picks (meal items), dismissible =====
+// ===== Frequent-item quick picks =====
 function loadHiddenItems(){ try{ return JSON.parse(localStorage.getItem(HIDDEN_ITEMS_KEY)||"[]"); }catch(e){ return []; } }
 function saveHiddenItems(list){ try{ localStorage.setItem(HIDDEN_ITEMS_KEY, JSON.stringify(list)); }catch(e){} }
 function hideQuickItem(meal, item){
@@ -610,25 +739,10 @@ function workoutRecency(){
 }
 
 // ===================== ENTRY FORMS =====================
-function openEntryForm(type){
-  currentEntryType = type;
-  closeOverlay("addPickerOverlay");
-  document.getElementById("entryFormTitle").textContent =
-    type==="food" ? "Log Food" : type==="weight" ? "Log Weight" : type==="habit" ? "Log Habit" : "Log Workout";
-  const body = document.getElementById("entryFormBody");
-  if(type==="food") body.innerHTML = foodFormHtml();
-  else if(type==="weight") body.innerHTML = weightFormHtml();
-  else if(type==="habit") body.innerHTML = habitFormHtml();
-  else body.innerHTML = workoutFormHtml();
-  openOverlay("entryFormOverlay");
-  if(type==="food") initFoodForm();
-  else if(type==="weight") initWeightForm();
-  else if(type==="habit") initHabitForm();
-  else initWorkoutForm();
-}
-
-// ---------- FOOD ----------
 function foodFormHtml(){
+  const timeChipsBreakfast = ["07:00","07:30","08:00","08:30","09:00","09:30"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="breakfast">${fmtTime12(t)}</button>`).join("");
+  const timeChipsSnack = ["15:00","15:30","16:00","16:30","17:00","17:30","18:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="snack">${fmtTime12(t)}</button>`).join("");
+  const timeChipsDinner = ["18:30","19:00","19:30","20:00","20:30","21:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="dinner">${fmtTime12(t)}</button>`).join("");
   return `
     <div class="section"><h3>⏱️ Fasting</h3>
       <div class="fasting-box"><div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div><span class="fasting-flag none" id="fastingFlag">no data</span></div>
@@ -636,27 +750,46 @@ function foodFormHtml(){
     </div>
     <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
       <div class="chip-row" id="breakfastChips"></div>
-      <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
-      <datalist id="breakfastAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="breakfastQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="breakfastTime" onchange="recalcFasting()">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="breakfastInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('breakfast')">Add</button>
+        </div>
+        <div class="typeahead-list" id="breakfastTypeahead"></div>
+      </div>
+      <div class="muted-note">As you type, past items appear as suggestions. Tap Add to add anything new.</div>
+      <div class="label" style="margin:14px 0 6px">Time (AM)</div>
+      <div class="chip-row time-chip-row" id="breakfastTimeChips">${timeChipsBreakfast}<button type="button" class="opt time-other" data-meal="breakfast">Other…</button></div>
+      <input type="time" id="breakfastTime" style="display:none;margin-top:8px" onchange="onTimeChanged('breakfast')">
     </div>
     <div class="section" id="mealSnack" data-meal="snack"><h3>🥗 Snack</h3>
       <div class="chip-row" id="snackChips"></div>
-      <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
-      <datalist id="snackAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="snackQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="snackTime">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="snackInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('snack')">Add</button>
+        </div>
+        <div class="typeahead-list" id="snackTypeahead"></div>
+      </div>
+      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
+      <div class="chip-row time-chip-row" id="snackTimeChips">${timeChipsSnack}<button type="button" class="opt time-other" data-meal="snack">Other…</button></div>
+      <input type="time" id="snackTime" style="display:none;margin-top:8px" onchange="onTimeChanged('snack')">
     </div>
     <div class="section" id="mealDinner" data-meal="dinner"><h3>🍽️ Dinner</h3>
       <div class="chip-row" id="dinnerChips"></div>
-      <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
-      <datalist id="dinnerAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="dinnerQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="dinnerTime" onchange="recalcFasting()">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="dinnerInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('dinner')">Add</button>
+        </div>
+        <div class="typeahead-list" id="dinnerTypeahead"></div>
+      </div>
+      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
+      <div class="chip-row time-chip-row" id="dinnerTimeChips">${timeChipsDinner}<button type="button" class="opt time-other" data-meal="dinner">Other…</button></div>
+      <input type="time" id="dinnerTime" style="display:none;margin-top:8px" onchange="onTimeChanged('dinner')">
     </div>
     <div class="section"><h3>📝 Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
-    <div class="section"><h3>📅 Date</h3><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div></div>
+    <div class="label">Date</div><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div>
     <button class="btn btn-save" onclick="saveFoodEntry()">Save Food Log</button>
   `;
 }
@@ -669,10 +802,32 @@ function initFoodForm(){
   document.getElementById("snackTime").value = normMeal(rec&&rec.snack).time || "";
   document.getElementById("dinnerTime").value = normMeal(rec&&rec.dinner).time || "";
   document.getElementById("foodNotes").value = (rec&&rec.notes) || "";
-  ["breakfast","snack","dinner"].forEach(renderMealChips);
-  renderAllMealQuickPicks();
   ["breakfast","snack","dinner"].forEach(meal=>{
-    document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
+    renderMealChips(meal);
+    // Wire typeahead
+    const input = document.getElementById(meal+"Input");
+    const list = document.getElementById(meal+"Typeahead");
+    setupTypeahead(input, list, ()=>mealItemFrequency(meal).map(([item])=>item), (picked)=>{
+      addMealItem(meal, picked);
+      input.value = "";
+    });
+    input.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); list.style.display="none"; } });
+    // Sync time chips with any existing time value
+    syncTimeChips(meal);
+    // Time chip clicks
+    document.getElementById(meal+"TimeChips").querySelectorAll(".time-chip").forEach(btn=>{
+      btn.onclick = ()=>{
+        document.getElementById(meal+"Time").value = btn.dataset.time;
+        document.getElementById(meal+"Time").style.display = "none";
+        syncTimeChips(meal);
+        if(meal==="breakfast" || meal==="dinner") recalcFasting();
+      };
+    });
+    // "Other…" chip → reveal raw time picker
+    document.getElementById(meal+"TimeChips").querySelector(".time-other").onclick = ()=>{
+      document.getElementById(meal+"Time").style.display = "block";
+      document.getElementById(meal+"Time").focus();
+    };
   });
   document.getElementById("foodDate").addEventListener("change", ()=>{
     const d = document.getElementById("foodDate").value || todayStr();
@@ -682,10 +837,29 @@ function initFoodForm(){
     document.getElementById("snackTime").value = normMeal(r&&r.snack).time || "";
     document.getElementById("dinnerTime").value = normMeal(r&&r.dinner).time || "";
     document.getElementById("foodNotes").value = (r&&r.notes) || "";
-    ["breakfast","snack","dinner"].forEach(renderMealChips);
+    ["breakfast","snack","dinner"].forEach(m=>{ renderMealChips(m); syncTimeChips(m); });
     recalcFasting();
   });
   recalcFasting();
+}
+
+function onTimeChanged(meal){
+  syncTimeChips(meal);
+  if(meal==="breakfast" || meal==="dinner") recalcFasting();
+}
+function syncTimeChips(meal){
+  const t = document.getElementById(meal+"Time").value;
+  const chips = document.getElementById(meal+"TimeChips").querySelectorAll(".time-chip");
+  let matched = false;
+  chips.forEach(btn=>{
+    const isMatch = btn.dataset.time===t;
+    btn.classList.toggle("sel", isMatch);
+    if(isMatch) matched = true;
+  });
+  const otherBtn = document.getElementById(meal+"TimeChips").querySelector(".time-other");
+  if(otherBtn) otherBtn.classList.toggle("sel", !!t && !matched);
+  // If time is set but not on a chip, show the raw input
+  if(t && !matched) document.getElementById(meal+"Time").style.display = "block";
 }
 function recalcFasting(){
   const date = document.getElementById("foodDate").value || todayStr();
@@ -719,34 +893,31 @@ async function saveFoodEntry(){
   rec.notes = notes || null;
   rec._source = "live";
   persistDays();
-  renderAllMealQuickPicks();
   toast("Food log saved ✓");
   if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
   closeAllOverlaysToHome();
 }
 
-// ---------- WEIGHT (append-only) ----------
 function weightFormHtml(){
   return `
     <div class="section"><h3>⚖️ Weight</h3>
       <div class="val-wrap"><input type="tel" id="weightValue" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
       <div class="muted-note" id="weightPrefillNote"></div>
     </div>
-    <div class="section"><h3>👟 Steps (optional)</h3><input type="tel" id="weightSteps" inputmode="numeric" placeholder="8000"></div>
-    <div class="section row2" style="display:grid">
+    <div class="label">👟 Steps (optional)</div><input type="tel" id="weightSteps" inputmode="numeric" placeholder="8000">
+    <div class="row2" style="display:grid;margin-top:14px">
       <div><div class="label" style="margin-top:0">Date</div><input type="date" id="weightDate"></div>
       <div><div class="label" style="margin-top:0">Time</div><input type="time" id="weightTime"></div>
     </div>
-    <div class="section"><h3>📝 Note (optional)</h3><textarea id="weightNote" placeholder="e.g. after workout"></textarea></div>
+    <div class="label" style="margin-top:14px">📝 Note (optional)</div><textarea id="weightNote" placeholder="e.g. after workout"></textarea>
     <button class="btn btn-save" onclick="saveWeightEntry()">Save Weight</button>
   `;
 }
-let weightEditSeed = null; // {weight, notes} pre-fill from a tapped historical entry
+let weightEditSeed = null;
 function initWeightForm(){
   const todayDate = todayStr();
   document.getElementById("weightDate").value = todayDate;
   document.getElementById("weightTime").value = nowTimeStr();
-  // Pre-fill steps from existing record if available
   const existingRec = days[todayDate];
   if(existingRec && existingRec.steps!=null){
     document.getElementById("weightSteps").value = existingRec.steps;
@@ -772,11 +943,11 @@ async function saveWeightEntry(){
     if(!confirm(`Save weight for ${date}? (not today)`)) return;
   }
   const rec = ensureDay(date);
-  if(!Array.isArray(rec.weightEntries)) rec.weightEntries = normWeightEntries(rec); // migrate legacy scalar in place
+  if(!Array.isArray(rec.weightEntries)) rec.weightEntries = normWeightEntries(rec);
   rec.weightEntries.push({ id: genId(), time: document.getElementById("weightTime").value||null, weight, notes: document.getElementById("weightNote").value.trim()||null });
-  delete rec.weight; // superseded by weightEntries
+  delete rec.weight;
   const steps = parseInt(document.getElementById("weightSteps").value,10);
-  if(steps) rec.steps = steps;
+  if(!isNaN(steps) && steps>0) rec.steps = steps;
   rec._source = "live";
   persistDays();
   toast("Weight saved ✓");
@@ -784,14 +955,12 @@ async function saveWeightEntry(){
   closeAllOverlaysToHome();
 }
 
-// ---------- HABIT (append-only events, whole habit set in one sitting) ----------
-let habitDraft = {}; // key -> value for this session
+let habitDraft = {};
 function habitFormHtml(){
   const today = days[todayStr()];
   habitDraft = {};
   BUILTIN_HABITS.forEach(h=>{ habitDraft[h.key] = habitDayValue(today, h.key); });
   trackers.forEach(t=>{ habitDraft[t.id] = habitDayValue(today, t.id); });
-
   const rows = BUILTIN_HABITS.map(h=>habitRowHtml(h)).join("") +
     trackers.map(t=>habitRowHtml({key:t.id, label:t.label, type:t.type})).join("");
   return `
@@ -837,7 +1006,6 @@ async function saveHabitEntry(){
   rec.habitEvents.forEach(e=>{ already[e.habitKey] = (already[e.habitKey]||0) + (typeof e.value=="number"?e.value:0); });
   const time = nowTimeStr();
   let appended = 0;
-
   BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type}))).forEach(h=>{
     const val = habitDraft[h.key];
     if(val==null || val===false || val==="") return;
@@ -861,7 +1029,6 @@ async function saveHabitEntry(){
   closeAllOverlaysToHome();
 }
 
-// ---------- WORKOUT (append-only) ----------
 function workoutFormHtml(){
   return `
     <div class="section"><h3>🏃 Workout</h3>
@@ -871,12 +1038,12 @@ function workoutFormHtml(){
       </div>
       <div class="muted-note" id="workoutPrefillNote"></div>
     </div>
-    <div class="section"><h3>Run distance (optional)</h3><div class="val-wrap"><input type="tel" id="workoutRunMiles" inputmode="decimal" placeholder="optional"><span class="unit">mi</span></div></div>
-    <div class="section row2" style="display:grid">
+    <div class="label">Run distance (optional)</div><div class="val-wrap"><input type="tel" id="workoutRunMiles" inputmode="decimal" placeholder="optional"><span class="unit">mi</span></div>
+    <div class="row2" style="display:grid;margin-top:14px">
       <div><div class="label" style="margin-top:0">Date</div><input type="date" id="workoutDate"></div>
       <div><div class="label" style="margin-top:0">Time</div><input type="time" id="workoutTime"></div>
     </div>
-    <div class="section"><h3>📝 Note (optional)</h3><textarea id="workoutNote" placeholder="anything about how it went…"></textarea></div>
+    <div class="label" style="margin-top:14px">📝 Note (optional)</div><textarea id="workoutNote" placeholder="anything about how it went…"></textarea>
     <button class="btn btn-save" onclick="saveWorkoutEntry()">Save Workout</button>
   `;
 }
@@ -886,7 +1053,6 @@ function initWorkoutForm(){
   document.getElementById("workoutTime").value = nowTimeStr();
   const input = document.getElementById("workoutValue"), list = document.getElementById("workoutTypeahead");
   setupTypeahead(input, list, workoutRecency, (picked)=>{
-    // pre-fill related field (run miles) from that workout's last entry, per the type-ahead spec
     const recs = allSortedRecords().slice().reverse();
     for(const r of recs){ const es = normWorkoutEntries(r).slice().reverse(); const found = es.find(e=>e.workout===picked); if(found){ if(found.run_miles!=null) document.getElementById("workoutRunMiles").value = found.run_miles; break; } }
   });
@@ -924,55 +1090,133 @@ function showChartFallback(id, msg){ const c=document.getElementById(id); if(!c)
 function showChartCanvas(id){ const c=document.getElementById(id); if(!c) return; c.style.display="block"; const e=document.getElementById(id+"Empty"); if(e) e.style.display="none"; }
 
 function showDashTab(tab){
+  document.getElementById("dashWeekView").style.display = tab==="week" ? "block" : "none";
   document.getElementById("dashMonthView").style.display = tab==="month" ? "block" : "none";
-  document.getElementById("dashDetailView").style.display = tab==="detail" ? "block" : "none";
   document.getElementById("dashOverallView").style.display = tab==="overall" ? "block" : "none";
+  document.getElementById("dashWeekBtn").classList.toggle("sel", tab==="week");
   document.getElementById("dashMonthBtn").classList.toggle("sel", tab==="month");
-  document.getElementById("dashDetailBtn").classList.toggle("sel", tab==="detail");
   document.getElementById("dashOverallBtn").classList.toggle("sel", tab==="overall");
   renderDashboard();
 }
 function activeDashTab(){
+  if(document.getElementById("dashWeekView").style.display!=="none") return "week";
   if(document.getElementById("dashMonthView").style.display!=="none") return "month";
-  if(document.getElementById("dashDetailView").style.display!=="none") return "detail";
   return "overall";
 }
 function renderDashboard(){
   const tab = activeDashTab();
-  if(tab==="month") renderMonthTab();
-  else if(tab==="detail") renderDetailTab();
+  if(tab==="week") renderWeeklyTab();
+  else if(tab==="month") renderMonthTab();
   else renderOverallTab();
+  updateHeaderMenu();
 }
 
-// Helper: get current YYYY-MM
 function currentMonthStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
 function daysAgoStr(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 
-// ----- TAB 1: This Month (default) -----
-function renderMonthTab(){
-  const cm = currentMonthStr();
+function renderWeeklyTab(){
   const recs = allSortedRecords();
-  const monthRecs = recs.filter(r=>r.date.startsWith(cm));
   const gw = goalWeight();
+  const last7Start = daysAgoStr(6);
+  const weekRecs = recs.filter(r=>r.date>=last7Start);
+  const wWeights = weekRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
+  const wSteps = weekRecs.filter(r=>r.steps!=null).map(r=>r.steps);
+  const wWorkouts = weekRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
+  const wRuns = weekRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
+  const wFasting = weekRecs.filter(r=>r.fasting_hours!=null);
+  const fastingRate = wFasting.length ? Math.round(wFasting.filter(r=>r.fasting_hours>=16).length/wFasting.length*100) : null;
+  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  let habitDone=0, habitTotal=0;
+  weekRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
+  const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
+  const latestW = wWeights.length ? wWeights[wWeights.length-1] : null;
 
+  document.getElementById("weekCards").innerHTML = `
+    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${latestW?latestW+"kg":"—"}</div><div class="card-sub">${latestW?"Goal: "+gw.toFixed(1)+"kg":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${wSteps.length?wSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${wSteps.length?wSteps.length+" days":"No data"}</div></div>
+    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${wFasting.length?wFasting.length+" days logged":"No data"}</div></div>
+    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${wWorkouts}</div><div class="card-sub">${wRuns.length?wRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
+  `;
+
+  if(typeof Chart==="undefined"){ showChartFallback("weekWeightChart","📊 Chart couldn't load — data still saved"); }
+  else if(wWeights.length){
+    showChartCanvas("weekWeightChart");
+    if(charts.weekWeight) charts.weekWeight.destroy();
+    const weightData = weekRecs.flatMap(r=>normWeightEntries(r).map(e=>({date:r.date, weight:e.weight})));
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.weekWeight = new Chart(document.getElementById("weekWeightChart"), {
+      type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
+        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(163,230,53,.12)", fill:true, tension:.25, pointRadius:3 },
+        { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
+      ]},
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
+    });
+  } else showChartFallback("weekWeightChart","⚖️ No weight entries this week yet");
+
+  // Habit checklist grid
+  const todayDate = todayStr();
+  const dates7 = [];
+  for(let i=6;i>=0;i--) dates7.push(daysAgoStr(i));
+  const allHabits = BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type})));
+  let habitGridHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:360px"><thead><tr><th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase">Habit</th>';
+  dates7.forEach(d=>{ const dayLabel = d.slice(8); const isToday = d===todayDate; habitGridHtml += `<th style="text-align:center;padding:6px 4px;color:var(--muted);font-size:10px;${isToday?'color:var(--accent);font-weight:800':'#'}">${dayLabel}</th>`; });
+  habitGridHtml += '</tr></thead><tbody>';
+  allHabits.forEach(h=>{
+    habitGridHtml += `<tr><td style="padding:8px;font-size:12px;white-space:nowrap">${h.label}</td>`;
+    dates7.forEach(d=>{
+      const rec = days[d];
+      const val = habitDayValue(rec, h.key);
+      let cell = '—';
+      let color = 'var(--muted)';
+      if(val!==null){
+        if(h.type==="count"){
+          cell = val; color = val>0 ? 'var(--green)' : 'var(--muted)';
+        } else if(h.type==="number" || h.type==="text"){
+          cell = val; color = 'var(--text)';
+        } else {
+          cell = val ? '✓' : '·'; color = val ? 'var(--green)' : 'var(--muted)';
+        }
+      }
+      const isToday = d===todayDate;
+      habitGridHtml += `<td style="text-align:center;padding:8px 4px;color:${color};font-weight:${val?'700':'400'};${isToday?'background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:8px':''}">${cell}</td>`;
+    });
+    habitGridHtml += '</tr>';
+  });
+  habitGridHtml += '</tbody></table></div>';
+  document.getElementById("weekHabitGrid").innerHTML = habitGridHtml;
+
+  document.getElementById("weekTable").innerHTML = weekRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
+    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+  </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
+}
+
+function renderMonthTab(){
+  const recs = allSortedRecords();
+  const gw = goalWeight();
+  const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
+  if(!months.length) months.push(currentMonthStr());
+  const picker = document.getElementById("monthPicker");
+  if(!picker.options.length || picker.options.length !== months.length){
+    picker.innerHTML = months.map(m=>{ const [y,mo]=m.split("-"); const d=new Date(parseInt(y),parseInt(mo)-1,1); return `<option value="${m}">${d.toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`; }).join("");
+  }
+  const selectedMonth = picker.value || months[months.length-1] || currentMonthStr();
+  picker.value = selectedMonth;
+  const monthRecs = recs.filter(r=>r.date.startsWith(selectedMonth));
   const mWeights = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
   const mSteps = monthRecs.filter(r=>r.steps!=null).map(r=>r.steps);
   const mWorkouts = monthRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
+  const mRuns = monthRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
   const mFasting = monthRecs.filter(r=>r.fasting_hours!=null);
   const fastingRate = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
-  let habitDone=0, habitTotal=0;
-  monthRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
-  const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
 
   document.getElementById("monthCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data yet"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${mSteps.length?monthRecs.length+" days":"No data"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${mFasting.length?mFasting.length+" days logged":"No data"}</div></div>
-    <div class="card orange"><div class="card-label">✅ Habit Rate</div><div class="card-value">${habitRate!=null?habitRate+"%":"—"}</div><div class="card-sub">${habitTotal?habitDone+"/"+habitTotal+" done":"No data"}</div></div>
+    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
+    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
+    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
   `;
 
-  // Weight chart for this month
   if(typeof Chart==="undefined"){ showChartFallback("monthWeightChart","📊 Chart couldn't load — data still saved"); }
   else if(monthRecs.length){
     showChartCanvas("monthWeightChart");
@@ -981,81 +1225,24 @@ function renderMonthTab(){
     const textColor=themeColor("--text"), gridColor=themeColor("--border");
     charts.monthWeight = new Chart(document.getElementById("monthWeightChart"), {
       type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
-        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,.12)", fill:true, tension:.25, pointRadius:2 },
+        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(163,230,53,.12)", fill:true, tension:.25, pointRadius:2 },
         { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
       ]},
       options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
     });
-  } else showChartFallback("monthWeightChart","⚖️ No weight entries this month yet");
+  } else showChartFallback("monthWeightChart","⚖️ No weight entries for this month");
 
-  // Last 7 days table
-  const last7Start = daysAgoStr(6);
-  const last7 = recs.filter(r=>r.date>=last7Start);
-  document.getElementById("monthRecentTable").innerHTML = last7.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workouts</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${last7.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount = BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length;
-      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td>${normWorkoutEntries(r).length}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
-  </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
-}
-
-// ----- TAB 2: Monthly Detail -----
-function renderDetailTab(){
-  const recs = allSortedRecords();
-  const gw = goalWeight();
-  const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
-  const picker = document.getElementById("detailMonthPicker");
-  if(!picker.options.length || picker.options.length !== months.length){
-    picker.innerHTML = months.map(m=>{ const [y,mo]=m.split("-"); const d=new Date(parseInt(y),parseInt(mo)-1,1); return `<option value="${m}">${d.toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`; }).join("");
-  }
-  const selectedMonth = picker.value || months[months.length-1] || currentMonthStr();
-  picker.value = selectedMonth;
-  const monthRecs = recs.filter(r=>r.date.startsWith(selectedMonth));
-
-  const mWeights = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
-  const mSteps = monthRecs.filter(r=>r.steps!=null).map(r=>r.steps);
-  const mWorkouts = monthRecs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
-  const mRuns = monthRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
-  const mFasting = monthRecs.filter(r=>r.fasting_hours!=null);
-  const fastingRate = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
-
-  document.getElementById("detailCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
-  `;
-
-  // Weight chart for selected month
-  if(typeof Chart==="undefined"){ showChartFallback("detailWeightChart","📊 Chart couldn't load — data still saved"); }
-  else if(monthRecs.length){
-    showChartCanvas("detailWeightChart");
-    if(charts.detailWeight) charts.detailWeight.destroy();
-    const weightData = monthRecs.flatMap(r=>normWeightEntries(r).map(e=>({date:r.date, weight:e.weight})));
-    const textColor=themeColor("--text"), gridColor=themeColor("--border");
-    charts.detailWeight = new Chart(document.getElementById("detailWeightChart"), {
-      type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
-        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,.12)", fill:true, tension:.25, pointRadius:2 },
-        { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
-      ]},
-      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
-    });
-  } else showChartFallback("detailWeightChart","⚖️ No weight entries for this month");
-
-  // Day-by-day table
-  document.getElementById("detailTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
+  document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
       return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;
 }
 
-// ----- TAB 3: Overall -----
 function renderOverallTab(){
   const recs = allSortedRecords();
   const gw = goalWeight();
   const overall = latestWeightOverall();
-
-  // Overall cards
   const allWeights = recs.flatMap(r=>normWeightEntries(r).map(e=>e.weight));
-  const allSteps = recs.filter(r=>r.steps!=null).map(r=>r.steps);
   const allWorkouts = recs.reduce((s,r)=>s+normWorkoutEntries(r).length,0);
   const allFasting = recs.filter(r=>r.fasting_hours!=null);
   const fastingRate = allFasting.length ? Math.round(allFasting.filter(r=>r.fasting_hours>=16).length/allFasting.length*100) : null;
@@ -1067,7 +1254,6 @@ function renderOverallTab(){
     <div class="card orange"><div class="card-label">🏃 Total Workouts</div><div class="card-value">${allWorkouts}</div><div class="card-sub">all-time</div></div>
   `;
 
-  // All-history weight chart
   if(typeof Chart==="undefined"){ showChartFallback("overallWeightChart","📊 Chart couldn't load — data still saved"); }
   else if(allWeights.length){
     showChartCanvas("overallWeightChart");
@@ -1076,14 +1262,13 @@ function renderOverallTab(){
     const textColor=themeColor("--text"), gridColor=themeColor("--border");
     charts.overallWeight = new Chart(document.getElementById("overallWeightChart"), {
       type:"line", data:{ labels:weightData.map(e=>e.date), datasets:[
-        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(79,140,255,.08)", fill:true, tension:.25, pointRadius:1 },
+        { label:"Weight", data:weightData.map(e=>e.weight), borderColor:themeColor("--accent"), backgroundColor:"rgba(163,230,53,.08)", fill:true, tension:.25, pointRadius:1 },
         { label:"Goal", data:weightData.map(()=>gw), borderColor:themeColor("--green"), borderDash:[6,4], pointRadius:0, fill:false }
       ]},
       options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60,autoSkip:true,maxTicksLimit:8}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
     });
   } else showChartFallback("overallWeightChart","⚖️ No weight entries yet");
 
-  // Habit adherence chart (all-time)
   const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
   const habitStats = habitList.map(h=>{
     const tracked = recs.map(r=>habitDayValue(r,h.key)).filter(v=>v!==null);
@@ -1102,7 +1287,6 @@ function renderOverallTab(){
     });
   } else showChartFallback("overallHabitChart","✅ No habit data yet");
 
-  // Month-over-month table
   const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
   document.getElementById("overallMonthTable").innerHTML = months.length ? `<table><thead><tr><th>Month</th><th>Days</th><th>Avg Wt</th><th>Avg Steps</th><th>Fasting %</th><th>Workouts</th></tr></thead><tbody>
     ${months.map(m=>{
@@ -1117,7 +1301,7 @@ function renderOverallTab(){
   </tbody></table>` : `<div class="dash-empty">📊 No data yet</div>`;
 }
 
-// ===================== Custom trackers (settings) =====================
+// ===================== Custom trackers =====================
 function toggleAddTrackerForm(){ const f=document.getElementById("addTrackerForm"); f.style.display = f.style.display==="none"?"flex":"none"; }
 async function addTracker(){
   const name=document.getElementById("newTrackerName").value.trim();
@@ -1132,15 +1316,68 @@ async function addTracker(){
 }
 function renderTrackers(){
   const box=document.getElementById("trackerList"); if(!box) return; box.innerHTML="";
-  if(!trackers.length){ box.innerHTML='<div class="muted-note">No custom trackers yet — add one below.</div>'; return; }
-  trackers.forEach(t=>{
+  // Built-in habits (read-only)
+  BUILTIN_HABITS.forEach(h=>{
     const row=document.createElement("div"); row.className="tracker-row";
-    row.innerHTML = `<span>${t.label}</span><span class="muted-note" style="margin:0">${t.type}</span>`;
+    row.innerHTML = `<span>${h.label}</span><span class="muted-note" style="margin:0">built-in</span>`;
     box.appendChild(row);
   });
+  if(!trackers.length){
+    const note=document.createElement("div"); note.className="muted-note"; note.style.marginTop="6px";
+    note.textContent="No custom trackers yet — tap 'Add tracker' below to add one. Swipe left on a custom row to delete it.";
+    box.appendChild(note);
+    return;
+  }
+  trackers.forEach(t=>{
+    const wrap = document.createElement("div"); wrap.className="tracker-swipe"; wrap.dataset.id=t.id;
+    wrap.innerHTML = `<button type="button" class="tracker-swipe-delete">Delete</button>
+      <div class="tracker-swipe-inner"><span>${t.label}</span><span class="tracker-swipe-badge">${t.type}</span></div>`;
+    box.appendChild(wrap);
+    wireSwipeDelete(wrap, t);
+  });
+}
+function wireSwipeDelete(wrap, tracker){
+  let startX=null, currentX=null;
+  const inner = wrap.querySelector(".tracker-swipe-inner");
+  const deleteBtn = wrap.querySelector(".tracker-swipe-delete");
+  inner.addEventListener("touchstart", e=>{ startX = e.touches[0].clientX; }, {passive:true});
+  inner.addEventListener("touchmove", e=>{
+    if(startX==null) return;
+    currentX = e.touches[0].clientX;
+    const dx = currentX - startX;
+    if(dx < 0){
+      const clamped = Math.max(dx, -80);
+      inner.style.transform = `translateX(${clamped}px)`;
+      inner.style.transition = "none";
+    }
+  }, {passive:true});
+  inner.addEventListener("touchend", ()=>{
+    if(startX==null) return;
+    const dx = (currentX||startX) - startX;
+    inner.style.transition = "";
+    if(dx < -40){ wrap.classList.add("revealed"); inner.style.transform=""; }
+    else { wrap.classList.remove("revealed"); inner.style.transform=""; }
+    startX = null; currentX = null;
+  });
+  // Desktop click-to-reveal fallback
+  let clickCount = 0;
+  inner.addEventListener("click", (e)=>{
+    if(e.target.closest(".tracker-swipe-delete")) return;
+    clickCount++;
+    if(clickCount>=2){ wrap.classList.toggle("revealed"); clickCount=0; }
+    setTimeout(()=>{ clickCount = 0; }, 400);
+  });
+  deleteBtn.onclick = async ()=>{
+    if(!confirm(`Delete tracker "${tracker.label}"? Historical entries stay in your data — this only removes it from the list.`)) return;
+    trackers = trackers.filter(t=>t.id!==tracker.id);
+    persistTrackers();
+    renderTrackers();
+    toast(`Removed "${tracker.label}"`);
+    if(cloudCfg) cloudSaveTrackers().catch(()=>toast("Removed locally — cloud sync failed","var(--amber)"));
+  };
 }
 
-// ===================== WhatsApp message (settings, pick a date) =====================
+// ===================== WhatsApp =====================
 function fmtDateLong(dateStr){ const d=new Date(dateStr+"T00:00:00"); return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"}); }
 function fmtTime12(t){ if(!t) return ""; const [h,m]=t.split(":").map(Number); const ampm=h>=12?"PM":"AM"; const h12=h%12===0?12:h%12; return `${h12}:${String(m).padStart(2,"0")} ${ampm}`; }
 function buildWhatsAppMessage(date){
@@ -1212,7 +1449,7 @@ function exportExcel(){
   toast("Excel export downloaded");
 }
 
-// ===================== Cloud Sync (unchanged mechanics, same day-file shape) =====================
+// ===================== Cloud Sync =====================
 function loadCloudCfg(){ try{ return JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); }catch(e){ return null; } }
 function saveCloudCfg(cfg){ localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg)); }
 function clearCloudCfg(){ localStorage.removeItem(CLOUD_KEY); }
@@ -1292,7 +1529,7 @@ async function cloudConnect(){
     toast(`Connected — ${(index||[]).length} days loaded`);
     setCloudStatus(true);
     renderTrackers();
-    updateHamburgerSummary();
+    updateHeaderMenu();
     renderDashboard();
   }catch(err){ toast("Connect failed: "+err.message,"var(--red)"); setCloudStatus(false, "Not connected — check token/repo and try again"); }
 }
@@ -1310,37 +1547,31 @@ async function cloudPullOnLoad(){
     const { data: remoteTrackers } = await cloudGetJson(cloudCfg, "trackers.json");
     mergeDaysFromCloud(index); persistDays();
     if(Array.isArray(remoteTrackers)) { trackers = remoteTrackers; persistTrackers(); }
-    setCloudStatus(true); updateHamburgerSummary(); renderTrackers(); renderDashboard();
+    setCloudStatus(true); updateHeaderMenu(); renderTrackers(); renderDashboard();
   }catch(err){ setCloudStatus(false, "Offline or cloud unreachable — using local copy"); }
 }
 
 // ===================== Theme =====================
 function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
-  document.getElementById("hpThemeToggle").textContent = theme==="light" ? "☀️ Light mode" : "🌙 Dark mode";
-  try{ localStorage.setItem("ihealth_dev_theme", theme); }catch(e){}
-  renderDashboard();
-}
-function toggleTheme(){
-  const current = document.documentElement.getAttribute("data-theme")==="light" ? "light" : "dark";
-  setTheme(current==="dark" ? "light" : "dark");
+  document.getElementById("headerMenuDarkBtn").classList.toggle("sel", theme!=="light");
+  document.getElementById("headerMenuLightBtn").classList.toggle("sel", theme==="light");
+  try{ localStorage.setItem(nsKey("ihealth_theme"), theme); }catch(e){}
+  if(document.getElementById("dashboardView").style.display !== "none") renderDashboard();
 }
 
 // ===================== Init =====================
 (function initApp(){
-  if(!checkOnboarding()){
-    // Onboarding is showing — don't initialize the dashboard yet.
-    // completeOnboarding() will call the rest of init.
-    return;
-  }
+  if(!checkOnboarding()) return;
   initAfterOnboarding();
 })();
 
 function initAfterOnboarding(){
-  updateHamburgerSummary();
+  updateHeaderMenu();
   renderTrackers();
   document.getElementById("waDate").value = todayStr();
   renderDashboard();
+  document.getElementById("fabAddBtn").style.display = "flex";
   if(cloudCfg){
     document.getElementById("cloudSetup").style.display="none";
     document.getElementById("cloudControls").style.display="block";
@@ -1348,10 +1579,15 @@ function initAfterOnboarding(){
     document.getElementById("cloudRepo").value=cloudCfg.repo;
     cloudPullOnLoad();
   } else { setCloudStatus(false); }
+  // visibility-based cloud pull (matches iExpense pattern)
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState==="visible" && cloudCfg) cloudPullOnLoad();
+  });
   (function initTheme(){
-    let saved="dark"; try{ saved = localStorage.getItem("ihealth_dev_theme") || "dark"; }catch(e){}
+    let saved="dark"; try{ saved = localStorage.getItem(nsKey("ihealth_theme")) || "dark"; }catch(e){}
     setTheme(saved);
   })();
+  showMainTab("dashboard");
 }
 </script>
 </body>

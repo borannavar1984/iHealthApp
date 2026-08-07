@@ -3,6 +3,29 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped: one-tap "Today's Message" (2026-08-07, later same day)
+
+Deep wants to hand the app to his dietitian and other clients, so sharing
+today's log needed to be one tap instead of buried in Settings:
+
+- The "+" fan-out menu now has a 5th item, 💬 **Message**, alongside
+  Food/Weight/Habit/Workout — all 5 evenly spaced around the FAB.
+- Tapping it opens straight to today's WhatsApp-formatted message, already
+  generated (no extra "Generate" tap needed since it's always today) — with
+  a **Copy Message** button to paste straight into WhatsApp.
+- If nothing's logged yet today, it shows a plain-language nudge ("Nothing
+  logged for today yet — add your weight, food, or habits first") instead
+  of an empty or misleading message.
+- The original Settings → WhatsApp Message section is unchanged, still
+  useful for generating a message for a past date; both paths now share one
+  clipboard-copy helper instead of duplicating the copy logic.
+
+Tested with 16 new scripted-browser checks (5-item fan menu, empty-state
+nudge, generated message contains real logged data, copy actually copies,
+old Settings generator still works via the shared helper, other 4 fan items
+unaffected) plus the full existing 29-check suite from the habit/fasting
+round earlier today — all 45 passed before merging to `main`.
+
 ## Shipped (2026-08-07)
 
 Note: between the 2026-08-03 entry below and this one, a separate development

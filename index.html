@@ -162,15 +162,17 @@
   .fan-item .fan-label{position:absolute;bottom:-22px;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text);background:var(--card);padding:2px 8px;border-radius:12px;border:1px solid var(--border);white-space:nowrap;text-transform:uppercase}
   .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
   .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}
-  /* Positions: 4 items arc from left to right, above the FAB. Center = FAB. */
-  .fan-item.pos-1{--fan-x:-96px;--fan-y:-56px}
-  .fan-item.pos-2{--fan-x:-34px;--fan-y:-104px}
-  .fan-item.pos-3{--fan-x:34px;--fan-y:-104px}
-  .fan-item.pos-4{--fan-x:96px;--fan-y:-56px}
+  /* Positions: 5 items arc from left to right, above the FAB. Center = FAB. */
+  .fan-item.pos-1{--fan-x:-105px;--fan-y:-34px}
+  .fan-item.pos-2{--fan-x:-65px;--fan-y:-89px}
+  .fan-item.pos-3{--fan-x:0px;--fan-y:-110px}
+  .fan-item.pos-4{--fan-x:65px;--fan-y:-89px}
+  .fan-item.pos-5{--fan-x:105px;--fan-y:-34px}
   .fan-backdrop.show ~ .fan-item.pos-1,
   .fan-backdrop.show ~ .fan-item.pos-2,
   .fan-backdrop.show ~ .fan-item.pos-3,
-  .fan-backdrop.show ~ .fan-item.pos-4{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
+  .fan-backdrop.show ~ .fan-item.pos-4,
+  .fan-backdrop.show ~ .fan-item.pos-5{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
 
   /* ===== Full-screen overlay pattern (cat-picker-overlay from iExpense) ===== */
   .cat-picker-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
@@ -324,6 +326,7 @@
 <button type="button" class="fan-item pos-2" onclick="chooseAdd('weight')" aria-label="Log Weight">⚖️<span class="fan-label">Weight</span></button>
 <button type="button" class="fan-item pos-3" onclick="chooseAdd('habit')" aria-label="Log Habit">✅<span class="fan-label">Habit</span></button>
 <button type="button" class="fan-item pos-4" onclick="chooseAdd('workout')" aria-label="Log Workout">🏃<span class="fan-label">Workout</span></button>
+<button type="button" class="fan-item pos-5" onclick="chooseAdd('message')" aria-label="Send Today's Message">💬<span class="fan-label">Message</span></button>
 
 <!-- ===================== Entry form overlay ===================== -->
 <div class="cat-picker-overlay" id="entryFormOverlay">
@@ -654,17 +657,54 @@ function closeAllOverlaysToHome(){
 function openEntryForm(type){
   currentEntryType = type;
   document.getElementById("entryFormTitle").textContent =
-    type==="food" ? "Log Food" : type==="weight" ? "Log Weight" : type==="habit" ? "Log Habit" : "Log Workout";
+    type==="food" ? "Log Food" : type==="weight" ? "Log Weight" : type==="habit" ? "Log Habit" : type==="workout" ? "Log Workout" : "Today's Message";
   const body = document.getElementById("entryFormBody");
   if(type==="food") body.innerHTML = foodFormHtml();
   else if(type==="weight") body.innerHTML = weightFormHtml();
   else if(type==="habit") body.innerHTML = habitFormHtml();
-  else body.innerHTML = workoutFormHtml();
+  else if(type==="workout") body.innerHTML = workoutFormHtml();
+  else body.innerHTML = messageFormHtml();
   showOverlay("entryFormOverlay");
   if(type==="food") initFoodForm();
   else if(type==="weight") initWeightForm();
   else if(type==="habit") initHabitForm();
-  else initWorkoutForm();
+  else if(type==="workout") initWorkoutForm();
+  else initMessageForm();
+}
+
+// ===== Today's Message (quick-access from the + menu) =====
+function messageFormHtml(){
+  return `
+    <div class="section"><h3>💬 Today's Message</h3>
+      <div class="muted-note">Built automatically from everything logged today. Add anything missing first, then copy and send it to your dietitian.</div>
+      <div class="wa-preview" id="fabWaPreview" style="margin-top:10px"></div>
+      <button class="btn btn-wa" id="fabWaCopyBtn" style="margin-top:12px;display:none" onclick="copyTextToClipboard(document.getElementById('fabWaPreview').textContent)">📋 Copy Message</button>
+    </div>
+  `;
+}
+function dayHasAnyEntry(rec){
+  if(!rec) return false;
+  return normWeightEntries(rec).length>0 || rec.steps!=null || normWorkoutEntries(rec).length>0 || normHabitEvents(rec).length>0 ||
+    normMeal(rec.breakfast).items.length>0 || normMeal(rec.snack).items.length>0 || normMeal(rec.dinner).items.length>0 || !!rec.notes;
+}
+function initMessageForm(){
+  const date = todayStr();
+  const rec = days[date];
+  const box = document.getElementById("fabWaPreview");
+  const copyBtn = document.getElementById("fabWaCopyBtn");
+  if(!dayHasAnyEntry(rec)){
+    box.textContent = "Nothing logged for today yet — add your weight, food, or habits first, then come back here to generate the message.";
+    box.style.opacity = "0.75";
+    copyBtn.style.display = "none";
+  } else {
+    box.textContent = buildWhatsAppMessage(date);
+    box.style.opacity = "1";
+    copyBtn.style.display = "block";
+  }
+}
+async function copyTextToClipboard(msg){
+  try{ await navigator.clipboard.writeText(msg); toast("Copied — paste into WhatsApp"); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); toast("Copied — paste into WhatsApp"); }
 }
 
 // ===== Type-ahead =====
@@ -1439,10 +1479,8 @@ function generateWhatsApp(){
   const box=document.getElementById("waPreview"); box.textContent=msg; box.style.display="block";
   document.getElementById("copyWaBtn").style.display="block";
 }
-async function copyWhatsApp(){
-  const msg=document.getElementById("waPreview").textContent;
-  try{ await navigator.clipboard.writeText(msg); toast("Copied — paste into WhatsApp"); }
-  catch(e){ const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); toast("Copied — paste into WhatsApp"); }
+function copyWhatsApp(){
+  copyTextToClipboard(document.getElementById("waPreview").textContent);
 }
 
 // ===================== Backup / Export =====================

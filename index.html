@@ -379,19 +379,46 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Detect environment based on URL path.
+// Dev: any URL that contains "/dev/" (e.g. github.io/iHealthApp/dev/)
+// Prod: anything else (e.g. github.io/iHealthApp/ or root domain)
 const IS_DEV_PREVIEW = location.pathname.includes("/dev/");
-function nsKey(key){ return IS_DEV_PREVIEW ? key+"_dev" : key; }
+
 if(IS_DEV_PREVIEW){
   document.title = "iHealth (DEV)";
   document.getElementById("devBadge").style.display = "inline";
   document.getElementById("devBanner").style.display = "block";
 }
 
-const LS_DAYS = nsKey("ihealth_dev_days_v3");
-const LS_TRACKERS = nsKey("ihealth_dev_trackers_v1");
-const CLOUD_KEY = nsKey("ihealth_dev_cloud_cfg_v2");
-const HIDDEN_ITEMS_KEY = nsKey("ihealth_dev_hidden_items_v1");
-const LS_USER = nsKey("ihealth_dev_user_v1");
+// localStorage keys are namespaced by environment so dev and prod never mix.
+// Prod: ihealth_*   |   Dev: ihealth_dev_*
+const KEY_PREFIX = IS_DEV_PREVIEW ? "ihealth_dev_" : "ihealth_";
+const LS_DAYS = KEY_PREFIX + "days_v3";
+const LS_TRACKERS = KEY_PREFIX + "trackers_v1";
+const CLOUD_KEY = KEY_PREFIX + "cloud_cfg_v2";
+const HIDDEN_ITEMS_KEY = KEY_PREFIX + "hidden_items_v1";
+const LS_USER = KEY_PREFIX + "user_v1";
+
+// One-time migration: prior versions used "ihealth_dev_*" keys on BOTH dev and
+// prod due to a naming bug. On prod, if the new keys are empty but the legacy
+// keys hold data, migrate them so no user data is lost.
+if(!IS_DEV_PREVIEW){
+  const legacyMap = {
+    "ihealth_days_v3": "ihealth_dev_days_v3",
+    "ihealth_trackers_v1": "ihealth_dev_trackers_v1",
+    "ihealth_cloud_cfg_v2": "ihealth_dev_cloud_cfg_v2",
+    "ihealth_hidden_items_v1": "ihealth_dev_hidden_items_v1",
+    "ihealth_user_v1": "ihealth_dev_user_v1"
+  };
+  try {
+    Object.entries(legacyMap).forEach(([newKey, legacyKey])=>{
+      if(!localStorage.getItem(newKey) && localStorage.getItem(legacyKey)){
+        localStorage.setItem(newKey, localStorage.getItem(legacyKey));
+        localStorage.removeItem(legacyKey);
+      }
+    });
+  } catch(e){ console.warn("Legacy key migration skipped:", e); }
+}
 
 let days = loadDays();
 let trackers = loadTrackers();

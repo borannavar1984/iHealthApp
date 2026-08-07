@@ -3,6 +3,27 @@
 Plain-English log of what's built and what's still open, against the phases in
 `PROJECT_BRIEF.md` (Deep approved 2026-07-12).
 
+## Habit customization + smarter fasting (2026-08-07, `main`)
+
+- Built-in habits (Water, Morning Detox, Deep Breathing, Isabgol,
+  Multivitamin) can now be switched off from Settings → My Trackers (kept as
+  defaults, toggle per habit) without losing their history; custom trackers
+  keep swipe-to-delete as before.
+- First-time onboarding now includes a pre-checked habit checklist so new
+  users pick what they want to track from day one.
+- The fasting-hours box is gone from the food entry form — fasting is
+  computed silently on save and only ever displayed on the dashboard's
+  Fasting Rate cards (Weekly/Monthly/Overall), as originally designed.
+- Fasting calc upgraded: fast-break point is now the *earliest* of today's
+  breakfast time, snack time, or a Morning Detox habit event's time — so
+  detox water logged before breakfast correctly ends the fast earlier.
+  Habit entries gained an optional per-row time field to make this accurate.
+- Confirmed dev (`/dev/`, `ihealth_dev_*`, `health-data-dev`) and production
+  (root, `ihealth_*`, `health-data`) remain on fully separate storage and
+  data repos; production data untouched.
+- 29 scripted-browser checks (17 new-feature, 12 regression against the real
+  198-day history) all passing before merge to `main`.
+
 ## Personalization and navigation overhaul (2026-08-03, on `develop`)
 
 - Editable user name and goal weight: hamburger profile section is now tappable,

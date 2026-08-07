@@ -3,6 +3,75 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped (2026-08-07)
+
+Note: between the 2026-08-03 entry below and this one, a separate development
+agent (Deep's "Perplexity development agent") pushed its own round of commits
+directly to `develop`/`main`/`health-data-dev` — the iExpense visual design
+language, a fan-out FAB replacing the quick-log bar, food item typeahead, meal
+time-chips, custom-tracker swipe-to-delete, and a real dev/prod localStorage
+collision fix — all reviewed and confirmed safe (see "Verified" below) before
+this round of work continued on top of it.
+
+This round addresses Deep's next feedback pass in full:
+
+1. **Custom trackers, including built-ins, can now be turned off.** Settings
+   → My Trackers lists all 5 built-in habits (💧 Water, 🌅 Morning Detox,
+   🫁 Deep Breathing, 🌾 Isabgol, 💊 Multivitamin) with an On/Off toggle next
+   to each — they stay as defaults but Deep can disable ones he doesn't want
+   to log, without losing their history. Custom trackers keep the existing
+   swipe-to-delete. Disabling a built-in only hides it from new logging (the
+   Habit form, and dashboard adherence/streak math) — it never touches past
+   entries, so old data still displays correctly if re-enabled later.
+2. **Onboarding now asks which habits to track.** The first-launch welcome
+   screen adds a checklist of the 5 built-in habits (all pre-checked) below
+   the name/goal-weight fields — unticking one there is equivalent to
+   switching it off in Settings afterward.
+3. **Fasting box removed from the food entry form.** It no longer shows a
+   live "X hrs" box while logging breakfast/snack/dinner. Fasting hours are
+   still computed automatically and silently on every save, and still show
+   up exactly where they already did — the dashboard's Fasting Rate cards
+   (Weekly/Monthly/Overall) — nothing to add there, it was already
+   dashboard-only.
+4. **Fasting calc now uses the earliest real intake, not just breakfast
+   time.** Previously it was strictly yesterday's dinner time → today's
+   breakfast time. Now it also considers today's snack time and a
+   Morning Detox habit event's time, and uses whichever is *earliest* as the
+   fast-breaking point — e.g. detox water logged at 6:00 AM now correctly
+   ends the fast at 6:00 AM even if breakfast is logged later at 8:30 AM.
+   Habit entries in the Habit form now carry an optional time (defaults to
+   "now", editable), the same idea as the existing meal time-chips, so this
+   can be accurate rather than always "whenever I happened to tap Save."
+   Recomputed and stored on both food-save and habit-save, since either can
+   change the earliest-intake time.
+
+**Verified (Deep asked explicitly):** dev (`ihealth_dev_*` keys, `/dev/`
+build, `health-data-dev` repo) and production (`ihealth_*` keys, root build,
+`health-data` repo) are on fully separate localStorage namespaces and
+separate GitHub data repos — confirmed by diffing both repos' git history.
+Production `health-data` is byte-identical to before (5a9da09, untouched,
+still old scalar schema — the app's normalizers read it fine). `develop` and
+`main` app code are identical (fast-forwarded, no divergence). `health-data-dev`
+has one extra commit beyond my last migration — Deep added a "Running"
+custom tracker while testing the dev build, which is exactly what that repo
+is for; no data-integrity issue.
+
+**Testing:** 29 scripted-browser checks — 17 new (onboarding habit checklist
+default-checked + persists unchecked choice, Habit form excludes a disabled
+built-in and includes an enabled one, every habit row has a time input,
+Settings toggle flips a built-in on/off and persists, fasting box confirmed
+absent from the food form, and the core fasting-math case: 20:00 dinner +
+06:00 detox water yields 10h fasting vs. the 12.5h a breakfast-only calc
+would have given for the same day) plus 12 regression checks against the
+real 198-day migrated history pulled through mocked cloud sync (all three
+dashboard tabs, both built-in-toggle and custom-tracker-swipe-delete
+Settings rows, all four entry forms cycling cleanly). All 29 passed.
+
+Deep's instruction for this round was explicit: "test validate verify
+everything in dev, everything looks good then push it to production." Pushed
+to `develop` first per house rule, all 29 checks green, then merged straight
+to `main` per that same instruction — no separate approval pause this round.
+
 ## Shipped to `develop` (2026-08-03)
 
 Major navigation and personalization overhaul:

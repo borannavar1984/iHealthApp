@@ -92,12 +92,6 @@
   .btn-ghost{background:var(--card2);color:var(--muted);font-size:14px;padding:12px;margin-top:10px;border-radius:999px}
   .btn-sm{padding:9px 14px;font-size:13px;margin-top:0;border-radius:999px;width:auto}
   .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#06281c;padding:12px 22px;border-radius:24px;font-weight:700;font-size:14px;display:none;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.35);max-width:calc(100% - 48px);text-align:center}
-  .fasting-box{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:12px 14px;margin-top:8px}
-  .fasting-box .fh{font-size:20px;font-weight:700}
-  .fasting-flag{font-size:12px;padding:3px 9px;border-radius:20px;font-weight:700}
-  .fasting-flag.ok{background:color-mix(in srgb, var(--green) 20%, transparent);color:var(--green)}
-  .fasting-flag.low{background:color-mix(in srgb, var(--amber) 20%, transparent);color:var(--amber)}
-  .fasting-flag.none{background:var(--card);color:var(--muted)}
   .habit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .habit-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:10px 12px}
   .stepper{display:flex;gap:4px}
@@ -372,6 +366,9 @@
     <div class="label" style="margin-top:14px">Goal weight</div>
     <div class="val-wrap"><input type="tel" id="onboardGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input" value="65.0"><span class="unit">kg</span></div>
     <div class="muted-note">You can change this anytime from the profile menu.</div>
+    <div class="label" style="margin-top:14px">What do you want to track?</div>
+    <div class="muted-note">All on by default — untick anything you don't need. You can change this anytime in Settings.</div>
+    <div id="onboardHabitList" style="margin-top:8px"></div>
     <button class="btn btn-save" onclick="completeOnboarding()">Get Started</button>
   </div>
 </div>
@@ -398,6 +395,7 @@ const LS_TRACKERS = KEY_PREFIX + "trackers_v1";
 const CLOUD_KEY = KEY_PREFIX + "cloud_cfg_v2";
 const HIDDEN_ITEMS_KEY = KEY_PREFIX + "hidden_items_v1";
 const LS_USER = KEY_PREFIX + "user_v1";
+const LS_HABIT_PREFS = KEY_PREFIX + "habit_prefs_v1";
 
 // One-time migration: prior versions used "ihealth_dev_*" keys on BOTH dev and
 // prod due to a naming bug. On prod, if the new keys are empty but the legacy
@@ -423,6 +421,7 @@ if(!IS_DEV_PREVIEW){
 let days = loadDays();
 let trackers = loadTrackers();
 let user = loadUser();
+let habitPrefs = loadHabitPrefs();
 
 function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
 function persistDays(){ try{ localStorage.setItem(LS_DAYS, JSON.stringify(days)); }catch(e){} }
@@ -430,6 +429,16 @@ function loadTrackers(){ try{ return JSON.parse(localStorage.getItem(LS_TRACKERS
 function persistTrackers(){ try{ localStorage.setItem(LS_TRACKERS, JSON.stringify(trackers)); }catch(e){} }
 function loadUser(){ try{ return JSON.parse(localStorage.getItem(LS_USER)||"null"); }catch(e){ return null; } }
 function saveUser(u){ try{ localStorage.setItem(LS_USER, JSON.stringify(u)); }catch(e){} }
+function loadHabitPrefs(){ try{ const v=JSON.parse(localStorage.getItem(LS_HABIT_PREFS)||"null"); return v || {}; }catch(e){ return {}; } }
+function persistHabitPrefs(){ try{ localStorage.setItem(LS_HABIT_PREFS, JSON.stringify(habitPrefs)); }catch(e){} }
+function isHabitEnabled(key){ return habitPrefs[key] !== false; }
+function setHabitEnabled(key, enabled){ habitPrefs[key] = enabled; persistHabitPrefs(); }
+function enabledBuiltins(){
+  return BUILTIN_HABITS.filter(h=>isHabitEnabled(h.key));
+}
+function activeHabitList(){
+  return enabledBuiltins().concat(trackers.map(t=>({key:t.id, label:t.label, type:t.type})));
+}
 function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function nowTimeStr(){ const d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
@@ -567,10 +576,19 @@ function saveProfile(){
 // ===== Onboarding =====
 function checkOnboarding(){
   if(!user){
+    renderOnboardHabitChecklist();
     document.getElementById("onboardingOverlay").style.display = "flex";
     return false;
   }
   return true;
+}
+function renderOnboardHabitChecklist(){
+  const box = document.getElementById("onboardHabitList"); if(!box) return;
+  box.innerHTML = BUILTIN_HABITS.map(h=>`
+    <label class="habit-row" style="margin-bottom:8px;cursor:pointer">
+      <span>${h.label}</span>
+      <input type="checkbox" data-onboard-habit="${h.key}" checked style="width:20px;height:20px">
+    </label>`).join("");
 }
 function completeOnboarding(){
   const name = document.getElementById("onboardName").value.trim();
@@ -579,6 +597,10 @@ function completeOnboarding(){
   if(!gw || gw<=0){ toast("Enter a valid goal weight","var(--red)"); return; }
   user = { name, goalWeight: gw };
   saveUser(user);
+  [...document.querySelectorAll("[data-onboard-habit]")].forEach(cb=>{
+    habitPrefs[cb.dataset.onboardHabit] = cb.checked;
+  });
+  persistHabitPrefs();
   document.getElementById("onboardingOverlay").style.display = "none";
   initAfterOnboarding();
   toast(`Welcome, ${name}! You're all set`);
@@ -744,10 +766,6 @@ function foodFormHtml(){
   const timeChipsSnack = ["15:00","15:30","16:00","16:30","17:00","17:30","18:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="snack">${fmtTime12(t)}</button>`).join("");
   const timeChipsDinner = ["18:30","19:00","19:30","20:00","20:30","21:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="dinner">${fmtTime12(t)}</button>`).join("");
   return `
-    <div class="section"><h3>⏱️ Fasting</h3>
-      <div class="fasting-box"><div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div><span class="fasting-flag none" id="fastingFlag">no data</span></div>
-      <div class="muted-note">Auto-calculated from yesterday's dinner time → today's breakfast time. Target: 16 hrs.</div>
-    </div>
     <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
       <div class="chip-row" id="breakfastChips"></div>
       <div class="typeahead-wrap" style="margin-top:8px">
@@ -820,7 +838,6 @@ function initFoodForm(){
         document.getElementById(meal+"Time").value = btn.dataset.time;
         document.getElementById(meal+"Time").style.display = "none";
         syncTimeChips(meal);
-        if(meal==="breakfast" || meal==="dinner") recalcFasting();
       };
     });
     // "Other…" chip → reveal raw time picker
@@ -838,14 +855,11 @@ function initFoodForm(){
     document.getElementById("dinnerTime").value = normMeal(r&&r.dinner).time || "";
     document.getElementById("foodNotes").value = (r&&r.notes) || "";
     ["breakfast","snack","dinner"].forEach(m=>{ renderMealChips(m); syncTimeChips(m); });
-    recalcFasting();
   });
-  recalcFasting();
 }
 
 function onTimeChanged(meal){
   syncTimeChips(meal);
-  if(meal==="breakfast" || meal==="dinner") recalcFasting();
 }
 function syncTimeChips(meal){
   const t = document.getElementById(meal+"Time").value;
@@ -861,34 +875,40 @@ function syncTimeChips(meal){
   // If time is set but not on a chip, show the raw input
   if(t && !matched) document.getElementById(meal+"Time").style.display = "block";
 }
-function recalcFasting(){
-  const date = document.getElementById("foodDate").value || todayStr();
+// Fasting is auto-calculated and shown only on the Dashboard — no live box in the
+// food form. The fast breaks at the *earliest* logged intake of the day: today's
+// breakfast, snack, or a morning-detox habit event with a time (e.g. detox water
+// at 6am counts as breaking the fast even before breakfast is logged).
+function fastBreakCandidates(rec){
+  const times = [];
+  const b = normMeal(rec && rec.breakfast); if(b.time) times.push(b.time);
+  const s = normMeal(rec && rec.snack); if(s.time) times.push(s.time);
+  normHabitEvents(rec).forEach(e=>{ if(e.habitKey==="morning_detox" && e.time) times.push(e.time); });
+  return times.sort();
+}
+function computeFastingHours(date, rec){
   const prevDate = prevDateStr(date);
   const prevRec = days[prevDate];
   const prevDinner = prevRec ? normMeal(prevRec.dinner).time : null;
-  const todayBreakfast = document.getElementById("breakfastTime").value;
-  const flagEl = document.getElementById("fastingFlag"), hoursEl = document.getElementById("fastingHours");
-  if(!prevDinner || !todayBreakfast){ hoursEl.textContent="—"; flagEl.textContent="no data"; flagEl.className="fasting-flag none"; return null; }
+  if(!prevDinner) return null;
+  const breakTime = fastBreakCandidates(rec)[0];
+  if(!breakTime) return null;
   const dinnerDt = new Date(prevDate+"T"+prevDinner+":00");
-  const breakfastDt = new Date(date+"T"+todayBreakfast+":00");
-  let hrs = (breakfastDt - dinnerDt) / 3600000;
+  const breakDt = new Date(date+"T"+breakTime+":00");
+  let hrs = (breakDt - dinnerDt) / 3600000;
   if(hrs<0) hrs += 24;
-  hrs = Math.round(hrs*10)/10;
-  hoursEl.textContent = hrs;
-  if(hrs>=16){ flagEl.textContent="✅ 16h+"; flagEl.className="fasting-flag ok"; } else { flagEl.textContent="⚠️ under 16h"; flagEl.className="fasting-flag low"; }
-  return hrs;
+  return Math.round(hrs*10)/10;
 }
 async function saveFoodEntry(){
   const date = document.getElementById("foodDate").value || todayStr();
   if(date !== todayStr()){
     if(!confirm(`Save food log for ${date}? (not today)`)) return;
   }
-  const fastingHours = recalcFasting();
   const rec = ensureDay(date);
   rec.breakfast = { time: document.getElementById("breakfastTime").value||null, items: mealsDraft.breakfast };
   rec.snack = { time: document.getElementById("snackTime").value||null, items: mealsDraft.snack };
   rec.dinner = { time: document.getElementById("dinnerTime").value||null, items: mealsDraft.dinner };
-  rec.fasting_hours = fastingHours;
+  rec.fasting_hours = computeFastingHours(date, rec);
   const notes = document.getElementById("foodNotes").value.trim();
   rec.notes = notes || null;
   rec._source = "live";
@@ -959,43 +979,47 @@ let habitDraft = {};
 function habitFormHtml(){
   const today = days[todayStr()];
   habitDraft = {};
-  BUILTIN_HABITS.forEach(h=>{ habitDraft[h.key] = habitDayValue(today, h.key); });
-  trackers.forEach(t=>{ habitDraft[t.id] = habitDayValue(today, t.id); });
-  const rows = BUILTIN_HABITS.map(h=>habitRowHtml(h)).join("") +
-    trackers.map(t=>habitRowHtml({key:t.id, label:t.label, type:t.type})).join("");
+  activeHabitList().forEach(h=>{ habitDraft[h.key] = { value: habitDayValue(today, h.key), time: nowTimeStr() }; });
+  const rows = activeHabitList().map(h=>habitRowHtml(h)).join("");
   return `
     <div class="section"><h3>✅ Today's Habits</h3>
       <div id="habitRows">${rows}</div>
-      <div class="muted-note">Saving only adds new entries for habits you've changed — it never erases what was already logged today.</div>
+      <div class="muted-note">Saving only adds new entries for habits you've changed — it never erases what was already logged today. Tap the time if it happened earlier than now.</div>
     </div>
     <button class="btn btn-save" onclick="saveHabitEntry()">Save Habits</button>
   `;
 }
 function habitRowHtml(h){
+  const timeInput = `<input type="time" data-habit-time="${h.key}" class="habit-time-input" style="width:96px;margin-left:8px">`;
   if(h.type==="count"){
-    return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><div class="stepper" data-habit="${h.key}">
-      ${[0,1,2].map(n=>`<button data-n="${n}">${n}</button>`).join("")}</div></div>`;
+    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><div class="stepper" data-habit="${h.key}">
+      ${[0,1,2].map(n=>`<button data-n="${n}">${n}</button>`).join("")}</div>${timeInput}</div></div>`;
   }
   if(h.type==="number" || h.type==="text"){
-    return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><input type="${h.type==='number'?'tel':'text'}" data-habit="${h.key}" style="width:110px" placeholder="${h.type==='number'?'0':'…'}"></div>`;
+    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><input type="${h.type==='number'?'tel':'text'}" data-habit="${h.key}" style="width:90px" placeholder="${h.type==='number'?'0':'…'}">${timeInput}</div></div>`;
   }
-  return `<div class="habit-row" style="margin-bottom:8px"><span>${h.label}</span><button class="opt" data-habit="${h.key}">Done</button></div>`;
+  return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><button class="opt" data-habit="${h.key}">Done</button>${timeInput}</div></div>`;
 }
 function initHabitForm(){
   const container = document.getElementById("habitRows");
   [...container.querySelectorAll("[data-habit]")].forEach(el=>{
     const key = el.dataset.habit;
-    const cur = habitDraft[key];
+    const cur = habitDraft[key].value;
     if(el.classList.contains("stepper")){
       [...el.children].forEach(btn=>{ btn.classList.toggle("sel", Number(btn.dataset.n)===cur);
-        btn.onclick=()=>{ habitDraft[key]=Number(btn.dataset.n); [...el.children].forEach(b=>b.classList.toggle("sel",b===btn)); }; });
+        btn.onclick=()=>{ habitDraft[key].value=Number(btn.dataset.n); [...el.children].forEach(b=>b.classList.toggle("sel",b===btn)); }; });
     } else if(el.tagName==="BUTTON"){
       el.classList.toggle("sel", cur===true);
-      el.onclick=()=>{ habitDraft[key] = habitDraft[key]===true ? false : true; el.classList.toggle("sel", habitDraft[key]===true); };
+      el.onclick=()=>{ habitDraft[key].value = habitDraft[key].value===true ? false : true; el.classList.toggle("sel", habitDraft[key].value===true); };
     } else {
       el.value = cur ?? "";
-      el.addEventListener("input", ()=>{ habitDraft[key]=el.value; });
+      el.addEventListener("input", ()=>{ habitDraft[key].value=el.value; });
     }
+  });
+  [...container.querySelectorAll("[data-habit-time]")].forEach(el=>{
+    const key = el.dataset.habitTime;
+    el.value = habitDraft[key].time;
+    el.addEventListener("change", ()=>{ habitDraft[key].time = el.value || nowTimeStr(); });
   });
 }
 async function saveHabitEntry(){
@@ -1004,10 +1028,11 @@ async function saveHabitEntry(){
   if(!Array.isArray(rec.habitEvents)) rec.habitEvents = normHabitEvents(rec);
   const already = {};
   rec.habitEvents.forEach(e=>{ already[e.habitKey] = (already[e.habitKey]||0) + (typeof e.value=="number"?e.value:0); });
-  const time = nowTimeStr();
   let appended = 0;
-  BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type}))).forEach(h=>{
-    const val = habitDraft[h.key];
+  activeHabitList().forEach(h=>{
+    const draft = habitDraft[h.key];
+    const val = draft.value;
+    const time = draft.time || nowTimeStr();
     if(val==null || val===false || val==="") return;
     if(h.key==="isabgol" || h.type==="count"){
       const target = Number(val)||0;
@@ -1023,6 +1048,7 @@ async function saveHabitEntry(){
   });
   delete rec.water; delete rec.morning_detox; delete rec.deep_breathing; delete rec.multivitamin; delete rec.isabgol_count; delete rec.isabgol; delete rec.custom;
   rec._source = "live";
+  rec.fasting_hours = computeFastingHours(date, rec);
   persistDays();
   toast(appended ? `Habits saved (${appended} new) ✓` : "No changes to save");
   if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
@@ -1125,7 +1151,7 @@ function renderWeeklyTab(){
   const wRuns = weekRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
   const wFasting = weekRecs.filter(r=>r.fasting_hours!=null);
   const fastingRate = wFasting.length ? Math.round(wFasting.filter(r=>r.fasting_hours>=16).length/wFasting.length*100) : null;
-  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  const habitList = enabledBuiltins().concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
   let habitDone=0, habitTotal=0;
   weekRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
   const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
@@ -1157,7 +1183,7 @@ function renderWeeklyTab(){
   const todayDate = todayStr();
   const dates7 = [];
   for(let i=6;i>=0;i--) dates7.push(daysAgoStr(i));
-  const allHabits = BUILTIN_HABITS.concat(trackers.map(t=>({key:t.id,label:t.label,type:t.type})));
+  const allHabits = activeHabitList();
   let habitGridHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:360px"><thead><tr><th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase">Habit</th>';
   dates7.forEach(d=>{ const dayLabel = d.slice(8); const isToday = d===todayDate; habitGridHtml += `<th style="text-align:center;padding:6px 4px;color:var(--muted);font-size:10px;${isToday?'color:var(--accent);font-weight:800':'#'}">${dayLabel}</th>`; });
   habitGridHtml += '</tr></thead><tbody>';
@@ -1186,8 +1212,8 @@ function renderWeeklyTab(){
   document.getElementById("weekHabitGrid").innerHTML = habitGridHtml;
 
   document.getElementById("weekTable").innerHTML = weekRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=enabledBuiltins().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${enabledBuiltins().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
 }
 
@@ -1233,8 +1259,8 @@ function renderMonthTab(){
   } else showChartFallback("monthWeightChart","⚖️ No weight entries for this month");
 
   document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=BUILTIN_HABITS.filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${BUILTIN_HABITS.length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+    ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=enabledBuiltins().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${enabledBuiltins().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;
 }
 
@@ -1269,7 +1295,7 @@ function renderOverallTab(){
     });
   } else showChartFallback("overallWeightChart","⚖️ No weight entries yet");
 
-  const habitList = BUILTIN_HABITS.concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  const habitList = enabledBuiltins().concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
   const habitStats = habitList.map(h=>{
     const tracked = recs.map(r=>habitDayValue(r,h.key)).filter(v=>v!==null);
     const yes = tracked.filter(v=>v===true || (typeof v==="number" && v>0)).length;
@@ -1316,10 +1342,16 @@ async function addTracker(){
 }
 function renderTrackers(){
   const box=document.getElementById("trackerList"); if(!box) return; box.innerHTML="";
-  // Built-in habits (read-only)
+  // Built-in habits — kept as defaults, but can be switched off
   BUILTIN_HABITS.forEach(h=>{
+    const enabled = isHabitEnabled(h.key);
     const row=document.createElement("div"); row.className="tracker-row";
-    row.innerHTML = `<span>${h.label}</span><span class="muted-note" style="margin:0">built-in</span>`;
+    row.innerHTML = `<span>${h.label}</span><button type="button" class="opt built-in-toggle${enabled?" sel":""}" data-key="${h.key}">${enabled?"On":"Off"}</button>`;
+    row.querySelector(".built-in-toggle").onclick = ()=>{
+      const nowEnabled = !isHabitEnabled(h.key);
+      setHabitEnabled(h.key, nowEnabled);
+      renderTrackers();
+    };
     box.appendChild(row);
   });
   if(!trackers.length){

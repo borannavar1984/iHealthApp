@@ -70,6 +70,13 @@
   button.opt:active{transform:scale(.95)}
   .chip-row{display:flex;flex-wrap:wrap;gap:8px}
   .chip-row button.opt{padding:10px 14px;border-radius:999px;flex:0 0 auto}
+  .time-chip-row button.opt{padding:8px 12px;font-size:13px;font-weight:600}
+  .time-chip-row button.opt.sel{background:var(--accent);color:var(--ctatext);border-color:var(--accent)}
+  .typeahead-wrap{position:relative}
+  .typeahead-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--border);border-radius:12px;max-height:220px;overflow-y:auto;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+  .typeahead-list button{display:block;width:100%;text-align:left;background:transparent;color:var(--text);border:none;padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)}
+  .typeahead-list button:last-child{border-bottom:none}
+  .typeahead-list button:hover,.typeahead-list button:active{background:var(--card)}
   .chip-wrap{position:relative;display:inline-flex}
   .chip-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:2px solid var(--bg);font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;z-index:1}
   .chip-remove:active{transform:scale(.9)}
@@ -97,6 +104,11 @@
   .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:700;cursor:pointer}
   .stepper button.sel{background:var(--accent2);border-color:var(--accent2);color:#fff}
   .tracker-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+  .tracker-swipe{position:relative;overflow:hidden;border-radius:16px;margin-bottom:8px;background:var(--red);touch-action:pan-y}
+  .tracker-swipe-inner{background:var(--card2);border-radius:16px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;transform:translateX(0);transition:transform .18s ease;position:relative;z-index:2}
+  .tracker-swipe.revealed .tracker-swipe-inner{transform:translateX(-80px)}
+  .tracker-swipe-delete{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);color:#fff;border:none;font-weight:700;font-size:13px;z-index:1;cursor:pointer}
+  .tracker-swipe-badge{font-size:11px;color:var(--muted);margin-right:8px}
   .wa-preview{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:14px;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.5;margin-top:10px;max-height:400px;overflow-y:auto}
   .cloud-status{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5}
   .cloud-status.on{color:var(--green)}
@@ -143,8 +155,28 @@
   .header-menu-link{display:block;width:100%;background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;text-align:left;padding:2px 0;cursor:pointer}
 
   /* ===== FAB (+) button (matches iExpense pattern) ===== */
-  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0}
+  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
   .fab-add:active{transform:translateX(-50%) scale(.93)}
+  .fab-add.open{transform:translateX(-50%) rotate(45deg);background:var(--red);color:#fff}
+
+  /* Fan-out backdrop */
+  .fan-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:145;display:none;opacity:0;transition:opacity .18s ease}
+  .fan-backdrop.show{display:block;opacity:1}
+
+  /* Fan-out arc menu items */
+  .fan-item{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);z-index:149;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
+  .fan-item .fan-label{position:absolute;bottom:-22px;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text);background:var(--card);padding:2px 8px;border-radius:12px;border:1px solid var(--border);white-space:nowrap;text-transform:uppercase}
+  .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
+  .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}
+  /* Positions: 4 items arc from left to right, above the FAB. Center = FAB. */
+  .fan-item.pos-1{--fan-x:-96px;--fan-y:-56px}
+  .fan-item.pos-2{--fan-x:-34px;--fan-y:-104px}
+  .fan-item.pos-3{--fan-x:34px;--fan-y:-104px}
+  .fan-item.pos-4{--fan-x:96px;--fan-y:-56px}
+  .fan-backdrop.show ~ .fan-item.pos-1,
+  .fan-backdrop.show ~ .fan-item.pos-2,
+  .fan-backdrop.show ~ .fan-item.pos-3,
+  .fan-backdrop.show ~ .fan-item.pos-4{transform:translate(calc(-50% + var(--fan-x)), var(--fan-y)) scale(1)}
 
   /* ===== Full-screen overlay pattern (cat-picker-overlay from iExpense) ===== */
   .cat-picker-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
@@ -290,22 +322,14 @@
 </div>
 
 <!-- ===================== FAB (+) button ===================== -->
-<button type="button" class="fab-add" id="fabAddBtn" onclick="openAddPicker()">+</button>
+<button type="button" class="fab-add" id="fabAddBtn" onclick="toggleFanMenu()">+</button>
 
-<!-- ===================== Add picker overlay (choose what to log) ===================== -->
-<div class="cat-picker-overlay" id="addPickerOverlay">
-  <div class="cat-picker-header">
-    <button type="button" class="cat-picker-back" onclick="closeAddPicker()">‹</button>
-    <div class="cat-picker-title">Add</div>
-    <div style="width:36px"></div>
-  </div>
-  <div class="cat-picker-list">
-    <div class="cat-picker-row" onclick="chooseAdd('food')"><span class="cpr-icon">🍽️</span><span class="cpr-label">Log Food</span></div>
-    <div class="cat-picker-row" onclick="chooseAdd('weight')"><span class="cpr-icon">⚖️</span><span class="cpr-label">Log Weight</span></div>
-    <div class="cat-picker-row" onclick="chooseAdd('habit')"><span class="cpr-icon">✅</span><span class="cpr-label">Log Habit</span></div>
-    <div class="cat-picker-row" onclick="chooseAdd('workout')"><span class="cpr-icon">🏃</span><span class="cpr-label">Log Workout</span></div>
-  </div>
-</div>
+<!-- ===================== Fan-out add menu (opens from FAB) ===================== -->
+<div class="fan-backdrop" id="fanBackdrop" onclick="closeFanMenu()"></div>
+<button type="button" class="fan-item pos-1" onclick="chooseAdd('food')" aria-label="Log Food">🍽️<span class="fan-label">Food</span></button>
+<button type="button" class="fan-item pos-2" onclick="chooseAdd('weight')" aria-label="Log Weight">⚖️<span class="fan-label">Weight</span></button>
+<button type="button" class="fan-item pos-3" onclick="chooseAdd('habit')" aria-label="Log Habit">✅<span class="fan-label">Habit</span></button>
+<button type="button" class="fan-item pos-4" onclick="chooseAdd('workout')" aria-label="Log Workout">🏃<span class="fan-label">Workout</span></button>
 
 <!-- ===================== Entry form overlay ===================== -->
 <div class="cat-picker-overlay" id="entryFormOverlay">
@@ -547,25 +571,33 @@ function showMainTab(tab){
 function showOverlay(id){ document.getElementById(id).style.display="flex"; window.scrollTo({top:0}); }
 function closeOverlay(id){ document.getElementById(id).style.display="none"; }
 
-// ===== Add picker (FAB → picker → form) =====
-function openAddPicker(){
-  document.getElementById("fabAddBtn").style.display = "none";
-  document.getElementById("addPickerOverlay").style.display = "flex";
+// ===== Fan-out add menu =====
+function openFanMenu(){
+  document.getElementById("fabAddBtn").classList.add("open");
+  document.getElementById("fanBackdrop").classList.add("show");
 }
-function closeAddPicker(){
-  document.getElementById("addPickerOverlay").style.display = "none";
-  document.getElementById("fabAddBtn").style.display = "flex";
+function closeFanMenu(){
+  document.getElementById("fabAddBtn").classList.remove("open");
+  document.getElementById("fanBackdrop").classList.remove("show");
+}
+function toggleFanMenu(){
+  const open = document.getElementById("fabAddBtn").classList.contains("open");
+  if(open) closeFanMenu(); else openFanMenu();
 }
 function chooseAdd(type){
-  closeAddPicker();
-  openEntryForm(type);
+  closeFanMenu();
+  setTimeout(()=>openEntryForm(type), 180);
 }
+// Back-compat shims
+function openAddPicker(){ openFanMenu(); }
+function closeAddPicker(){ closeFanMenu(); }
 
 // ===== Entry form =====
 let currentEntryType = null;
-function backToPicker(){ closeOverlay("entryFormOverlay"); openAddPicker(); }
+function backToPicker(){ closeOverlay("entryFormOverlay"); document.getElementById("fabAddBtn").style.display = "flex"; renderDashboard(); }
 function closeAllOverlaysToHome(){
-  closeOverlay("addPickerOverlay"); closeOverlay("entryFormOverlay");
+  closeFanMenu();
+  closeOverlay("entryFormOverlay");
   document.getElementById("fabAddBtn").style.display = "flex";
   renderDashboard();
 }
@@ -681,6 +713,9 @@ function workoutRecency(){
 
 // ===================== ENTRY FORMS =====================
 function foodFormHtml(){
+  const timeChipsBreakfast = ["07:00","07:30","08:00","08:30","09:00","09:30"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="breakfast">${fmtTime12(t)}</button>`).join("");
+  const timeChipsSnack = ["15:00","15:30","16:00","16:30","17:00","17:30","18:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="snack">${fmtTime12(t)}</button>`).join("");
+  const timeChipsDinner = ["18:30","19:00","19:30","20:00","20:30","21:00"].map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="dinner">${fmtTime12(t)}</button>`).join("");
   return `
     <div class="section"><h3>⏱️ Fasting</h3>
       <div class="fasting-box"><div><span class="fh" id="fastingHours">—</span> <span style="color:var(--muted);font-size:13px">hrs</span></div><span class="fasting-flag none" id="fastingFlag">no data</span></div>
@@ -688,24 +723,43 @@ function foodFormHtml(){
     </div>
     <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
       <div class="chip-row" id="breakfastChips"></div>
-      <div class="item-add"><input type="text" id="breakfastInput" list="breakfastAutocomplete" placeholder="Add item…"><button onclick="addMealItem('breakfast')">Add</button></div>
-      <datalist id="breakfastAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="breakfastQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="breakfastTime" onchange="recalcFasting()">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="breakfastInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('breakfast')">Add</button>
+        </div>
+        <div class="typeahead-list" id="breakfastTypeahead"></div>
+      </div>
+      <div class="muted-note">As you type, past items appear as suggestions. Tap Add to add anything new.</div>
+      <div class="label" style="margin:14px 0 6px">Time (AM)</div>
+      <div class="chip-row time-chip-row" id="breakfastTimeChips">${timeChipsBreakfast}<button type="button" class="opt time-other" data-meal="breakfast">Other…</button></div>
+      <input type="time" id="breakfastTime" style="display:none;margin-top:8px" onchange="onTimeChanged('breakfast')">
     </div>
     <div class="section" id="mealSnack" data-meal="snack"><h3>🥗 Snack</h3>
       <div class="chip-row" id="snackChips"></div>
-      <div class="item-add"><input type="text" id="snackInput" list="snackAutocomplete" placeholder="Add item…"><button onclick="addMealItem('snack')">Add</button></div>
-      <datalist id="snackAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="snackQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="snackTime">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="snackInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('snack')">Add</button>
+        </div>
+        <div class="typeahead-list" id="snackTypeahead"></div>
+      </div>
+      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
+      <div class="chip-row time-chip-row" id="snackTimeChips">${timeChipsSnack}<button type="button" class="opt time-other" data-meal="snack">Other…</button></div>
+      <input type="time" id="snackTime" style="display:none;margin-top:8px" onchange="onTimeChanged('snack')">
     </div>
     <div class="section" id="mealDinner" data-meal="dinner"><h3>🍽️ Dinner</h3>
       <div class="chip-row" id="dinnerChips"></div>
-      <div class="item-add"><input type="text" id="dinnerInput" list="dinnerAutocomplete" placeholder="Add item…"><button onclick="addMealItem('dinner')">Add</button></div>
-      <datalist id="dinnerAutocomplete"></datalist>
-      <div class="label" style="margin:10px 0 6px">Frequent</div><div class="chip-row" id="dinnerQuick"></div>
-      <div class="label" style="margin:12px 0 6px">Time (optional)</div><input type="time" id="dinnerTime" onchange="recalcFasting()">
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="dinnerInput" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('dinner')">Add</button>
+        </div>
+        <div class="typeahead-list" id="dinnerTypeahead"></div>
+      </div>
+      <div class="label" style="margin:14px 0 6px">Time (PM)</div>
+      <div class="chip-row time-chip-row" id="dinnerTimeChips">${timeChipsDinner}<button type="button" class="opt time-other" data-meal="dinner">Other…</button></div>
+      <input type="time" id="dinnerTime" style="display:none;margin-top:8px" onchange="onTimeChanged('dinner')">
     </div>
     <div class="section"><h3>📝 Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
     <div class="label">Date</div><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div>
@@ -721,10 +775,32 @@ function initFoodForm(){
   document.getElementById("snackTime").value = normMeal(rec&&rec.snack).time || "";
   document.getElementById("dinnerTime").value = normMeal(rec&&rec.dinner).time || "";
   document.getElementById("foodNotes").value = (rec&&rec.notes) || "";
-  ["breakfast","snack","dinner"].forEach(renderMealChips);
-  renderAllMealQuickPicks();
   ["breakfast","snack","dinner"].forEach(meal=>{
-    document.getElementById(meal+"Input").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); } });
+    renderMealChips(meal);
+    // Wire typeahead
+    const input = document.getElementById(meal+"Input");
+    const list = document.getElementById(meal+"Typeahead");
+    setupTypeahead(input, list, ()=>mealItemFrequency(meal).map(([item])=>item), (picked)=>{
+      addMealItem(meal, picked);
+      input.value = "";
+    });
+    input.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); list.style.display="none"; } });
+    // Sync time chips with any existing time value
+    syncTimeChips(meal);
+    // Time chip clicks
+    document.getElementById(meal+"TimeChips").querySelectorAll(".time-chip").forEach(btn=>{
+      btn.onclick = ()=>{
+        document.getElementById(meal+"Time").value = btn.dataset.time;
+        document.getElementById(meal+"Time").style.display = "none";
+        syncTimeChips(meal);
+        if(meal==="breakfast" || meal==="dinner") recalcFasting();
+      };
+    });
+    // "Other…" chip → reveal raw time picker
+    document.getElementById(meal+"TimeChips").querySelector(".time-other").onclick = ()=>{
+      document.getElementById(meal+"Time").style.display = "block";
+      document.getElementById(meal+"Time").focus();
+    };
   });
   document.getElementById("foodDate").addEventListener("change", ()=>{
     const d = document.getElementById("foodDate").value || todayStr();
@@ -734,10 +810,29 @@ function initFoodForm(){
     document.getElementById("snackTime").value = normMeal(r&&r.snack).time || "";
     document.getElementById("dinnerTime").value = normMeal(r&&r.dinner).time || "";
     document.getElementById("foodNotes").value = (r&&r.notes) || "";
-    ["breakfast","snack","dinner"].forEach(renderMealChips);
+    ["breakfast","snack","dinner"].forEach(m=>{ renderMealChips(m); syncTimeChips(m); });
     recalcFasting();
   });
   recalcFasting();
+}
+
+function onTimeChanged(meal){
+  syncTimeChips(meal);
+  if(meal==="breakfast" || meal==="dinner") recalcFasting();
+}
+function syncTimeChips(meal){
+  const t = document.getElementById(meal+"Time").value;
+  const chips = document.getElementById(meal+"TimeChips").querySelectorAll(".time-chip");
+  let matched = false;
+  chips.forEach(btn=>{
+    const isMatch = btn.dataset.time===t;
+    btn.classList.toggle("sel", isMatch);
+    if(isMatch) matched = true;
+  });
+  const otherBtn = document.getElementById(meal+"TimeChips").querySelector(".time-other");
+  if(otherBtn) otherBtn.classList.toggle("sel", !!t && !matched);
+  // If time is set but not on a chip, show the raw input
+  if(t && !matched) document.getElementById(meal+"Time").style.display = "block";
 }
 function recalcFasting(){
   const date = document.getElementById("foodDate").value || todayStr();
@@ -771,7 +866,6 @@ async function saveFoodEntry(){
   rec.notes = notes || null;
   rec._source = "live";
   persistDays();
-  renderAllMealQuickPicks();
   toast("Food log saved ✓");
   if(cloudCfg){ try{ await cloudSaveDay(rec); setCloudStatus(true); }catch(err){ setCloudStatus(false,"Saved locally — cloud sync failed"); } }
   closeAllOverlaysToHome();
@@ -1195,12 +1289,65 @@ async function addTracker(){
 }
 function renderTrackers(){
   const box=document.getElementById("trackerList"); if(!box) return; box.innerHTML="";
-  if(!trackers.length){ box.innerHTML='<div class="muted-note">No custom trackers yet — add one below.</div>'; return; }
-  trackers.forEach(t=>{
+  // Built-in habits (read-only)
+  BUILTIN_HABITS.forEach(h=>{
     const row=document.createElement("div"); row.className="tracker-row";
-    row.innerHTML = `<span>${t.label}</span><span class="muted-note" style="margin:0">${t.type}</span>`;
+    row.innerHTML = `<span>${h.label}</span><span class="muted-note" style="margin:0">built-in</span>`;
     box.appendChild(row);
   });
+  if(!trackers.length){
+    const note=document.createElement("div"); note.className="muted-note"; note.style.marginTop="6px";
+    note.textContent="No custom trackers yet — tap 'Add tracker' below to add one. Swipe left on a custom row to delete it.";
+    box.appendChild(note);
+    return;
+  }
+  trackers.forEach(t=>{
+    const wrap = document.createElement("div"); wrap.className="tracker-swipe"; wrap.dataset.id=t.id;
+    wrap.innerHTML = `<button type="button" class="tracker-swipe-delete">Delete</button>
+      <div class="tracker-swipe-inner"><span>${t.label}</span><span class="tracker-swipe-badge">${t.type}</span></div>`;
+    box.appendChild(wrap);
+    wireSwipeDelete(wrap, t);
+  });
+}
+function wireSwipeDelete(wrap, tracker){
+  let startX=null, currentX=null;
+  const inner = wrap.querySelector(".tracker-swipe-inner");
+  const deleteBtn = wrap.querySelector(".tracker-swipe-delete");
+  inner.addEventListener("touchstart", e=>{ startX = e.touches[0].clientX; }, {passive:true});
+  inner.addEventListener("touchmove", e=>{
+    if(startX==null) return;
+    currentX = e.touches[0].clientX;
+    const dx = currentX - startX;
+    if(dx < 0){
+      const clamped = Math.max(dx, -80);
+      inner.style.transform = `translateX(${clamped}px)`;
+      inner.style.transition = "none";
+    }
+  }, {passive:true});
+  inner.addEventListener("touchend", ()=>{
+    if(startX==null) return;
+    const dx = (currentX||startX) - startX;
+    inner.style.transition = "";
+    if(dx < -40){ wrap.classList.add("revealed"); inner.style.transform=""; }
+    else { wrap.classList.remove("revealed"); inner.style.transform=""; }
+    startX = null; currentX = null;
+  });
+  // Desktop click-to-reveal fallback
+  let clickCount = 0;
+  inner.addEventListener("click", (e)=>{
+    if(e.target.closest(".tracker-swipe-delete")) return;
+    clickCount++;
+    if(clickCount>=2){ wrap.classList.toggle("revealed"); clickCount=0; }
+    setTimeout(()=>{ clickCount = 0; }, 400);
+  });
+  deleteBtn.onclick = async ()=>{
+    if(!confirm(`Delete tracker "${tracker.label}"? Historical entries stay in your data — this only removes it from the list.`)) return;
+    trackers = trackers.filter(t=>t.id!==tracker.id);
+    persistTrackers();
+    renderTrackers();
+    toast(`Removed "${tracker.label}"`);
+    if(cloudCfg) cloudSaveTrackers().catch(()=>toast("Removed locally — cloud sync failed","var(--amber)"));
+  };
 }
 
 // ===================== WhatsApp =====================

@@ -149,9 +149,9 @@
   .header-menu-link{display:block;width:100%;background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;text-align:left;padding:2px 0;cursor:pointer}
 
   /* ===== FAB (+) button (matches iExpense pattern) ===== */
-  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+  .fab-add{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:color-mix(in srgb, var(--accent) 88%, transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ctatext);font-size:30px;line-height:1;border:none;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
   .fab-add:active{transform:translateX(-50%) scale(.93)}
-  .fab-add.open{transform:translateX(-50%) rotate(45deg);background:var(--red);color:#fff}
+  .fab-add.open{transform:translateX(-50%) rotate(45deg);background:color-mix(in srgb, var(--red) 88%, transparent);color:#fff}
 
   /* Fan-out backdrop */
   .fan-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:145;display:none;opacity:0;transition:opacity .18s ease}
@@ -160,8 +160,9 @@
   /* Fan-out arc menu items — icon-only (no label pills, so the ring can sit
      close to the FAB without any risk of label-to-label or label-to-circle
      collision). aria-label covers accessibility; title gives a hover tip on
-     desktop. */
-  .fan-item{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);z-index:149;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
+     desktop. Slightly translucent with a soft blur behind, like a frosted
+     glass chip, instead of a flat opaque circle. */
+  .fan-item{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:color-mix(in srgb, var(--card) 78%, transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid color-mix(in srgb, var(--border) 70%, transparent);color:var(--text);z-index:149;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;padding:0}
   .fan-item svg{width:26px;height:26px}
   .fan-item:active{transform:translate(-50%,var(--fan-y,0)) translateX(var(--fan-x,0)) scale(.92) !important}
   .fan-backdrop.show ~ .fan-item{opacity:1;pointer-events:auto}

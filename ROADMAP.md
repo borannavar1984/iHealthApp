@@ -3,6 +3,54 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped: real habits, real meal plan, fully deletable (2026-08-08)
+
+Deep shared his actual dietitian maintenance-plan document and asked the app
+to reflect it — no more generic guessed defaults he can't remove.
+
+1. **Habits are one unified, fully deletable list.** The On/Off toggle from
+   yesterday is gone — replaced with true delete (same swipe-left pattern
+   custom trackers already had). There's no more "built-in vs custom"
+   distinction: every habit, whether suggested by the app or typed in by
+   hand, lives in the same list and can be removed outright. Deleting one
+   never touches its historical entries — old data stays intact and still
+   labels correctly on the dashboard even after the habit itself is gone.
+2. **New default habits, straight from the plan** (fresh onboarding and a
+   one-time upgrade for Deep's existing profile): 💧 Water (3L target, now
+   tracked as two halves like the old Isabgol counter), 🫁 Deep Breathing,
+   🚶 Stay Active (10k Steps), 🌙 Good Sleep (7-8 hrs, by 11pm). Isabgol,
+   Morning Detox, and Multivitamin are gone from the loggable list — none of
+   them are in the current plan — but their historical entries still render
+   with a proper label via a small legacy lookup table.
+3. **Food form expanded from 3 meals to the plan's actual 6:** On Rise,
+   Breakfast, Mid-Morning, Lunch, Evening Snack, Early Dinner. Each is a
+   generic, data-driven section (one template, not six copy-pasted blocks)
+   so it was a clean, low-risk expansion.
+4. **Preset items seeded directly from the plan document**, one-time, for
+   Deep's existing profile (not force-pushed into brand-new onboarding,
+   since that's specific to *his* dietitian, not a universal default): On
+   Rise gets the herbal-water rotation, Breakfast the 8 rotating options,
+   Lunch the 3 options, Evening Snack the 6 options, Early Dinner the
+   soup/salad+protein pattern — all as tap chips, so logging is "eat what's
+   suggested, tap it" instead of typing from memory or "whatever is there."
+5. **Fasting calc now considers Mid-Morning too** (in addition to Breakfast
+   and Snack) as a possible fast-breaking time — On Rise is deliberately
+   excluded since it's plain/herbal water, not real intake.
+6. Settings' preset-meal picker, the WhatsApp message, and the Excel export
+   all cover all 6 meals now, not just the original 3.
+
+Tested with 19 new scripted-browser checks (meal-plan-specific: 6 sections
+in the right order, preset chips from the actual plan document, save/load
+round-trip, Mid-Morning vs On-Rise fasting distinction, WhatsApp message
+coverage) plus 17 checks for the habit unification (true delete works,
+onboarding shows the 4 new defaults not the old 5, one-time migration adds
+the new defaults to an existing profile without disturbing custom trackers,
+migration never re-fires so a deliberately deleted habit stays deleted,
+legacy label lookup for removed habit keys) — on top of the full existing
+suite (habits/fasting, FAB overlap, Message quick-action, entry-form
+overhaul, real 198-day-history regression). All checks passed before
+merging to `main`.
+
 ## Shipped: FAB polish — tighter ring + real icons (2026-08-07, later same day)
 
 Deep's feedback after trying the entry-form overhaul: the fan-out ring sat

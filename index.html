@@ -316,11 +316,7 @@
     </div>
     <div class="label">🍽️ Preset Menu Items</div>
     <div class="muted-note">Pre-load common items (or ones your dietitian suggests) so they're always a quick tap in the food form — no typing needed.</div>
-    <div id="presetMealPicker" class="chip-row" style="margin-top:8px">
-      <button type="button" class="opt sel" data-preset-meal="breakfast">Breakfast</button>
-      <button type="button" class="opt" data-preset-meal="snack">Snack</button>
-      <button type="button" class="opt" data-preset-meal="dinner">Dinner</button>
-    </div>
+    <div id="presetMealPicker" class="chip-row" style="margin-top:8px"></div>
     <div id="presetItemList" style="margin-top:8px"></div>
     <div class="item-add" style="margin-top:8px">
       <input type="text" id="newPresetItem" placeholder="e.g. Idli, Poha, Dal Rice" autocomplete="off">
@@ -407,6 +403,20 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Six meal-time slots, matching the dietitian's maintenance plan exactly
+// (was just Breakfast/Snack/Dinner). Defined first since several storage
+// defaults below depend on it.
+const MEAL_DEFS = [
+  {key:"on_rise", label:"🌅 On Rise", fallback:["06:30","07:00"]},
+  {key:"breakfast", label:"🍳 Breakfast", fallback:["08:00","08:30"]},
+  {key:"mid_morning", label:"🍎 Mid-Morning", fallback:["10:30","11:00"]},
+  {key:"lunch", label:"🍛 Lunch", fallback:["13:00","13:30"]},
+  {key:"snack", label:"🥗 Evening Snack", fallback:["16:00","17:00"]},
+  {key:"dinner", label:"🍽️ Early Dinner", fallback:["19:00","19:30"]},
+];
+const MEAL_KEYS = MEAL_DEFS.map(m=>m.key);
+function emptyMealsDraft(){ const d={}; MEAL_KEYS.forEach(k=>d[k]=[]); return d; }
+
 // Detect environment based on URL path.
 // Dev: any URL that contains "/dev/" (e.g. github.io/iHealthApp/dev/)
 // Prod: anything else (e.g. github.io/iHealthApp/ or root domain)
@@ -426,8 +436,9 @@ const LS_TRACKERS = KEY_PREFIX + "trackers_v1";
 const CLOUD_KEY = KEY_PREFIX + "cloud_cfg_v2";
 const HIDDEN_ITEMS_KEY = KEY_PREFIX + "hidden_items_v1";
 const LS_USER = KEY_PREFIX + "user_v1";
-const LS_HABIT_PREFS = KEY_PREFIX + "habit_prefs_v1";
 const LS_PRESET_ITEMS = KEY_PREFIX + "preset_items_v1";
+const HABIT_MIGRATION_KEY = KEY_PREFIX + "habit_migration_v2_done";
+const PRESET_MIGRATION_KEY = KEY_PREFIX + "preset_migration_v1_done";
 
 // One-time migration: prior versions used "ihealth_dev_*" keys on BOTH dev and
 // prod due to a naming bug. On prod, if the new keys are empty but the legacy
@@ -453,8 +464,33 @@ if(!IS_DEV_PREVIEW){
 let days = loadDays();
 let trackers = loadTrackers();
 let user = loadUser();
-let habitPrefs = loadHabitPrefs();
 let presetItems = loadPresetItems();
+
+// One-time upgrade for existing profiles: habits used to be hardcoded
+// outside the trackers list, so an already-onboarded user would otherwise
+// land on zero habits the first time they open this version. Adds the new
+// defaults (from the maintenance plan) alongside whatever custom trackers
+// they already have. Never re-runs, so deliberately deleting a habit later
+// sticks — this only fires once, and never for brand-new profiles (they
+// choose their starting habits during onboarding instead).
+if(user && !localStorage.getItem(HABIT_MIGRATION_KEY)){
+  const existingIds = new Set(trackers.map(t=>t.id));
+  defaultTrackerSeed().forEach(h=>{ if(!existingIds.has(h.id)) trackers.push(h); });
+  persistTrackers();
+}
+try{ localStorage.setItem(HABIT_MIGRATION_KEY, "1"); }catch(e){}
+
+// One-time upgrade, same idea: pre-load the maintenance plan's rotating meal
+// options as preset chips, so the food form has real choices to tap instead
+// of typing from memory ("eating whatever is there"). Only fills in a meal
+// that's currently empty — never overwrites anything already customized in
+// Settings.
+if(user && !localStorage.getItem(PRESET_MIGRATION_KEY)){
+  const seed = defaultPresetItemsSeed();
+  MEAL_KEYS.forEach(k=>{ if(!presetItems[k] || !presetItems[k].length) presetItems[k] = seed[k]; });
+  persistPresetItems();
+}
+try{ localStorage.setItem(PRESET_MIGRATION_KEY, "1"); }catch(e){}
 
 function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"{}"); }catch(e){ return {}; } }
 function persistDays(){ try{ localStorage.setItem(LS_DAYS, JSON.stringify(days)); }catch(e){} }
@@ -462,17 +498,13 @@ function loadTrackers(){ try{ return JSON.parse(localStorage.getItem(LS_TRACKERS
 function persistTrackers(){ try{ localStorage.setItem(LS_TRACKERS, JSON.stringify(trackers)); }catch(e){} }
 function loadUser(){ try{ return JSON.parse(localStorage.getItem(LS_USER)||"null"); }catch(e){ return null; } }
 function saveUser(u){ try{ localStorage.setItem(LS_USER, JSON.stringify(u)); }catch(e){} }
-function loadHabitPrefs(){ try{ const v=JSON.parse(localStorage.getItem(LS_HABIT_PREFS)||"null"); return v || {}; }catch(e){ return {}; } }
-function persistHabitPrefs(){ try{ localStorage.setItem(LS_HABIT_PREFS, JSON.stringify(habitPrefs)); }catch(e){} }
-function loadPresetItems(){ try{ const v=JSON.parse(localStorage.getItem(LS_PRESET_ITEMS)||"null"); return v || {breakfast:[],snack:[],dinner:[]}; }catch(e){ return {breakfast:[],snack:[],dinner:[]}; } }
+function loadPresetItems(){ try{ const v=JSON.parse(localStorage.getItem(LS_PRESET_ITEMS)||"null"); return v || emptyMealsDraft(); }catch(e){ return emptyMealsDraft(); } }
 function persistPresetItems(){ try{ localStorage.setItem(LS_PRESET_ITEMS, JSON.stringify(presetItems)); }catch(e){} }
-function isHabitEnabled(key){ return habitPrefs[key] !== false; }
-function setHabitEnabled(key, enabled){ habitPrefs[key] = enabled; persistHabitPrefs(); }
-function enabledBuiltins(){
-  return BUILTIN_HABITS.filter(h=>isHabitEnabled(h.key));
-}
+// Every habit — whether it came from the app's suggested defaults or was
+// typed in by the user — lives in one place (`trackers`), fully add/deletable.
+// Nothing is hardcoded as permanent.
 function activeHabitList(){
-  return enabledBuiltins().concat(trackers.map(t=>({key:t.id, label:t.label, type:t.type})));
+  return trackers.map(t=>({key:t.id, label:t.label, type:t.type}));
 }
 function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
@@ -512,25 +544,51 @@ function normHabitEvents(rec){
   Object.entries(rec.custom||{}).forEach(([k,v])=>{ if(v!=null && v!=="") out.push({id:"legacy-custom-"+k,time:null,habitKey:k,value:v}); });
   return out;
 }
-const BUILTIN_HABITS = [
-  {key:"water", label:"💧 Water", type:"boolean"},
-  {key:"morning_detox", label:"🌅 Morning Detox", type:"boolean"},
-  {key:"deep_breathing", label:"🫁 Deep Breathing", type:"boolean"},
-  {key:"isabgol", label:"🌾 Isabgol (2x target)", type:"count"},
-  {key:"multivitamin", label:"💊 Multivitamin", type:"boolean"},
-];
+// New profiles get these 4 as a starting point (from Deep's dietitian's
+// maintenance plan) — pre-checked at onboarding, but not locked in: every
+// one can be deleted from Settings same as anything typed in by hand.
+function defaultTrackerSeed(){
+  const today = todayStr();
+  return [
+    {id:"water", label:"💧 Water (3L target)", type:"count", addedDate: today},
+    {id:"deep_breathing", label:"🫁 Deep Breathing", type:"boolean", addedDate: today},
+    {id:"steps_goal", label:"🚶 Stay Active (10k Steps)", type:"boolean", addedDate: today},
+    {id:"sleep_goal", label:"🌙 Good Sleep (7-8 hrs, by 11pm)", type:"boolean", addedDate: today},
+  ];
+}
+// Rotating meal options straight from Deep's dietitian's maintenance plan —
+// pre-loaded once for his existing account so the food form has real,
+// tappable choices instead of a blank typing field. Editable/removable
+// afterward from Settings like any other preset item.
+function defaultPresetItemsSeed(){
+  return {
+    on_rise: ["Warm water (250ml)", "Lemon water", "Methi water", "Jeera water", "Dhaniya water"],
+    breakfast: ["2 Dosa + chutney + veg", "Adai Dosa/Pesarattu + veg", "Red Poha/Upma + peas", "Dhaliya Khichdi + veg", "Sprouts or paneer", "Paneer Burji + veg", "Idli + Sambar", "Veggie sandwich + paneer/cheese"],
+    mid_morning: ["Seasonal fruit (100g)"],
+    lunch: ["Red rice + dal sambar + veg", "Roti + sabji + veg", "Khichdi + curd raitha"],
+    snack: ["Veg Bhel", "Khakra", "Makhana", "Roasted peanuts", "Nuts (handful)", "Kokum/Amla juice"],
+    dinner: ["Soup/Salad + paneer", "Sprouts + light dinner"],
+  };
+}
+// Labels for habit keys that used to be trackable but were removed —
+// keeps old history readable (dashboard tables, WhatsApp messages for past
+// dates) without making them loggable again.
+const LEGACY_HABIT_LABELS = {
+  morning_detox: {label:"🌅 Morning Detox", type:"boolean"},
+  isabgol: {label:"🌾 Isabgol (2x target)", type:"count"},
+  multivitamin: {label:"💊 Multivitamin", type:"boolean"},
+};
 function habitDef(key){
-  const b = BUILTIN_HABITS.find(h=>h.key===key);
-  if(b) return b;
   const t = trackers.find(t=>t.id===key);
   if(t) return {key:t.id, label:t.label, type:t.type};
+  if(LEGACY_HABIT_LABELS[key]) return {key, ...LEGACY_HABIT_LABELS[key]};
   return {key, label:key, type:"boolean"};
 }
 function habitDayValue(rec, key){
   const events = normHabitEvents(rec).filter(e=>e.habitKey===key);
   if(!events.length) return null;
   const def = habitDef(key);
-  if(key==="isabgol" || def.type==="count") return events.reduce((s,e)=>s+(Number(e.value)||0),0);
+  if(def.type==="count") return events.reduce((s,e)=>s+(Number(e.value)||0),0);
   if(def.type=="number" || def.type=="text") return events[events.length-1].value;
   return events.some(e=>e.value===true);
 }
@@ -619,10 +677,10 @@ function checkOnboarding(){
 }
 function renderOnboardHabitChecklist(){
   const box = document.getElementById("onboardHabitList"); if(!box) return;
-  box.innerHTML = BUILTIN_HABITS.map(h=>`
+  box.innerHTML = defaultTrackerSeed().map(h=>`
     <label class="habit-row" style="margin-bottom:8px;cursor:pointer">
       <span>${h.label}</span>
-      <input type="checkbox" data-onboard-habit="${h.key}" checked style="width:20px;height:20px">
+      <input type="checkbox" data-onboard-habit="${h.id}" checked style="width:20px;height:20px">
     </label>`).join("");
 }
 function completeOnboarding(){
@@ -632,10 +690,9 @@ function completeOnboarding(){
   if(!gw || gw<=0){ toast("Enter a valid goal weight","var(--red)"); return; }
   user = { name, goalWeight: gw };
   saveUser(user);
-  [...document.querySelectorAll("[data-onboard-habit]")].forEach(cb=>{
-    habitPrefs[cb.dataset.onboardHabit] = cb.checked;
-  });
-  persistHabitPrefs();
+  const checkedIds = [...document.querySelectorAll("[data-onboard-habit]")].filter(cb=>cb.checked).map(cb=>cb.dataset.onboardHabit);
+  trackers = defaultTrackerSeed().filter(h=>checkedIds.includes(h.id));
+  persistTrackers();
   document.getElementById("onboardingOverlay").style.display = "none";
   initAfterOnboarding();
   toast(`Welcome, ${name}! You're all set`);
@@ -717,7 +774,7 @@ function messageFormHtml(){
 function dayHasAnyEntry(rec){
   if(!rec) return false;
   return normWeightEntries(rec).length>0 || rec.steps!=null || normWorkoutEntries(rec).length>0 || normHabitEvents(rec).length>0 ||
-    normMeal(rec.breakfast).items.length>0 || normMeal(rec.snack).items.length>0 || normMeal(rec.dinner).items.length>0 || !!rec.notes;
+    MEAL_KEYS.some(k=>normMeal(rec[k]).items.length>0) || !!rec.notes;
 }
 function initMessageForm(){
   const date = todayStr();
@@ -802,7 +859,7 @@ function renderMealQuickPicks(meal){
 }
 function renderAllMealQuickPicks(){ ["breakfast","snack","dinner"].forEach(renderMealQuickPicks); }
 
-let mealsDraft = { breakfast: [], snack: [], dinner: [] };
+let mealsDraft = emptyMealsDraft();
 function renderMealChips(meal){
   const box=document.getElementById(meal+"Chips"); if(!box) return; box.innerHTML="";
   mealsDraft[meal].forEach((item,idx)=>{
@@ -835,71 +892,52 @@ function frequentMealTimes(meal, fallbacks){
   return result.slice(0,2).sort();
 }
 function foodFormHtml(){
-  const timeChipsFor = meal => {
-    const fallback = meal==="breakfast" ? ["08:00","08:30"] : meal==="snack" ? ["16:00","17:00"] : ["19:00","19:30"];
-    return frequentMealTimes(meal, fallback).map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="${meal}">${fmtTime12(t)}</button>`).join("");
-  };
+  const timeChipsFor = m => frequentMealTimes(m.key, m.fallback).map(t=>`<button type="button" class="opt time-chip" data-time="${t}" data-meal="${m.key}">${fmtTime12(t)}</button>`).join("");
   const presetChipsFor = meal => {
     const items = presetItems[meal] || [];
     if(!items.length) return "";
     return `<div class="chip-row" id="${meal}PresetChips">${items.map(item=>`<button type="button" class="opt" data-preset-add="${meal}">${item}</button>`).join("")}</div>`;
   };
+  const mealSection = m => `
+    <div class="section" id="meal_${m.key}" data-meal="${m.key}"><h3>${m.label}</h3>
+      <div class="chip-row" id="${m.key}Chips"></div>
+      ${presetChipsFor(m.key)}
+      <div class="typeahead-wrap" style="margin-top:8px">
+        <div class="item-add">
+          <input type="text" id="${m.key}Input" placeholder="Start typing…" autocomplete="off">
+          <button onclick="addMealItem('${m.key}')">Add</button>
+        </div>
+        <div class="typeahead-list" id="${m.key}Typeahead"></div>
+      </div>
+      <div class="chip-row time-chip-row" id="${m.key}TimeChips">${timeChipsFor(m)}<button type="button" class="opt time-other" data-meal="${m.key}">Other…</button></div>
+      <input type="time" id="${m.key}Time" style="display:none;margin-top:8px" onchange="onTimeChanged('${m.key}')">
+    </div>`;
   return `
-    <div class="section" id="mealBreakfast" data-meal="breakfast"><h3>🍳 Breakfast</h3>
-      <div class="chip-row" id="breakfastChips"></div>
-      ${presetChipsFor("breakfast")}
-      <div class="typeahead-wrap" style="margin-top:8px">
-        <div class="item-add">
-          <input type="text" id="breakfastInput" placeholder="Start typing…" autocomplete="off">
-          <button onclick="addMealItem('breakfast')">Add</button>
-        </div>
-        <div class="typeahead-list" id="breakfastTypeahead"></div>
-      </div>
-      <div class="chip-row time-chip-row" id="breakfastTimeChips">${timeChipsFor("breakfast")}<button type="button" class="opt time-other" data-meal="breakfast">Other…</button></div>
-      <input type="time" id="breakfastTime" style="display:none;margin-top:8px" onchange="onTimeChanged('breakfast')">
-    </div>
-    <div class="section" id="mealSnack" data-meal="snack"><h3>🥗 Snack</h3>
-      <div class="chip-row" id="snackChips"></div>
-      ${presetChipsFor("snack")}
-      <div class="typeahead-wrap" style="margin-top:8px">
-        <div class="item-add">
-          <input type="text" id="snackInput" placeholder="Start typing…" autocomplete="off">
-          <button onclick="addMealItem('snack')">Add</button>
-        </div>
-        <div class="typeahead-list" id="snackTypeahead"></div>
-      </div>
-      <div class="chip-row time-chip-row" id="snackTimeChips">${timeChipsFor("snack")}<button type="button" class="opt time-other" data-meal="snack">Other…</button></div>
-      <input type="time" id="snackTime" style="display:none;margin-top:8px" onchange="onTimeChanged('snack')">
-    </div>
-    <div class="section" id="mealDinner" data-meal="dinner"><h3>🍽️ Dinner</h3>
-      <div class="chip-row" id="dinnerChips"></div>
-      ${presetChipsFor("dinner")}
-      <div class="typeahead-wrap" style="margin-top:8px">
-        <div class="item-add">
-          <input type="text" id="dinnerInput" placeholder="Start typing…" autocomplete="off">
-          <button onclick="addMealItem('dinner')">Add</button>
-        </div>
-        <div class="typeahead-list" id="dinnerTypeahead"></div>
-      </div>
-      <div class="chip-row time-chip-row" id="dinnerTimeChips">${timeChipsFor("dinner")}<button type="button" class="opt time-other" data-meal="dinner">Other…</button></div>
-      <input type="time" id="dinnerTime" style="display:none;margin-top:8px" onchange="onTimeChanged('dinner')">
-    </div>
+    ${MEAL_DEFS.map(mealSection).join("")}
     <div class="section"><h3>📝 Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
     <div class="label">Date</div><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div>
     <button class="btn btn-save" onclick="saveFoodEntry()">Save Food Log</button>
   `;
 }
+function loadMealsDraftFromRec(rec){
+  const d = emptyMealsDraft();
+  MEAL_KEYS.forEach(k=>{ d[k] = normMeal(rec && rec[k]).items.slice(); });
+  return d;
+}
+function applyFoodFormFieldsForDate(rec){
+  mealsDraft = loadMealsDraftFromRec(rec);
+  MEAL_KEYS.forEach(meal=>{
+    document.getElementById(meal+"Time").value = normMeal(rec&&rec[meal]).time || "";
+    renderMealChips(meal);
+    syncTimeChips(meal);
+  });
+  document.getElementById("foodNotes").value = (rec&&rec.notes) || "";
+}
 function initFoodForm(){
   document.getElementById("foodDate").value = todayStr();
   const date = todayStr();
-  const rec = days[date];
-  mealsDraft = { breakfast: normMeal(rec&&rec.breakfast).items.slice(), snack: normMeal(rec&&rec.snack).items.slice(), dinner: normMeal(rec&&rec.dinner).items.slice() };
-  document.getElementById("breakfastTime").value = normMeal(rec&&rec.breakfast).time || "";
-  document.getElementById("snackTime").value = normMeal(rec&&rec.snack).time || "";
-  document.getElementById("dinnerTime").value = normMeal(rec&&rec.dinner).time || "";
-  document.getElementById("foodNotes").value = (rec&&rec.notes) || "";
-  ["breakfast","snack","dinner"].forEach(meal=>{
-    renderMealChips(meal);
+  applyFoodFormFieldsForDate(days[date]);
+  MEAL_KEYS.forEach(meal=>{
     // Preset menu item chips (curated in Settings) — tap to add directly
     const presetBox = document.getElementById(meal+"PresetChips");
     if(presetBox) presetBox.querySelectorAll("[data-preset-add]").forEach(btn=>{
@@ -913,8 +951,6 @@ function initFoodForm(){
       input.value = "";
     });
     input.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMealItem(meal); list.style.display="none"; } });
-    // Sync time chips with any existing time value
-    syncTimeChips(meal);
     // Time chip clicks
     document.getElementById(meal+"TimeChips").querySelectorAll(".time-chip").forEach(btn=>{
       btn.onclick = ()=>{
@@ -931,13 +967,7 @@ function initFoodForm(){
   });
   document.getElementById("foodDate").addEventListener("change", ()=>{
     const d = document.getElementById("foodDate").value || todayStr();
-    const r = days[d];
-    mealsDraft = { breakfast: normMeal(r&&r.breakfast).items.slice(), snack: normMeal(r&&r.snack).items.slice(), dinner: normMeal(r&&r.dinner).items.slice() };
-    document.getElementById("breakfastTime").value = normMeal(r&&r.breakfast).time || "";
-    document.getElementById("snackTime").value = normMeal(r&&r.snack).time || "";
-    document.getElementById("dinnerTime").value = normMeal(r&&r.dinner).time || "";
-    document.getElementById("foodNotes").value = (r&&r.notes) || "";
-    ["breakfast","snack","dinner"].forEach(m=>{ renderMealChips(m); syncTimeChips(m); });
+    applyFoodFormFieldsForDate(days[d]);
   });
 }
 
@@ -959,13 +989,13 @@ function syncTimeChips(meal){
   if(t && !matched) document.getElementById(meal+"Time").style.display = "block";
 }
 // Fasting is auto-calculated and shown only on the Dashboard — no live box in the
-// food form. The fast breaks at the *earliest* logged intake of the day: today's
-// breakfast, snack, or a morning-detox habit event with a time (e.g. detox water
-// at 6am counts as breaking the fast even before breakfast is logged).
+// food form. The fast breaks at the *earliest* real food/drink of the day: today's
+// Mid-Morning bite, Breakfast, Snack, or a legacy morning-detox habit event with a
+// time (old data only). "On Rise" (plain/herbal water) is deliberately excluded —
+// it's not calorie-bearing, so it doesn't end an intermittent fast.
 function fastBreakCandidates(rec){
   const times = [];
-  const b = normMeal(rec && rec.breakfast); if(b.time) times.push(b.time);
-  const s = normMeal(rec && rec.snack); if(s.time) times.push(s.time);
+  ["breakfast","mid_morning","snack"].forEach(meal=>{ const m = normMeal(rec && rec[meal]); if(m.time) times.push(m.time); });
   normHabitEvents(rec).forEach(e=>{ if(e.habitKey==="morning_detox" && e.time) times.push(e.time); });
   return times.sort();
 }
@@ -988,9 +1018,9 @@ async function saveFoodEntry(){
     if(!confirm(`Save food log for ${date}? (not today)`)) return;
   }
   const rec = ensureDay(date);
-  rec.breakfast = { time: document.getElementById("breakfastTime").value||null, items: mealsDraft.breakfast };
-  rec.snack = { time: document.getElementById("snackTime").value||null, items: mealsDraft.snack };
-  rec.dinner = { time: document.getElementById("dinnerTime").value||null, items: mealsDraft.dinner };
+  MEAL_KEYS.forEach(meal=>{
+    rec[meal] = { time: document.getElementById(meal+"Time").value||null, items: mealsDraft[meal] };
+  });
   rec.fasting_hours = computeFastingHours(date, rec);
   const notes = document.getElementById("foodNotes").value.trim();
   rec.notes = notes || null;
@@ -1126,7 +1156,7 @@ async function saveHabitEntry(){
     const val = draft.value;
     const time = draft.time || nowTimeStr();
     if(val==null || val===false || val==="") return;
-    if(h.key==="isabgol" || h.type==="count"){
+    if(h.type==="count"){
       const target = Number(val)||0;
       const already_count = already[h.key]||0;
       for(let i=already_count;i<target;i++){ rec.habitEvents.push({id:genId(), time, habitKey:h.key, value:1}); appended++; }
@@ -1303,7 +1333,7 @@ function renderWeeklyTab(){
   const wRuns = weekRecs.flatMap(r=>normWorkoutEntries(r).map(e=>e.run_miles)).filter(v=>v!=null);
   const wFasting = weekRecs.filter(r=>r.fasting_hours!=null);
   const fastingRate = wFasting.length ? Math.round(wFasting.filter(r=>r.fasting_hours>=16).length/wFasting.length*100) : null;
-  const habitList = enabledBuiltins().concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  const habitList = activeHabitList().filter(h=>h.type==="boolean");
   let habitDone=0, habitTotal=0;
   weekRecs.forEach(r=>habitList.forEach(h=>{ const v=habitDayValue(r,h.key); if(v!==null){ habitTotal++; if(v===true||(typeof v==="number"&&v>0)) habitDone++; } }));
   const habitRate = habitTotal ? Math.round(habitDone/habitTotal*100) : null;
@@ -1364,8 +1394,8 @@ function renderWeeklyTab(){
   document.getElementById("weekHabitGrid").innerHTML = habitGridHtml;
 
   document.getElementById("weekTable").innerHTML = weekRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=enabledBuiltins().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${enabledBuiltins().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+    ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=activeHabitList().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
 }
 
@@ -1411,8 +1441,8 @@ function renderMonthTab(){
   } else showChartFallback("monthWeightChart","⚖️ No weight entries for this month");
 
   document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
-    ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=enabledBuiltins().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${enabledBuiltins().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+    ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=activeHabitList().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
+      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;
 }
 
@@ -1447,7 +1477,7 @@ function renderOverallTab(){
     });
   } else showChartFallback("overallWeightChart","⚖️ No weight entries yet");
 
-  const habitList = enabledBuiltins().concat(trackers.filter(t=>t.type==="boolean").map(t=>({key:t.id,label:t.label,type:t.type})));
+  const habitList = activeHabitList().filter(h=>h.type==="boolean");
   const habitStats = habitList.map(h=>{
     const tracked = recs.map(r=>habitDayValue(r,h.key)).filter(v=>v!==null);
     const yes = tracked.filter(v=>v===true || (typeof v==="number" && v>0)).length;
@@ -1484,8 +1514,8 @@ function renderOverallTab(){
 let presetMealTab = "breakfast";
 function renderPresetItemList(){
   const picker = document.getElementById("presetMealPicker"); if(!picker) return;
+  picker.innerHTML = MEAL_DEFS.map(m=>`<button type="button" class="opt${m.key===presetMealTab?" sel":""}" data-preset-meal="${m.key}">${m.label.replace(/^[^\s]+\s/,"")}</button>`).join("");
   [...picker.querySelectorAll("[data-preset-meal]")].forEach(btn=>{
-    btn.classList.toggle("sel", btn.dataset.presetMeal===presetMealTab);
     btn.onclick = ()=>{ presetMealTab = btn.dataset.presetMeal; renderPresetItemList(); };
   });
   const box = document.getElementById("presetItemList"); if(!box) return;
@@ -1538,24 +1568,14 @@ async function addTracker(){
 }
 function renderTrackers(){
   const box=document.getElementById("trackerList"); if(!box) return; box.innerHTML="";
-  // Built-in habits — kept as defaults, but can be switched off
-  BUILTIN_HABITS.forEach(h=>{
-    const enabled = isHabitEnabled(h.key);
-    const row=document.createElement("div"); row.className="tracker-row";
-    row.innerHTML = `<span>${h.label}</span><button type="button" class="opt built-in-toggle${enabled?" sel":""}" data-key="${h.key}">${enabled?"On":"Off"}</button>`;
-    row.querySelector(".built-in-toggle").onclick = ()=>{
-      const nowEnabled = !isHabitEnabled(h.key);
-      setHabitEnabled(h.key, nowEnabled);
-      renderTrackers();
-    };
-    box.appendChild(row);
-  });
   if(!trackers.length){
     const note=document.createElement("div"); note.className="muted-note"; note.style.marginTop="6px";
-    note.textContent="No custom trackers yet — tap 'Add tracker' below to add one. Swipe left on a custom row to delete it.";
+    note.textContent="No habits yet — tap 'Add tracker' below to add one.";
     box.appendChild(note);
     return;
   }
+  // Every habit is fully deletable, whether it started as one of the app's
+  // suggested defaults or was typed in by hand — swipe left to remove it.
   trackers.forEach(t=>{
     const wrap = document.createElement("div"); wrap.className="tracker-swipe"; wrap.dataset.id=t.id;
     wrap.innerHTML = `<button type="button" class="tracker-swipe-delete">Delete</button>
@@ -1618,12 +1638,12 @@ function buildWhatsAppMessage(date){
   if(rec.steps) lines.push(`👟 Steps: ${Number(rec.steps).toLocaleString()}`);
   if(rec.fasting_hours!=null) lines.push(`⏱️ Fasting: ${rec.fasting_hours} hrs`);
   lines.push("");
-  const bk=normMeal(rec.breakfast), sn=normMeal(rec.snack), dn=normMeal(rec.dinner);
-  if(bk.items.length){ lines.push(`🍳 Breakfast${bk.time?" ("+fmtTime12(bk.time)+")":""}`); bk.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
-  if(sn.items.length){ lines.push(`🥗 Snack${sn.time?" ("+fmtTime12(sn.time)+")":""}`); sn.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
-  if(dn.items.length){ lines.push(`🍽️ Dinner${dn.time?" ("+fmtTime12(dn.time)+")":""}`); dn.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
+  MEAL_DEFS.forEach(m=>{
+    const meal = normMeal(rec[m.key]);
+    if(meal.items.length){ lines.push(`${m.label}${meal.time?" ("+fmtTime12(meal.time)+")":""}`); meal.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
+  });
   const habitParts = [];
-  BUILTIN_HABITS.forEach(h=>{ const v=habitDayValue(rec,h.key); if(h.key==="isabgol"){ if(v!=null) habitParts.push(`Isabgol ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(h.label.replace(/^[^\s]+\s/,"")+" ✓"); });
+  activeHabitList().forEach(h=>{ const v=habitDayValue(rec,h.key); const plainLabel=h.label.replace(/^[^\s]+\s/,""); if(h.type==="count"){ if(v!=null) habitParts.push(`${plainLabel} ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(plainLabel+" ✓"); });
   if(habitParts.length) lines.push(`✅ ${habitParts.join(" · ")}`);
   woEntries.forEach(e=>lines.push(`🏃 Workout: ${e.workout}${e.run_miles?` (${e.run_miles} mi)`:e.duration_min?` (${e.duration_min} min)`:""}`));
   if(rec.notes){ lines.push(""); lines.push(`📝 ${rec.notes}`); }
@@ -1655,9 +1675,12 @@ function exportExcel(){
   const weightRows = recs.flatMap(r=>normWeightEntries(r).map(e=>({Date:r.date, Time:e.time||"", "Weight (kg)":e.weight, "To Goal":Math.round((e.weight-goalWeight())*10)/10, Notes:e.notes||""})));
   const workoutRows = recs.flatMap(r=>normWorkoutEntries(r).map(e=>({Date:r.date, Time:e.time||"", Workout:e.workout, "Run (mi)":e.run_miles, "Duration (min)":e.duration_min})));
   const habitRows = recs.flatMap(r=>normHabitEvents(r).map(e=>({Date:r.date, Time:e.time||"", Habit:trackerLabel(e.habitKey)||habitDef(e.habitKey).label, Value:String(e.value)})));
-  const dailyLog = recs.map(r=>{ const bk=normMeal(r.breakfast), sn=normMeal(r.snack), dn=normMeal(r.dinner); return {
-    Date:r.date, Steps:r.steps, "Fasting (hrs)":r.fasting_hours,
-    "Breakfast Items":bk.items.join("; "), "Snack Items":sn.items.join("; "), "Dinner Items":dn.items.join("; "), Notes:r.notes||"" }; });
+  const dailyLog = recs.map(r=>{
+    const row = { Date:r.date, Steps:r.steps, "Fasting (hrs)":r.fasting_hours };
+    MEAL_DEFS.forEach(m=>{ row[m.label.replace(/^[^\s]+\s/,"")+" Items"] = normMeal(r[m.key]).items.join("; "); });
+    row.Notes = r.notes||"";
+    return row;
+  });
   const months = [...new Set(recs.map(r=>r.date.slice(0,7)))].sort();
   const monthlySummary = months.map(m=>{
     const mRecs = recs.filter(r=>r.date.slice(0,7)===m);

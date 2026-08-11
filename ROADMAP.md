@@ -3,6 +3,57 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped to `develop`: professional icon set + security hardening (2026-08-11, later same day)
+
+Deep asked for more polish (professional icons app-wide) plus a security and
+bug pass.
+
+**Icons.** Built one shared icon set (`ICONS`/`icon()`) — consistent stroke,
+`currentColor` so it themes correctly, same style as the FAB icons shipped
+earlier. Replaced emoji everywhere it mattered for "professional feel":
+- Dashboard stat cards (Latest Weight, Total Steps, Fasting Rate, Workouts)
+  across all three tabs
+- The 6 meal section headers, Daily Notes, and every entry-form title
+  (Weight/Habits/Workout/Message)
+- The 7 workout activity-type chips (running/walking/cycling/yoga/
+  swimming/gym/other) — actual little pictograms now, not emoji
+- The 4 default habits (Water/Deep Breathing/Stay Active/Good Sleep),
+  Settings section headers (Cloud Sync/Backup/My Trackers/Preset Items/
+  WhatsApp), and the hamburger menu (profile/theme/settings)
+- Left emoji alone in transient text contexts (toasts, the WhatsApp message
+  body) since SVG can't render in plain text pasted elsewhere.
+
+**Security review — found and fixed real gaps:**
+- Several spots rendered user-entered text (custom tracker names, preset
+  food items, workout notes shown in day-by-day tables, typeahead
+  suggestions) straight into `innerHTML` without escaping — a genuinely
+  exploitable stored-XSS path (e.g. a tracker named `<img src=x
+  onerror=...>` would have executed). Added a shared `escapeHtml()` and
+  applied it everywhere user text meets `innerHTML`.
+- Hardened `mergeDaysFromCloud()` against a malformed/tampered
+  `index.json` record whose `date` field is `"__proto__"` (or
+  `constructor`/`prototype`) — a plain `days[key]=value` assignment would
+  otherwise corrupt the `days` object's prototype chain instead of setting
+  a normal property.
+- Verified (no changes needed): the GitHub PAT is never logged, never
+  re-displayed after connecting, never included in the JSON backup export,
+  and is only ever sent as an `Authorization` header over HTTPS — not in
+  any URL. No `eval`/`Function`/`document.write` anywhere in the app.
+
+**Bug-hunt pass:** re-read the food form's 6-slot date-change handling,
+the workout multi-entry queue, and cloud-save retry logic from recent
+rounds — no defects found, all confirmed correct.
+
+Tested with 55 checks this round: 14 covering the new icons plus two
+deliberate XSS attack payloads (a malicious tracker name and a malicious
+preset item) confirmed inert, 12 re-confirming the fasting fix still holds,
+7 against the real 198-day history with zero JS errors, and 8-form smoke
+checks. Note: the container was reset since the last session (ephemeral —
+all work was already safely pushed to GitHub, nothing lost), so the full
+historical regression suite from earlier rounds had to be partially
+rebuilt; this round's coverage is real but narrower than the ~115-check
+peak from before the reset.
+
 ## Shipped to `develop`: fasting calc bug fix + daily fasting report (2026-08-11)
 
 Deep reported fasting hours weren't calculating automatically and asked for

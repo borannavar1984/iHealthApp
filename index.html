@@ -235,16 +235,16 @@
 
 <div class="header-menu-backdrop" id="headerMenuBackdrop" onclick="closeHeaderMenu()"></div>
 <div class="header-menu" id="headerMenu">
-  <div class="header-menu-name" id="headerMenuName">👤 You</div>
+  <div class="header-menu-name" id="headerMenuName"><span data-icon="profile"></span> You</div>
   <div class="header-menu-sub" id="headerMenuSub">—</div>
   <div class="header-menu-label">Appearance</div>
   <div class="header-menu-theme-row">
-    <button type="button" class="opt" id="headerMenuDarkBtn" onclick="setTheme('dark'); closeHeaderMenu();">🌙 Dark</button>
-    <button type="button" class="opt" id="headerMenuLightBtn" onclick="setTheme('light'); closeHeaderMenu();">☀️ Light</button>
+    <button type="button" class="opt" id="headerMenuDarkBtn" onclick="setTheme('dark'); closeHeaderMenu();"><span data-icon="sleep"></span> Dark</button>
+    <button type="button" class="opt" id="headerMenuLightBtn" onclick="setTheme('light'); closeHeaderMenu();"><span data-icon="sun"></span> Light</button>
   </div>
   <div class="header-menu-divider"></div>
-  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); openProfileEdit();">👤 Edit profile ›</button>
-  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); showMainTab('settings');">⚙️ Settings ›</button>
+  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); openProfileEdit();"><span data-icon="profile"></span> Edit profile ›</button>
+  <button type="button" class="header-menu-link" onclick="closeHeaderMenu(); showMainTab('settings');"><span data-icon="gear"></span> Settings ›</button>
 </div>
 
 <!-- ===================== DASHBOARD (home screen) ===================== -->
@@ -288,7 +288,7 @@
     <div class="cat-picker-title">Settings</div>
   </div>
   <div class="section">
-    <div class="label" style="margin-top:0">☁️ Cloud Sync</div>
+    <div class="label" style="margin-top:0"><span data-icon="cloud"></span> Cloud Sync</div>
     <div class="cloud-status" id="cloudStatus">Not connected — saving on this device only</div>
     <div id="cloudSetup">
       <input type="text" id="cloudOwner" placeholder="GitHub username" autocomplete="off">
@@ -299,12 +299,12 @@
     <div id="cloudControls" style="display:none">
       <button class="btn btn-ghost" onclick="cloudDisconnect()">Disconnect</button>
     </div>
-    <div class="label">💾 Backup &amp; Export</div>
+    <div class="label"><span data-icon="backup"></span> Backup &amp; Export</div>
     <div class="row2">
       <button class="btn btn-ghost btn-sm" style="width:100%" onclick="backupData()">Backup (.json)</button>
       <button class="btn btn-ghost btn-sm" style="width:100%" onclick="exportExcel()">Export (.xlsx)</button>
     </div>
-    <div class="label">🧩 My Trackers</div>
+    <div class="label"><span data-icon="checklist"></span> My Trackers</div>
     <div id="trackerList"></div>
     <button class="btn btn-ghost btn-sm" onclick="toggleAddTrackerForm()">+ Add tracker</button>
     <div class="add-tracker-form" id="addTrackerForm" style="display:none">
@@ -317,7 +317,7 @@
       </select>
       <button class="btn btn-save btn-sm" onclick="addTracker()">Save Tracker</button>
     </div>
-    <div class="label">🍽️ Preset Menu Items</div>
+    <div class="label"><span data-icon="food"></span> Preset Menu Items</div>
     <div class="muted-note">Pre-load common items (or ones your dietitian suggests) so they're always a quick tap in the food form — no typing needed.</div>
     <div id="presetMealPicker" class="chip-row" style="margin-top:8px"></div>
     <div id="presetItemList" style="margin-top:8px"></div>
@@ -325,7 +325,7 @@
       <input type="text" id="newPresetItem" placeholder="e.g. Idli, Poha, Dal Rice" autocomplete="off">
       <button onclick="addPresetItem()">Add</button>
     </div>
-    <div class="label">💬 WhatsApp Message</div>
+    <div class="label"><span data-icon="message"></span> WhatsApp Message</div>
     <div class="muted-note">Draft template — this is my best guess at your format from the migrated history. Tell me how it should differ and I'll adjust it.</div>
     <input type="date" id="waDate" style="margin-top:8px">
     <button class="btn btn-wa" onclick="generateWhatsApp()">Generate Message for This Date</button>
@@ -373,9 +373,9 @@
     <div style="width:36px"></div>
   </div>
   <div class="ob-body">
-    <div class="label">👤 Your Name</div>
+    <div class="label"><span data-icon="profile"></span> Your Name</div>
     <input type="text" id="profileName" placeholder="Your name" autocomplete="off">
-    <div class="label" style="margin-top:14px">🎯 Goal Weight</div>
+    <div class="label" style="margin-top:14px"><span data-icon="target"></span> Goal Weight</div>
     <div class="val-wrap"><input type="tel" id="profileGoalWeight" inputmode="decimal" placeholder="65.0" class="hero-input"><span class="unit">kg</span></div>
     <div class="muted-note">You can change this anytime from the profile menu.</div>
     <button class="btn btn-save" onclick="saveProfile()">Save Profile</button>
@@ -410,15 +410,67 @@
 // (was just Breakfast/Snack/Dinner). Defined first since several storage
 // defaults below depend on it.
 const MEAL_DEFS = [
-  {key:"on_rise", label:"🌅 On Rise", fallback:["06:30","07:00"]},
-  {key:"breakfast", label:"🍳 Breakfast", fallback:["08:00","08:30"]},
-  {key:"mid_morning", label:"🍎 Mid-Morning", fallback:["10:30","11:00"]},
-  {key:"lunch", label:"🍛 Lunch", fallback:["13:00","13:30"]},
-  {key:"snack", label:"🥗 Evening Snack", fallback:["16:00","17:00"]},
-  {key:"dinner", label:"🍽️ Early Dinner", fallback:["19:00","19:30"]},
+  {key:"on_rise", label:"🌅 On Rise", fallback:["06:30","07:00"], icon:"sunrise"},
+  {key:"breakfast", label:"🍳 Breakfast", fallback:["08:00","08:30"], icon:"food"},
+  {key:"mid_morning", label:"🍎 Mid-Morning", fallback:["10:30","11:00"], icon:"fruit"},
+  {key:"lunch", label:"🍛 Lunch", fallback:["13:00","13:30"], icon:"bowl"},
+  {key:"snack", label:"🥗 Evening Snack", fallback:["16:00","17:00"], icon:"leaf"},
+  {key:"dinner", label:"🍽️ Early Dinner", fallback:["19:00","19:30"], icon:"dinner"},
 ];
 const MEAL_KEYS = MEAL_DEFS.map(m=>m.key);
 function emptyMealsDraft(){ const d={}; MEAL_KEYS.forEach(k=>d[k]=[]); return d; }
+
+// Shared icon set — one consistent line-icon style (stroke, currentColor, no
+// fill) used everywhere the app used to rely on emoji, so it renders the same
+// crisp way on every device instead of each platform's own emoji artwork.
+const ICONS = {
+  weight: `<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12.5" r="3.4"/><path d="M12 10.3v2.2l1.6 1.1"/>`,
+  steps: `<path d="M9.5 3.5c1.4 0 2.2 1.1 2.2 2.8 0 1.6-.5 2.3-.9 3.4-.5 1.3-1 2-1 3.6 0 2-.1 4.2-2.3 4.2-1.6 0-2.3-1.2-2.3-3 0-1.7.5-2.3 1-3.6.5-1.2.9-2 .9-3.8 0-1.9.7-3.6 2.4-3.6Z"/><path d="M15.3 8.2c1.4 0 2.2 1.1 2.2 2.8 0 1.6-.5 2.3-.9 3.4-.5 1.3-1 2-1 3.6 0 2-.1 4.5-2.3 4.5-1.6 0-2.3-1.5-2.3-3.3 0-1.7.5-2.3 1-3.6.5-1.2.9-2 .9-3.8 0-1.9.7-3.6 2.4-3.6Z"/>`,
+  fasting: `<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3.3 2"/>`,
+  workout: `<rect x="5" y="8" width="3.4" height="8" rx="1"/><rect x="15.6" y="8" width="3.4" height="8" rx="1"/><path d="M8.4 12h7.2"/><path d="M3.2 10.2v3.6"/><path d="M20.8 10.2v3.6"/>`,
+  food: `<path d="M6 2v7a2 2 0 0 0 2 2v11"/><path d="M6 2v7"/><path d="M9 2v7"/><path d="M17 2c-2 1.6-2 4.6-2 7 0 1.7 1 2.6 2 2.6V22"/>`,
+  habit: `<circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.3l3 3 6-6.6"/>`,
+  message: `<path d="M4 5.8A2.8 2.8 0 0 1 6.8 3h10.4A2.8 2.8 0 0 1 20 5.8v7.4a2.8 2.8 0 0 1-2.8 2.8H9l-4.6 3.8v-4.2A2.8 2.8 0 0 1 4 13.2Z"/><path d="M8 9.2h8M8 12.2h5"/>`,
+  water: `<path d="M12 3C9 8 6 11.6 6 15.2a6 6 0 0 0 12 0C18 11.6 15 8 12 3Z"/>`,
+  lungs: `<path d="M12 3v6.5"/><path d="M12 9.5c-1.2 0-4 .8-4 5 0 3 1 6.5 3 6.5.8 0 1-1 1-2Z"/><path d="M12 9.5c1.2 0 4 .8 4 5 0 3-1 6.5-3 6.5-.8 0-1-1-1-2Z"/><path d="M8 8l-1.5-1.5M16 8l1.5-1.5"/>`,
+  sleep: `<path d="M20 14.7A8.5 8.5 0 1 1 9.3 4a7 7 0 0 0 10.7 10.7Z"/>`,
+  sunrise: `<path d="M12 3v3.5"/><path d="M5.6 8.6l2 2"/><path d="M18.4 8.6l-2 2"/><path d="M3 17h18"/><path d="M6.5 17a5.5 5.5 0 0 1 11 0"/>`,
+  fruit: `<path d="M12 9c-3.3 0-5.5 2.4-5.5 6S9 21 12 21s5.5-2.4 5.5-6S15.3 9 12 9Z"/><path d="M12 9c0-2 .8-3.6 2.3-4.5"/><path d="M10 5.3c.9-1 2.2-1.3 3.3-1"/>`,
+  bowl: `<path d="M3.5 12h17a8.5 8.5 0 0 1-17 0Z"/><path d="M8.5 12V9a3.5 3.5 0 0 1 7 0v3"/>`,
+  leaf: `<path d="M4.5 19.5C4.5 9 12.5 3.5 20.5 3.5c0 8-6 16.5-16 16Z"/><path d="M6.5 17.5c3.5-3.5 7-7 10.5-10.5"/>`,
+  dinner: `<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/>`,
+  cloud: `<path d="M7 18a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.8-1.2A4 4 0 0 1 17 18H7Z"/><path d="M12 11.5v6.5m0 0-2.3-2.3M12 18l2.3-2.3"/>`,
+  backup: `<path d="M12 3v11.5m0 0-3.5-3.5M12 14.5 15.5 11"/><path d="M4.5 16.5v2.7a2.3 2.3 0 0 0 2.3 2.3h10.4a2.3 2.3 0 0 0 2.3-2.3v-2.7"/>`,
+  checklist: `<path d="M9.5 6h10M9.5 12h10M9.5 18h10"/><path d="M4 6.3l1.2 1.2L7.5 5M4 12.3l1.2 1.2 2.3-2.5M4 18.3l1.2 1.2 2.3-2.5"/>`,
+  gear: `<circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.7 7.7 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.7 7.7 0 0 0 1.7-1l2.4 1 2-3.4Z"/>`,
+  profile: `<circle cx="12" cy="8.3" r="4"/><path d="M4.2 20.5c0-4 3.5-7 7.8-7s7.8 3 7.8 7"/>`,
+  note: `<path d="M6 3.5h9l3.5 3.5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15.5a1 1 0 0 1 1-1Z"/><path d="M15 3.5V7h3.5"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/>`,
+  sun: `<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M4.5 12H6.7M17.3 12h2.2M6.5 6.5l1.5 1.5M16 16l1.5 1.5M17.5 6.5 16 8M8 16l-1.5 1.5"/>`,
+  target: `<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>`,
+  running: `<path d="M6 20l3-5 3 1.5L15 12"/><path d="M13 6.5a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z"/><path d="M9.5 20l1-4-2-1.5 1.5-4.5L13 8l2.5 2.5-1 4"/>`,
+  walking: `<path d="M9 20l1.5-6"/><path d="M14 6.5a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z"/><path d="M11 20l1-5-2-2 1-4.5 3 1 2 3-1 3.5"/>`,
+  cycling: `<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-8h4l3 8"/><path d="M9 9h3l2 3"/>`,
+  yoga: `<circle cx="12" cy="5.5" r="2"/><path d="M12 7.5v5"/><path d="M12 12.5l-5.5 5"/><path d="M12 12.5l5.5 5"/><path d="M7 9.5c1.5 1.7 3 2.2 5 2.2s3.5-.5 5-2.2"/>`,
+  swimming: `<path d="M3 15c1.3 1.2 2.6 1.2 3.9 0 1.3-1.2 2.6-1.2 3.9 0 1.3 1.2 2.6 1.2 3.9 0 1.3-1.2 2.6-1.2 3.9 0"/><path d="M3 19c1.3 1.2 2.6 1.2 3.9 0 1.3-1.2 2.6-1.2 3.9 0 1.3 1.2 2.6 1.2 3.9 0 1.3-1.2 2.6-1.2 3.9 0"/><circle cx="16" cy="6.5" r="1.8"/><path d="M6 12l4-2.5 2.5 1.5L15 8.5"/>`,
+  spark: `<path d="M12 3l1.8 5.6L19 10l-5.2 1.4L12 17l-1.8-5.6L5 10l5.2-1.4Z"/>`,
+};
+function icon(name, size){
+  const body = ICONS[name];
+  if(!body) return "";
+  const s = size || 18;
+  return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px">${body}</svg>`;
+}
+// Escapes user-entered text before it's placed into innerHTML alongside markup
+// (icons, tags) — anywhere a plain textContent/value assignment isn't an option.
+function escapeHtml(str){
+  return String(str==null?"":str).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+// Fills in <span data-icon="name"></span> placeholders used in static HTML
+// (markup that isn't generated from a JS template literal, so icon(...)
+// can't be interpolated directly at parse time).
+function hydrateStaticIcons(){
+  document.querySelectorAll("[data-icon]").forEach(el=>{ el.innerHTML = icon(el.dataset.icon); });
+}
 
 // Detect environment based on URL path.
 // Dev: any URL that contains "/dev/" (e.g. github.io/iHealthApp/dev/)
@@ -507,7 +559,7 @@ function persistPresetItems(){ try{ localStorage.setItem(LS_PRESET_ITEMS, JSON.s
 // typed in by the user — lives in one place (`trackers`), fully add/deletable.
 // Nothing is hardcoded as permanent.
 function activeHabitList(){
-  return trackers.map(t=>({key:t.id, label:t.label, type:t.type}));
+  return trackers.map(t=>({key:t.id, label:t.label, type:t.type, icon:t.icon}));
 }
 function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
@@ -553,10 +605,10 @@ function normHabitEvents(rec){
 function defaultTrackerSeed(){
   const today = todayStr();
   return [
-    {id:"water", label:"💧 Water (3L target)", type:"count", addedDate: today},
-    {id:"deep_breathing", label:"🫁 Deep Breathing", type:"boolean", addedDate: today},
-    {id:"steps_goal", label:"🚶 Stay Active (10k Steps)", type:"boolean", addedDate: today},
-    {id:"sleep_goal", label:"🌙 Good Sleep (7-8 hrs, by 11pm)", type:"boolean", addedDate: today},
+    {id:"water", label:"💧 Water (3L target)", icon:"water", type:"count", addedDate: today},
+    {id:"deep_breathing", label:"🫁 Deep Breathing", icon:"lungs", type:"boolean", addedDate: today},
+    {id:"steps_goal", label:"🚶 Stay Active (10k Steps)", icon:"steps", type:"boolean", addedDate: today},
+    {id:"sleep_goal", label:"🌙 Good Sleep (7-8 hrs, by 11pm)", icon:"sleep", type:"boolean", addedDate: today},
   ];
 }
 // Rotating meal options straight from Deep's dietitian's maintenance plan —
@@ -613,7 +665,7 @@ function latestWeightOverall(){
 }
 
 function updateHeaderMenu(){
-  document.getElementById("headerMenuName").textContent = "👤 " + userName();
+  document.getElementById("headerMenuName").innerHTML = icon("profile") + " " + escapeHtml(userName());
   const latest = latestWeightOverall();
   const gw = goalWeight();
   const el = document.getElementById("headerMenuSub");
@@ -682,7 +734,7 @@ function renderOnboardHabitChecklist(){
   const box = document.getElementById("onboardHabitList"); if(!box) return;
   box.innerHTML = defaultTrackerSeed().map(h=>`
     <label class="habit-row" style="margin-bottom:8px;cursor:pointer">
-      <span>${h.label}</span>
+      <span>${icon(h.icon)} ${escapeHtml(h.label.replace(/^[^\s]+\s/,""))}</span>
       <input type="checkbox" data-onboard-habit="${h.id}" checked style="width:20px;height:20px">
     </label>`).join("");
 }
@@ -767,7 +819,7 @@ function openEntryForm(type){
 // ===== Today's Message (quick-access from the + menu) =====
 function messageFormHtml(){
   return `
-    <div class="section"><h3>💬 Today's Message</h3>
+    <div class="section"><h3>${icon("message")} Today's Message</h3>
       <div class="muted-note">Built automatically from everything logged today. Add anything missing first, then copy and send it to your dietitian.</div>
       <div class="wa-preview" id="fabWaPreview" style="margin-top:10px"></div>
       <button class="btn btn-wa" id="fabWaCopyBtn" style="margin-top:12px;display:none" onclick="copyTextToClipboard(document.getElementById('fabWaPreview').textContent)">📋 Copy Message</button>
@@ -810,7 +862,7 @@ function setupTypeahead(inputEl, listEl, getSource, onPick){
     const contains = source.filter(s=>!s.toLowerCase().startsWith(q) && s.toLowerCase().includes(q));
     results = [...starts, ...contains].slice(0,8);
     if(!results.length){ listEl.style.display="none"; listEl.innerHTML=""; return; }
-    listEl.innerHTML = results.map(r=>`<button type="button">${r.replace(/</g,"&lt;")}</button>`).join("");
+    listEl.innerHTML = results.map(r=>`<button type="button">${escapeHtml(r)}</button>`).join("");
     [...listEl.children].forEach((btn,i)=>{
       btn.onclick=()=>{ inputEl.value = results[i]; listEl.style.display="none"; listEl.innerHTML=""; onPick && onPick(results[i]); };
     });
@@ -899,10 +951,10 @@ function foodFormHtml(){
   const presetChipsFor = meal => {
     const items = presetItems[meal] || [];
     if(!items.length) return "";
-    return `<div class="chip-row" id="${meal}PresetChips">${items.map(item=>`<button type="button" class="opt" data-preset-add="${meal}">${item}</button>`).join("")}</div>`;
+    return `<div class="chip-row" id="${meal}PresetChips">${items.map(item=>`<button type="button" class="opt" data-preset-add="${meal}">${escapeHtml(item)}</button>`).join("")}</div>`;
   };
   const mealSection = m => `
-    <div class="section" id="meal_${m.key}" data-meal="${m.key}"><h3>${m.label}</h3>
+    <div class="section" id="meal_${m.key}" data-meal="${m.key}"><h3>${icon(m.icon)} ${m.label.replace(/^[^\s]+\s/,"")}</h3>
       <div class="chip-row" id="${m.key}Chips"></div>
       ${presetChipsFor(m.key)}
       <div class="typeahead-wrap" style="margin-top:8px">
@@ -917,7 +969,7 @@ function foodFormHtml(){
     </div>`;
   return `
     ${MEAL_DEFS.map(mealSection).join("")}
-    <div class="section"><h3>📝 Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
+    <div class="section"><h3>${icon("note")} Daily Notes (optional)</h3><textarea id="foodNotes" placeholder="How are you feeling today? Any symptoms, energy levels, etc."></textarea></div>
     <div class="label">Date</div><input type="date" id="foodDate"><div class="muted-note">Defaults to today.</div>
     <button class="btn btn-save" onclick="saveFoodEntry()">Save Food Log</button>
   `;
@@ -1051,7 +1103,7 @@ async function saveFoodEntry(){
 
 function weightFormHtml(){
   return `
-    <div class="section"><h3>⚖️ Weight</h3>
+    <div class="section"><h3>${icon("weight")} Weight</h3>
       <div class="val-wrap"><input type="tel" id="weightValue" inputmode="decimal" placeholder="65.0" class="hero-input" autofocus><span class="unit">kg</span></div>
       <div class="muted-note" id="weightPrefillNote"></div>
     </div>
@@ -1122,7 +1174,7 @@ function habitFormHtml(){
   activeHabitList().forEach(h=>{ habitDraft[h.key] = { value: habitDayValue(today, h.key), time: nowTimeStr() }; });
   const rows = activeHabitList().map(h=>habitRowHtml(h)).join("");
   return `
-    <div class="section"><h3>✅ Today's Habits</h3>
+    <div class="section"><h3>${icon("habit")} Today's Habits</h3>
       <div id="habitRows">${rows}</div>
       <div class="muted-note">Saving only adds new entries for habits you've changed — it never erases what was already logged today. Tap the time if it happened earlier than now.</div>
     </div>
@@ -1131,14 +1183,20 @@ function habitFormHtml(){
 }
 function habitRowHtml(h){
   const timeInput = `<input type="time" data-habit-time="${h.key}" class="habit-time-input" style="width:96px;margin-left:8px">`;
+  // Only the app's own default habits carry an emoji-prefixed label (and an
+  // icon name to match) — strip that prefix and show the SVG instead. Custom
+  // trackers the user typed in have no icon and no emoji, so leave them as-is;
+  // blindly stripping the "first word" would mangle a name like "Knee physio".
+  const displayLabel = escapeHtml(h.icon ? h.label.replace(/^[^\s]+\s/,"") : h.label);
+  const labelHtml = h.icon ? `<span>${icon(h.icon)} ${displayLabel}</span>` : `<span>${displayLabel}</span>`;
   if(h.type==="count"){
-    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><div class="stepper" data-habit="${h.key}">
+    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap">${labelHtml}<div style="display:flex;align-items:center"><div class="stepper" data-habit="${h.key}">
       ${[0,1,2].map(n=>`<button data-n="${n}">${n}</button>`).join("")}</div>${timeInput}</div></div>`;
   }
   if(h.type==="number" || h.type==="text"){
-    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><input type="${h.type==='number'?'tel':'text'}" data-habit="${h.key}" style="width:90px" placeholder="${h.type==='number'?'0':'…'}">${timeInput}</div></div>`;
+    return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap">${labelHtml}<div style="display:flex;align-items:center"><input type="${h.type==='number'?'tel':'text'}" data-habit="${h.key}" style="width:90px" placeholder="${h.type==='number'?'0':'…'}">${timeInput}</div></div>`;
   }
-  return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap"><span>${h.label}</span><div style="display:flex;align-items:center"><button class="opt" data-habit="${h.key}">Done</button>${timeInput}</div></div>`;
+  return `<div class="habit-row" style="margin-bottom:8px;flex-wrap:wrap">${labelHtml}<div style="display:flex;align-items:center"><button class="opt" data-habit="${h.key}">Done</button>${timeInput}</div></div>`;
 }
 function initHabitForm(){
   const container = document.getElementById("habitRows");
@@ -1199,22 +1257,22 @@ async function saveHabitEntry(){
 // (distance for things you measure in miles, duration for things you measure
 // in minutes) — no more guessing what a free-text "workout" field wants.
 const WORKOUT_TYPES = [
-  {key:"running", label:"🏃 Running", metric:"distance"},
-  {key:"walking", label:"🚶 Walking", metric:"distance"},
-  {key:"cycling", label:"🚴 Cycling", metric:"distance"},
-  {key:"yoga", label:"🧘 Yoga", metric:"duration"},
-  {key:"swimming", label:"🏊 Swimming", metric:"duration"},
-  {key:"gym", label:"🏋️ Gym", metric:"duration"},
-  {key:"other", label:"⚡ Other", metric:"duration"},
+  {key:"running", label:"Running", icon:"running", metric:"distance"},
+  {key:"walking", label:"Walking", icon:"walking", metric:"distance"},
+  {key:"cycling", label:"Cycling", icon:"cycling", metric:"distance"},
+  {key:"yoga", label:"Yoga", icon:"yoga", metric:"duration"},
+  {key:"swimming", label:"Swimming", icon:"swimming", metric:"duration"},
+  {key:"gym", label:"Gym", icon:"workout", metric:"duration"},
+  {key:"other", label:"Other", icon:"spark", metric:"duration"},
 ];
 function workoutFormHtml(){
   return `
-    <div class="section"><h3>🏃 Workout</h3>
+    <div class="section"><h3>${icon("workout")} Workout</h3>
       <div class="label" style="margin-top:0">Type</div>
-      <div class="chip-row" id="workoutTypeChips">${WORKOUT_TYPES.map(t=>`<button type="button" class="opt" data-workout-type="${t.key}">${t.label}</button>`).join("")}</div>
+      <div class="chip-row" id="workoutTypeChips">${WORKOUT_TYPES.map(t=>`<button type="button" class="opt" data-workout-type="${t.key}">${icon(t.icon)} ${t.label}</button>`).join("")}</div>
       <div id="workoutMetricField" style="display:none;margin-top:14px"></div>
       <div class="label" style="margin-top:14px">Time</div><input type="time" id="workoutTime">
-      <div class="label" style="margin-top:14px">📝 Style / notes (optional)</div><textarea id="workoutNote" placeholder="e.g. Vinyasa, felt strong today…"></textarea>
+      <div class="label" style="margin-top:14px">${icon("note")} Style / notes (optional)</div><textarea id="workoutNote" placeholder="e.g. Vinyasa, felt strong today…"></textarea>
       <button type="button" class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addWorkoutToQueue()">+ Add to Today's Log</button>
     </div>
     <div class="section" id="workoutQueueSection" style="display:none">
@@ -1258,7 +1316,7 @@ function addWorkoutToQueue(){
   const metricVal = metricInput ? parseFloat(metricInput.value) : null;
   const notes = document.getElementById("workoutNote").value.trim();
   const time = document.getElementById("workoutTime").value || nowTimeStr();
-  const label = t.label.replace(/^[^\s]+\s/,"");
+  const label = t.label;
   const workout = label + (notes ? " — " + notes : "");
   workoutQueueDraft.push({
     type: t.key, workout, time,
@@ -1358,10 +1416,10 @@ function renderWeeklyTab(){
   const latestW = wWeights.length ? wWeights[wWeights.length-1] : null;
 
   document.getElementById("weekCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${latestW?latestW+"kg":"—"}</div><div class="card-sub">${latestW?"Goal: "+gw.toFixed(1)+"kg":"No data"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${wSteps.length?wSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${wSteps.length?wSteps.length+" days":"No data"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${wFasting.length?wFasting.length+" days logged":"No data"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${wWorkouts}</div><div class="card-sub">${wRuns.length?wRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
+    <div class="card"><div class="card-label">${icon("weight")} Latest Weight</div><div class="card-value">${latestW?latestW+"kg":"—"}</div><div class="card-sub">${latestW?"Goal: "+gw.toFixed(1)+"kg":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">${icon("steps")} Total Steps</div><div class="card-value">${wSteps.length?wSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div><div class="card-sub">${wSteps.length?wSteps.length+" days":"No data"}</div></div>
+    <div class="card green"><div class="card-label">${icon("fasting")} Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${wFasting.length?wFasting.length+" days logged":"No data"}</div></div>
+    <div class="card orange"><div class="card-label">${icon("workout")} Workouts</div><div class="card-value">${wWorkouts}</div><div class="card-sub">${wRuns.length?wRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
   `;
 
   if(typeof Chart==="undefined"){ showChartFallback("weekWeightChart","📊 Chart couldn't load — data still saved"); }
@@ -1401,7 +1459,7 @@ function renderWeeklyTab(){
   dates7.forEach(d=>{ const dayLabel = d.slice(8); const isToday = d===todayDate; habitGridHtml += `<th style="text-align:center;padding:6px 4px;color:var(--muted);font-size:10px;${isToday?'color:var(--accent);font-weight:800':'#'}">${dayLabel}</th>`; });
   habitGridHtml += '</tr></thead><tbody>';
   allHabits.forEach(h=>{
-    habitGridHtml += `<tr><td style="padding:8px;font-size:12px;white-space:nowrap">${h.label}</td>`;
+    habitGridHtml += `<tr><td style="padding:8px;font-size:12px;white-space:nowrap">${h.icon?icon(h.icon)+" ":""}${escapeHtml(h.icon?h.label.replace(/^[^\s]+\s/,""):h.label)}</td>`;
     dates7.forEach(d=>{
       const rec = days[d];
       const val = habitDayValue(rec, h.key);
@@ -1426,7 +1484,7 @@ function renderWeeklyTab(){
 
   document.getElementById("weekTable").innerHTML = weekRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${weekRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=activeHabitList().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+      return `<tr><td>${r.date.slice(5)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(woText)}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📊 No entries in the last 7 days</div>`;
 }
 
@@ -1450,10 +1508,10 @@ function renderMonthTab(){
   const fastingRate = mFasting.length ? Math.round(mFasting.filter(r=>r.fasting_hours>=16).length/mFasting.length*100) : null;
 
   document.getElementById("monthCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
-    <div class="card purple"><div class="card-label">👟 Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
-    <div class="card green"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
-    <div class="card orange"><div class="card-label">🏃 Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
+    <div class="card"><div class="card-label">${icon("weight")} Avg Weight</div><div class="card-value">${mWeights.length?Math.round(mWeights.reduce((a,b)=>a+b,0)/mWeights.length*10)/10+"kg":"—"}</div><div class="card-sub">${mWeights.length?mWeights.length+" entries":"No data"}</div></div>
+    <div class="card purple"><div class="card-label">${icon("steps")} Total Steps</div><div class="card-value">${mSteps.length?mSteps.reduce((a,b)=>a+b,0).toLocaleString():"—"}</div></div>
+    <div class="card green"><div class="card-label">${icon("fasting")} Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div></div>
+    <div class="card orange"><div class="card-label">${icon("workout")} Workouts</div><div class="card-value">${mWorkouts}</div><div class="card-sub">${mRuns.length?mRuns.reduce((a,b)=>a+b,0).toFixed(1)+" mi run":"No runs"}</div></div>
   `;
 
   if(typeof Chart==="undefined"){ showChartFallback("monthWeightChart","📊 Chart couldn't load — data still saved"); }
@@ -1486,7 +1544,7 @@ function renderMonthTab(){
 
   document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=activeHabitList().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
-      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${woText.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
+      return `<tr><td>${r.date.slice(8)}</td><td>${w}</td><td>${r.steps!=null?r.steps.toLocaleString():"—"}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(woText)}</td><td>${wo.flatMap(e=>e.run_miles).filter(v=>v!=null).join(", ")||"—"}</td><td>${hCount}/${activeHabitList().length}</td><td>${r.fasting_hours!=null?r.fasting_hours+"h":"—"}</td></tr>`; }).join("")}
   </tbody></table>` : `<div class="dash-empty">📭 No entries for this month</div>`;
 }
 
@@ -1500,10 +1558,10 @@ function renderOverallTab(){
   const fastingRate = allFasting.length ? Math.round(allFasting.filter(r=>r.fasting_hours>=16).length/allFasting.length*100) : null;
 
   document.getElementById("overallCards").innerHTML = `
-    <div class="card"><div class="card-label">⚖️ Latest Weight</div><div class="card-value">${overall?overall.entry.weight+"kg":"—"}</div><div class="card-sub">${overall?"Goal: "+gw.toFixed(1)+"kg":""}</div></div>
-    <div class="card green"><div class="card-label">📊 Days Logged</div><div class="card-value">${recs.length}</div><div class="card-sub">Since ${recs.length?recs[0].date:"—"}</div></div>
-    <div class="card purple"><div class="card-label">⏱️ Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${allFasting.length} days logged</div></div>
-    <div class="card orange"><div class="card-label">🏃 Total Workouts</div><div class="card-value">${allWorkouts}</div><div class="card-sub">all-time</div></div>
+    <div class="card"><div class="card-label">${icon("weight")} Latest Weight</div><div class="card-value">${overall?overall.entry.weight+"kg":"—"}</div><div class="card-sub">${overall?"Goal: "+gw.toFixed(1)+"kg":""}</div></div>
+    <div class="card green"><div class="card-label">${icon("checklist")} Days Logged</div><div class="card-value">${recs.length}</div><div class="card-sub">Since ${recs.length?recs[0].date:"—"}</div></div>
+    <div class="card purple"><div class="card-label">${icon("fasting")} Fasting Rate</div><div class="card-value">${fastingRate!=null?fastingRate+"%":"—"}</div><div class="card-sub">${allFasting.length} days logged</div></div>
+    <div class="card orange"><div class="card-label">${icon("workout")} Total Workouts</div><div class="card-value">${allWorkouts}</div><div class="card-sub">all-time</div></div>
   `;
 
   if(typeof Chart==="undefined"){ showChartFallback("overallWeightChart","📊 Chart couldn't load — data still saved"); }
@@ -1558,7 +1616,7 @@ function renderOverallTab(){
 let presetMealTab = "breakfast";
 function renderPresetItemList(){
   const picker = document.getElementById("presetMealPicker"); if(!picker) return;
-  picker.innerHTML = MEAL_DEFS.map(m=>`<button type="button" class="opt${m.key===presetMealTab?" sel":""}" data-preset-meal="${m.key}">${m.label.replace(/^[^\s]+\s/,"")}</button>`).join("");
+  picker.innerHTML = MEAL_DEFS.map(m=>`<button type="button" class="opt${m.key===presetMealTab?" sel":""}" data-preset-meal="${m.key}">${icon(m.icon,15)} ${m.label.replace(/^[^\s]+\s/,"")}</button>`).join("");
   [...picker.querySelectorAll("[data-preset-meal]")].forEach(btn=>{
     btn.onclick = ()=>{ presetMealTab = btn.dataset.presetMeal; renderPresetItemList(); };
   });
@@ -1623,7 +1681,7 @@ function renderTrackers(){
   trackers.forEach(t=>{
     const wrap = document.createElement("div"); wrap.className="tracker-swipe"; wrap.dataset.id=t.id;
     wrap.innerHTML = `<button type="button" class="tracker-swipe-delete">Delete</button>
-      <div class="tracker-swipe-inner"><span>${t.label}</span><span class="tracker-swipe-badge">${t.type}</span></div>`;
+      <div class="tracker-swipe-inner"><span>${t.icon?icon(t.icon)+" ":""}${escapeHtml(t.icon?t.label.replace(/^[^\s]+\s/,""):t.label)}</span><span class="tracker-swipe-badge">${escapeHtml(t.type)}</span></div>`;
     box.appendChild(wrap);
     wireSwipeDelete(wrap, t);
   });
@@ -1810,8 +1868,13 @@ function setCloudStatus(ok, msg){
   if(ok){ el.textContent=`Connected to ${cloudCfg.owner}/${cloudCfg.repo} — last synced ${new Date().toLocaleTimeString()}`; el.className="cloud-status on"; }
   else { el.textContent = msg || "Cloud sync error"; el.className="cloud-status off"; }
 }
+const UNSAFE_OBJECT_KEYS = new Set(["__proto__","constructor","prototype"]);
 function mergeDaysFromCloud(remoteArr){
-  (remoteArr||[]).forEach(rec=>{ days[rec.date] = rec; });
+  // Guard against a malformed/tampered index.json record whose "date" is
+  // something like "__proto__" — a plain bracket assignment (days[key]=rec)
+  // would otherwise walk the prototype chain instead of setting a normal
+  // property, corrupting lookups on the days object.
+  (remoteArr||[]).forEach(rec=>{ if(rec && typeof rec.date==="string" && !UNSAFE_OBJECT_KEYS.has(rec.date)) days[rec.date] = rec; });
   recalcAllFastingHours();
 }
 async function cloudConnect(){
@@ -1871,6 +1934,7 @@ function setTheme(theme){
 
 // ===================== Init =====================
 (function initApp(){
+  hydrateStaticIcons();
   if(!checkOnboarding()) return;
   initAfterOnboarding();
 })();

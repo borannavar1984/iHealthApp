@@ -3,6 +3,40 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped to `develop`: fasting calc bug fix + daily fasting report (2026-08-11)
+
+Deep reported fasting hours weren't calculating automatically and asked for
+a daily-basis view of how he's doing.
+
+**Root cause:** the last update replaced the old "Morning Detox" habit with
+the new 6-meal-slot food form, but `fastBreakCandidates()` was never updated
+to match — it still only checked Breakfast/Mid-Morning/Snack times, and
+deliberately *excluded* On Rise (reasoning it was "just water, not
+calorie-bearing"). But Deep's own definition of when his fast breaks is his
+On Rise drink (methi/jeera/lemon water etc.) — so on any day where only On
+Rise was logged (no Breakfast time yet), fasting hours silently stayed
+blank.
+
+1. **Fixed:** On Rise is now the primary fast-break candidate, compared
+   against the previous day's dinner time, same as Deep described.
+2. **Backfill:** added `recalcAllFastingHours()`, which recomputes
+   fasting_hours for every already-logged day from its real timestamps (no
+   invented data) — runs automatically on cloud sync and app load, so days
+   logged before this fix get corrected instead of staying stuck at "no
+   data" forever.
+3. **New daily report:** added a "Fasting Hours" bar chart (green if the
+   16h target was hit, amber if not) to both the Weekly tab (last 7 days)
+   and Monthly tab (day-by-day for the selected month) — sits right below
+   the existing Weight Trend chart, same visual pattern.
+
+Tested with 27 checks (exact reported bug scenario: on_rise-only day now
+computes correctly; backfill runs once and is idempotent; both new charts
+render; full regression against the real 198-day history with zero JS
+errors and sane recalculated values; all 5 entry forms + Settings still
+open cleanly). Pushed to `develop` only — riding alongside the bigger
+habit/meal-plan/transparency changes Deep is still reviewing on `/dev/`
+before any of it goes to production.
+
 ## Shipped: real habits, real meal plan, fully deletable (2026-08-08)
 
 Deep shared his actual dietitian maintenance-plan document and asked the app

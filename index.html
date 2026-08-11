@@ -258,6 +258,7 @@
   <div id="dashWeekView">
     <div class="cards" id="weekCards"></div>
     <div class="chart-card"><h4>Weight Trend — Last 7 Days</h4><canvas id="weekWeightChart" height="160"></canvas><div class="dash-empty" id="weekWeightChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Fasting Hours — Last 7 Days</h4><canvas id="weekFastingChart" height="160"></canvas><div class="dash-empty" id="weekFastingChartEmpty" style="display:none"></div></div>
     <div class="chart-card"><h4>Habit Checklist — This Week</h4><div id="weekHabitGrid"></div></div>
     <div class="dtable-wrap"><div class="tw-head">Day by Day — Last 7 Days</div><div id="weekTable"></div></div>
   </div>
@@ -268,6 +269,7 @@
     </div>
     <div class="cards" id="monthCards"></div>
     <div class="chart-card"><h4>Weight Trend — Selected Month</h4><canvas id="monthWeightChart" height="160"></canvas><div class="dash-empty" id="monthWeightChartEmpty" style="display:none"></div></div>
+    <div class="chart-card"><h4>Fasting Hours — Selected Month</h4><canvas id="monthFastingChart" height="160"></canvas><div class="dash-empty" id="monthFastingChartEmpty" style="display:none"></div></div>
     <div class="dtable-wrap"><div class="tw-head">Day by Day</div><div id="monthTable"></div></div>
   </div>
 
@@ -990,13 +992,14 @@ function syncTimeChips(meal){
   if(t && !matched) document.getElementById(meal+"Time").style.display = "block";
 }
 // Fasting is auto-calculated and shown only on the Dashboard — no live box in the
-// food form. The fast breaks at the *earliest* real food/drink of the day: today's
-// Mid-Morning bite, Breakfast, Snack, or a legacy morning-detox habit event with a
-// time (old data only). "On Rise" (plain/herbal water) is deliberately excluded —
-// it's not calorie-bearing, so it doesn't end an intermittent fast.
+// food form. The fast breaks at the *earliest* real intake of the day: today's
+// On Rise (morning water/detox drink), Mid-Morning bite, Breakfast, Snack, or a
+// legacy morning-detox habit event with a time (old data only). Deep's own
+// definition: the day's On Rise drink is what actually ends the fast, so it's
+// the primary candidate, not excluded.
 function fastBreakCandidates(rec){
   const times = [];
-  ["breakfast","mid_morning","snack"].forEach(meal=>{ const m = normMeal(rec && rec[meal]); if(m.time) times.push(m.time); });
+  ["on_rise","breakfast","mid_morning","snack"].forEach(meal=>{ const m = normMeal(rec && rec[meal]); if(m.time) times.push(m.time); });
   normHabitEvents(rec).forEach(e=>{ if(e.habitKey==="morning_detox" && e.time) times.push(e.time); });
   return times.sort();
 }
@@ -1012,6 +1015,20 @@ function computeFastingHours(date, rec){
   let hrs = (breakDt - dinnerDt) / 3600000;
   if(hrs<0) hrs += 24;
   return Math.round(hrs*10)/10;
+}
+// Recomputes fasting_hours for every day already logged — pure recalculation
+// from timestamps already in the record, never invents anything. Needed so
+// days logged before a fasting-calc fix (like adding On Rise as a candidate)
+// get corrected automatically instead of staying stuck at "no data".
+function recalcAllFastingHours(){
+  let changed = false;
+  Object.keys(days).forEach(date=>{
+    const rec = days[date];
+    const newVal = computeFastingHours(date, rec);
+    if(rec.fasting_hours !== newVal){ rec.fasting_hours = newVal; changed = true; }
+  });
+  if(changed) persistDays();
+  return changed;
 }
 async function saveFoodEntry(){
   const date = document.getElementById("foodDate").value || todayStr();
@@ -1362,6 +1379,19 @@ function renderWeeklyTab(){
     });
   } else showChartFallback("weekWeightChart","⚖️ No weight entries this week yet");
 
+  if(typeof Chart==="undefined"){ showChartFallback("weekFastingChart","📊 Chart couldn't load — data still saved"); }
+  else if(wFasting.length){
+    showChartCanvas("weekFastingChart");
+    if(charts.weekFasting) charts.weekFasting.destroy();
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.weekFasting = new Chart(document.getElementById("weekFastingChart"), {
+      type:"bar", data:{ labels:wFasting.map(r=>r.date.slice(5)), datasets:[
+        { label:"Fasting Hours", data:wFasting.map(r=>r.fasting_hours), backgroundColor:wFasting.map(r=>r.fasting_hours>=16?themeColor("--green"):themeColor("--amber")), borderRadius:6 }
+      ]},
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}, suggestedMax:20} } }
+    });
+  } else showChartFallback("weekFastingChart","⏱️ No fasting data this week yet");
+
   // Habit checklist grid
   const todayDate = todayStr();
   const dates7 = [];
@@ -1440,6 +1470,19 @@ function renderMonthTab(){
       options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}} } }
     });
   } else showChartFallback("monthWeightChart","⚖️ No weight entries for this month");
+
+  if(typeof Chart==="undefined"){ showChartFallback("monthFastingChart","📊 Chart couldn't load — data still saved"); }
+  else if(mFasting.length){
+    showChartCanvas("monthFastingChart");
+    if(charts.monthFasting) charts.monthFasting.destroy();
+    const textColor=themeColor("--text"), gridColor=themeColor("--border");
+    charts.monthFasting = new Chart(document.getElementById("monthFastingChart"), {
+      type:"bar", data:{ labels:mFasting.map(r=>r.date.slice(8)), datasets:[
+        { label:"Fasting Hours", data:mFasting.map(r=>r.fasting_hours), backgroundColor:mFasting.map(r=>r.fasting_hours>=16?themeColor("--green"):themeColor("--amber")), borderRadius:5 }
+      ]},
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:textColor,maxRotation:60}, grid:{color:gridColor}}, y:{ticks:{color:textColor}, grid:{color:gridColor}, suggestedMax:20} } }
+    });
+  } else showChartFallback("monthFastingChart","⏱️ No fasting data for this month");
 
   document.getElementById("monthTable").innerHTML = monthRecs.length ? `<table><thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Workout</th><th>Run</th><th>Habits</th><th>Fasting</th></tr></thead><tbody>
     ${monthRecs.map(r=>{ const es=normWeightEntries(r); const w=es.length?es[es.length-1].weight+"kg":"—"; const hCount=activeHabitList().filter(h=>habitDayValue(r,h.key)).length; const wo=normWorkoutEntries(r); const woText=wo.length?wo.map(e=>e.workout).join("; "):"—";
@@ -1769,6 +1812,7 @@ function setCloudStatus(ok, msg){
 }
 function mergeDaysFromCloud(remoteArr){
   (remoteArr||[]).forEach(rec=>{ days[rec.date] = rec; });
+  recalcAllFastingHours();
 }
 async function cloudConnect(){
   const owner=document.getElementById("cloudOwner").value.trim();
@@ -1832,6 +1876,7 @@ function setTheme(theme){
 })();
 
 function initAfterOnboarding(){
+  recalcAllFastingHours();
   updateHeaderMenu();
   renderTrackers();
   document.getElementById("waDate").value = todayStr();

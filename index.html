@@ -568,8 +568,8 @@ function prevDateStr(dateStr){ const d=new Date(dateStr+"T00:00:00"); d.setDate(
 function ensureDay(date){ if(!days[date]) days[date] = { date }; return days[date]; }
 function toast(msg,color){
   const t=document.getElementById("toast");
-  const icon = color==="var(--red)" ? "⚠️ " : color==="var(--amber)" ? "ℹ️ " : "✅ ";
-  t.textContent=icon+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2200);
+  const prefix = color==="var(--red)" ? "⚠️ " : color==="var(--amber)" ? "ℹ️ " : "✅ ";
+  t.textContent=prefix+msg; t.style.background=color||"var(--green)"; t.style.display="block"; setTimeout(()=>t.style.display="none",2200);
 }
 function goalWeight(){ return user && user.goalWeight ? user.goalWeight : 65.0; }
 function userName(){ return user && user.name ? user.name : "You"; }
@@ -734,7 +734,7 @@ function renderOnboardHabitChecklist(){
   const box = document.getElementById("onboardHabitList"); if(!box) return;
   box.innerHTML = defaultTrackerSeed().map(h=>`
     <label class="habit-row" style="margin-bottom:8px;cursor:pointer">
-      <span>${icon(h.icon)} ${escapeHtml(h.label.replace(/^[^\s]+\s/,""))}</span>
+      <span>${icon(h.icon)} ${escapeHtml(h.icon?h.label.replace(/^[^\s]+\s/,""):h.label)}</span>
       <input type="checkbox" data-onboard-habit="${h.id}" checked style="width:20px;height:20px">
     </label>`).join("");
 }
@@ -1475,7 +1475,7 @@ function renderWeeklyTab(){
         }
       }
       const isToday = d===todayDate;
-      habitGridHtml += `<td style="text-align:center;padding:8px 4px;color:${color};font-weight:${val?'700':'400'};${isToday?'background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:8px':''}">${cell}</td>`;
+      habitGridHtml += `<td style="text-align:center;padding:8px 4px;color:${color};font-weight:${val?'700':'400'};${isToday?'background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:8px':''}">${escapeHtml(String(cell))}</td>`;
     });
     habitGridHtml += '</tr>';
   });
@@ -1745,7 +1745,7 @@ function buildWhatsAppMessage(date){
     if(meal.items.length){ lines.push(`${m.label}${meal.time?" ("+fmtTime12(meal.time)+")":""}`); meal.items.forEach(i=>lines.push(`• ${i}`)); lines.push(""); }
   });
   const habitParts = [];
-  activeHabitList().forEach(h=>{ const v=habitDayValue(rec,h.key); const plainLabel=h.label.replace(/^[^\s]+\s/,""); if(h.type==="count"){ if(v!=null) habitParts.push(`${plainLabel} ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(plainLabel+" ✓"); });
+  activeHabitList().forEach(h=>{ const v=habitDayValue(rec,h.key); const plainLabel=h.icon?h.label.replace(/^[^\s]+\s/,""):h.label; if(h.type==="count"){ if(v!=null) habitParts.push(`${plainLabel} ${v}/2${v>=2?" ✓":""}`); } else if(v===true) habitParts.push(plainLabel+" ✓"); });
   if(habitParts.length) lines.push(`✅ ${habitParts.join(" · ")}`);
   woEntries.forEach(e=>lines.push(`🏃 Workout: ${e.workout}${e.run_miles?` (${e.run_miles} mi)`:e.duration_min?` (${e.duration_min} min)`:""}`));
   if(rec.notes){ lines.push(""); lines.push(`📝 ${rec.notes}`); }

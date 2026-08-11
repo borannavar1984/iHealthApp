@@ -3,6 +3,55 @@
 Running log of what's shipped, in progress, and planned — kept up to date as we go
 so work can continue across sessions without losing track. Newest first.
 
+## Shipped to `develop`: reviewer-caught XSS fix + 3 consistency fixes (2026-08-11, later same day)
+
+First real exercise of the new `researcher`/`reviewer`/`qa` subagent workflow
+(see `CLAUDE.md`). Deep asked for another icons/security/bugs/test round —
+that exact work was already done and shipped (previous entry below), so
+instead of redoing it, dispatched all three agents to verify it and propose
+what's next.
+
+**Reviewer found a real HIGH-severity gap the previous round missed:**
+custom habit trackers can be `type:"text"` (free-text values, e.g. a
+"Symptom notes" tracker) — those values were stored and displayed raw,
+unescaped, in the Weekly tab's 7-day habit checklist grid. A malicious
+value (or a tampered cloud `index.json` reaching the same code path via
+`mergeDaysFromCloud()`) would execute on simply opening the Week tab. The
+previous round's own XSS tests covered tracker *labels* and preset
+*items*, never a text-habit *value* — exactly the gap that let this slip
+through. Fixed: the grid cell now goes through the same `escapeHtml()`
+every other user-text site already used.
+
+**3 lower-severity consistency fixes also found and applied:**
+- The WhatsApp message generator stripped every habit label's "first word"
+  unconditionally — for a custom habit like "Knee physio exercises" (no
+  icon, so no real emoji prefix) that mangled it to "physio exercises" in
+  the generated message. Now guarded the same way the icon-rendering call
+  sites already were.
+- The onboarding habit checklist had the same unconditional strip, safe
+  today only because all 4 seeded defaults happen to carry an icon — made
+  it defensively consistent with the other three call sites instead of
+  relying on that invariant silently holding.
+- `toast()` declared a local variable named `icon`, shadowing the global
+  `icon()` SVG helper from inside that function — harmless today, but a
+  landmine for any future edit inside `toast()`. Renamed.
+
+QA's independent pass (42 checks) confirmed the previous round's fixes all
+still hold, and flagged the same "text-type habit value" and "workout note
+in the dashboard table" paths as under-covered — used both as the basis
+for 10 new targeted checks this round, including the exact HIGH-finding
+payload. All passing.
+
+**Researcher's prioritized suggestions for next** (not started, pending
+Deep's pick): PWA installability (manifest + service worker — the app
+currently only has iOS meta tags, doesn't install as a real PWA on
+Android and has no offline caching), a "Copy Yesterday" quick-action in
+the food form, habit streaks (current/longest, framed non-punitively),
+letting habits be logged for a past date like every other entry type
+already can, tap-to-view/edit on dashboard day rows (the `.entry-row` CSS
+already exists but was never wired up), a soft weight-trend projection,
+and a guided walkthrough for the Cloud Sync setup step.
+
 ## Shipped to `develop`: professional icon set + security hardening (2026-08-11, later same day)
 
 Deep asked for more polish (professional icons app-wide) plus a security and
